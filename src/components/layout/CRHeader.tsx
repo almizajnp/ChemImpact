@@ -1,4 +1,4 @@
-import { Settings, User } from "lucide-react";
+import { Settings, User, LogOut } from "lucide-react";
 import React from "react";
 import { useAudio } from "../../hooks/useAudio";
 
@@ -6,11 +6,13 @@ export default function CRHeader({
   title,
   onProfileClick,
   onSettingsClick,
+  onLogoutClick,
   theme,
 }: {
   title?: string;
   onProfileClick?: () => void;
   onSettingsClick?: () => void;
+  onLogoutClick?: () => void;
   theme?: { id: string; name: string; primary: string; secondary: string };
 }) {
   const { playSound } = useAudio();
@@ -28,7 +30,7 @@ export default function CRHeader({
           <img
             src="/images/logo2.png"
             alt="ChemImpact Logo"
-            className="h-14 lg:h-24 w-auto object-cover"
+            className="h-14 lg:h-14 w-auto object-cover"
           />
         </div>
 
@@ -88,23 +90,55 @@ export default function CRHeader({
           >
             <Settings size={22} style={{ color: theme?.primary }} />
           </button>
+          <button
+            className="w-10 h-10 rounded-full flex items-center justify-center shadow-lg active:scale-95 transition-transform hover:bg-red-500/20"
+            style={{
+              backgroundColor: "#ef4444",
+              borderWidth: "2px",
+              borderColor: "#dc2626",
+            }}
+            onClick={() => {
+              playSound("/audio/click.mp3");
+              onLogoutClick?.();
+            }}
+            title="Logout"
+          >
+            <LogOut size={22} className="text-white" />
+          </button>
         </div>
 
         {/* Right: Settings - Mobile Only */}
-        <button
-          className="md:hidden w-10 h-10 rounded-full flex items-center justify-center shadow-lg active:scale-95 transition-transform"
-          style={{
-            backgroundColor: `${theme?.primary}40`,
-            borderWidth: "2px",
-            borderColor: theme?.primary,
-          }}
-          onClick={() => {
-            playSound("/audio/click.mp3");
-            onSettingsClick?.();
-          }}
-        >
-          <Settings size={22} style={{ color: theme?.primary }} />
-        </button>
+        <div className="md:hidden flex items-center gap-2">
+          <button
+            className="w-10 h-10 rounded-full flex items-center justify-center shadow-lg active:scale-95 transition-transform"
+            style={{
+              backgroundColor: `${theme?.primary}40`,
+              borderWidth: "2px",
+              borderColor: theme?.primary,
+            }}
+            onClick={() => {
+              playSound("/audio/click.mp3");
+              onSettingsClick?.();
+            }}
+          >
+            <Settings size={22} style={{ color: theme?.primary }} />
+          </button>
+          <button
+            className="w-10 h-10 rounded-full flex items-center justify-center shadow-lg active:scale-95 transition-transform hover:bg-red-500/20"
+            style={{
+              backgroundColor: "#ef4444",
+              borderWidth: "2px",
+              borderColor: "#dc2626",
+            }}
+            onClick={() => {
+              playSound("/audio/click.mp3");
+              onLogoutClick?.();
+            }}
+            title="Logout"
+          >
+            <LogOut size={22} className="text-white" />
+          </button>
+        </div>
       </div>
     </header>
   );

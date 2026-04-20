@@ -54,7 +54,7 @@ export default function ShopTab({ currentBg = "bg.png", theme }: ShopTabProps) {
           >
             <div className="flex flex-col items-center gap-3 text-center md:text-left md:flex-row md:items-start">
               <img
-                src="/images/sungai.png"
+                src="/images/p1.jpeg"
                 alt="Al Miza Jolietah Nizar Putri"
                 className="w-12 h-12 rounded-full border-2 border-white/20 shadow-md object-cover flex-shrink-0"
               />
@@ -80,7 +80,7 @@ export default function ShopTab({ currentBg = "bg.png", theme }: ShopTabProps) {
           >
             <div className="flex flex-col items-center gap-3 text-center md:text-left md:flex-row md:items-start">
               <img
-                src="/images/2.png"
+                src="/images/p2.jpeg"
                 alt="Prof. Dra. Sri Rahayu, M.Ed., Ph.D."
                 className="w-12 h-12 rounded-full border-2 border-white/20 shadow-md object-cover flex-shrink-0"
               />

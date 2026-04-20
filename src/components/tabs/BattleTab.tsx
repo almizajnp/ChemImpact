@@ -30,18 +30,6 @@ const arenas = [
     image: "/images/bersih.png",
     color: "#3498db",
   },
-  {
-    id: 2,
-    name: "Cooming Soon",
-    image: "/images/cm.png",
-    color: "#2ecc71",
-  },
-  {
-    id: 3,
-    name: "Cooming Soon",
-    image: "/images/cm.png",
-    color: "#9b59b6",
-  },
 ];
 
 const ArenaGraphic = ({ id, name, image, color = "#3498db" }: ArenaProps) => (
@@ -118,7 +106,7 @@ export default function BattleTab({
       </div>
 
       {/* Arena Display Section */}
-      <div className="flex-1 flex items-center justify-center relative mb-4 w-full">
+      <div className="flex-1 flex items-center md:items-end justify-center relative mb-4 w-full pb-4">
         {/* Mobile: Slider View */}
         <div className="w-full md:hidden">
           {/* Background Overlay */}
@@ -202,7 +190,7 @@ export default function BattleTab({
 
           {/* Draggable Grid Container */}
           <motion.div
-            className="hidden md:grid w-full gap-6 lg:gap-8 md:grid-cols-2 lg:grid-cols-3"
+            className="hidden md:flex flex-1 items-center justify-center"
             drag="x"
             dragConstraints={{ left: -100, right: 100 }}
             dragElastic={0.2}
