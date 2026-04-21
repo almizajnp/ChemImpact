@@ -49,32 +49,37 @@ const comicPages = [
     essays: [
       {
         id: "essay1",
-        question: "1. Bagaimana warna air sungai?",
+        question: "1. Apa yang kamu amati pada kondisi sungai tersebut?",
         placeholder: "Jelaskan warna air sungai yang Anda amati...",
         required: true,
       },
       {
         id: "essay2",
-        question: "2. Bagaimana kondisi kebersihan air?",
-        placeholder: "Jelaskan kondisi kebersihan air...",
+        question:
+          "2. Apakah terdapat tanda-tanda pencemaran pada sungai tersebut? Jelaskan.",
+        placeholder: "Jelaskan tanda-tanda pencemaran yang Anda amati...",
         required: true,
       },
       {
         id: "essay3",
-        question: "3. Apakah terdapat busa di permukaan air?",
-        placeholder: "Jelaskan keberadaan busa di permukaan air...",
+        question:
+          "3. Menurutmu, aktivitas manusia apa saja yang kemungkinan berkontribusi terhadap kondisi tersebut?",
+        placeholder:
+          "Jelaskan aktivitas manusia yang mungkin menyebabkan pencemaran...",
         required: true,
       },
       {
         id: "essay4",
-        question: "4. Bagaimana kondisi lingkungan sekitar sungai?",
-        placeholder: "Jelaskan kondisi lingkungan sekitar sungai...",
+        question:
+          "4. Apa dampak yang mungkin terjadi terhadap makhluk hidup di sekitar sungai tersebut?",
+        placeholder: "Jelaskan dampak pencemaran terhadap makhluk hidup...",
         required: true,
       },
       {
         id: "essay5",
-        question: "5. Aktivitas manusia apa yang terlihat di sekitar sungai?",
-        placeholder: "Jelaskan aktivitas manusia yang Anda amati...",
+        question:
+          "5. Apa risiko yang dapat terjadi jika pencemaran ini diabaikan?",
+        placeholder: "Jelaskan risiko yang mungkin terjadi...",
         required: true,
       },
     ],
@@ -499,12 +504,22 @@ export default function ComicStory({
 
         console.log("👤 Final IDs:", { finalSiswaId, finalSiswaName });
 
+        // Find reflection page index first
+        const reflectionPageIndex = comicPages.findIndex(
+          (p) => p.type === "reflection",
+        );
+
         // Flatten essay answers from Record<number, Record<string, string>> to Record<string, string>
+        // EXCLUDE reflection answers (only include observation/image-with-essays answers)
         const flattenedEssayAnswers: Record<string, string> = {};
         Object.entries(essayAnswers).forEach(([pageNum, answers]) => {
-          Object.entries(answers).forEach(([essayId, answer]) => {
-            flattenedEssayAnswers[essayId] = answer;
-          });
+          const pageNumInt = parseInt(pageNum);
+          // Skip reflection page when flattening
+          if (pageNumInt !== reflectionPageIndex) {
+            Object.entries(answers).forEach(([essayId, answer]) => {
+              flattenedEssayAnswers[essayId] = answer;
+            });
+          }
         });
 
         // Add questionIndex to multiChoice answers
@@ -515,10 +530,7 @@ export default function ComicStory({
           }),
         );
 
-        // Extract reflection answers (typically on the last page which is reflection type)
-        const reflectionPageIndex = comicPages.findIndex(
-          (p) => p.type === "reflection",
-        );
+        // Extract reflection answers (only from reflection page)
         const reflectionAnswers =
           reflectionPageIndex !== -1
             ? essayAnswers[reflectionPageIndex] || {}
@@ -810,15 +822,16 @@ export default function ComicStory({
                     </div>
                   )}
 
-                  {/* Essay Questions - Mobile */}
-                  {hasEssays && (
+                  {/* Essay Questions - Mobile (Only for Observation) */}
+                  {currentComic.type === "image-with-essays" && hasEssays && (
                     <div className="w-full max-w-md px-2 flex-shrink-0 bg-white rounded-lg shadow-lg border border-gray-200 p-4 space-y-4">
                       <div className="mb-3">
                         <h3 className="text-lg font-bold text-gray-900">
                           Pertanyaan Pengamatan
                         </h3>
                         <p className="text-sm text-gray-600 mt-1">
-                          Jawab pertanyaan berikut!!
+                          Setelah kalian mengamati contoh nyata sungai berbusa
+                          diatas , jawabalah pertanyaan berikut !
                         </p>
                       </div>
 
@@ -884,6 +897,72 @@ export default function ComicStory({
                           {choice.id}: {(choice as any).text}
                         </button>
                       ))}
+                    </div>
+                  )}
+
+                  {/* Reflection Essays - Mobile */}
+                  {currentComic.type === "reflection" && hasEssays && (
+                    <div className="w-full max-w-md px-2 flex-shrink-0 bg-gradient-to-br from-purple-50 to-pink-50 rounded-lg shadow-lg border border-purple-200 p-4 space-y-4">
+                      <div className="mb-3">
+                        <h3 className="text-lg font-bold text-purple-900">
+                          Refleksi Diri
+                        </h3>
+                        <p className="text-sm text-purple-700 mt-1">
+                          Renungkan pengalaman dan komitmen Anda untuk masa
+                          depan yang lebih baik
+                        </p>
+                      </div>
+
+                      {showEssayWarning && (
+                        <div className="bg-red-50 border border-red-200 rounded-lg p-3 flex gap-2 items-start">
+                          <AlertTriangle className="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" />
+                          <p className="text-sm text-red-800">
+                            Harap isi semua pertanyaan sebelum melanjutkan
+                          </p>
+                        </div>
+                      )}
+
+                      {currentComic.essays?.map((essay) => (
+                        <div
+                          key={essay.id}
+                          className="space-y-2 pb-3 border-b border-purple-200 last:border-b-0"
+                        >
+                          <label className="block text-sm font-semibold text-purple-900">
+                            {essay.question}
+                          </label>
+                          <textarea
+                            value={essayAnswers[currentPage]?.[essay.id] || ""}
+                            onChange={(e) =>
+                              handleEssayChange(essay.id, e.target.value)
+                            }
+                            placeholder={essay.placeholder}
+                            className="w-full px-3 py-2 border border-purple-300 rounded-lg text-sm text-black focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent resize-none bg-white/80"
+                            rows={4}
+                          />
+                          <div className="text-xs text-purple-600">
+                            {
+                              (essayAnswers[currentPage]?.[essay.id] || "")
+                                .length
+                            }{" "}
+                            / 500 karakter
+                          </div>
+                        </div>
+                      ))}
+
+                      {/* Submit Button - Mobile */}
+                      <button
+                        onClick={handleClose}
+                        disabled={
+                          !currentComic.essays?.every(
+                            (essay) =>
+                              essayAnswers[currentPage]?.[essay.id] &&
+                              essayAnswers[currentPage][essay.id].trim() !== "",
+                          )
+                        }
+                        className="w-full mt-4 bg-purple-500 hover:bg-purple-600 disabled:bg-gray-300 disabled:cursor-not-allowed text-white font-semibold py-3 px-4 rounded-lg transition-colors"
+                      >
+                        Selesaikan Refleksi
+                      </button>
                     </div>
                   )}
                 </motion.div>
@@ -1016,15 +1095,16 @@ export default function ComicStory({
                     )}
                   </div>
 
-                  {/* Bottom Section: Essays (only for essay pages) */}
-                  {hasEssays && (
+                  {/* Bottom Section: Essays (only for Observation pages) */}
+                  {currentComic.type === "image-with-essays" && hasEssays && (
                     <div className="w-full max-w-2xl mx-auto bg-white rounded-lg shadow-lg border border-gray-200 p-6 space-y-4">
                       <div className="mb-3">
                         <h3 className="text-lg font-bold text-gray-900">
                           Pertanyaan Pengamatan
                         </h3>
                         <p className="text-sm text-gray-600 mt-1">
-                          Jawab pertanyaan berikut!!
+                          Setelah kalian mengamati contoh nyata sungai berbusa
+                          diatas , jawabalah pertanyaan berikut !
                         </p>
                       </div>
 
@@ -1078,6 +1158,84 @@ export default function ComicStory({
                         className="w-full mt-4 bg-blue-500 hover:bg-blue-600 disabled:bg-gray-300 disabled:cursor-not-allowed text-white font-semibold py-3 px-4 rounded-lg transition-colors"
                       >
                         Lanjut ke Halaman Berikutnya
+                      </button>
+                    </div>
+                  )}
+
+                  {/* Reflection Essays - Desktop */}
+                  {currentComic.type === "reflection" && hasEssays && (
+                    <div className="w-full max-w-3xl mx-auto bg-gradient-to-br from-purple-50 to-pink-50 rounded-lg shadow-lg border border-purple-200 p-8 space-y-6">
+                      <div className="mb-4">
+                        <h3 className="text-2xl font-bold text-purple-900 mb-3">
+                          🌱 Refleksi Diri dan Komitmen
+                        </h3>
+                        <p className="text-base text-purple-700 leading-relaxed">
+                          Renungkan kembali perjalanan pembelajaran Anda. Setiap
+                          pertanyaan di bawah dirancang untuk membantu Anda
+                          memahami dampak tindakan Anda dan merencanakan
+                          perubahan positif untuk masa depan.
+                        </p>
+                      </div>
+
+                      {showEssayWarning && (
+                        <div className="bg-red-50 border border-red-200 rounded-lg p-4 flex gap-3 items-start">
+                          <AlertTriangle className="w-6 h-6 text-red-600 flex-shrink-0 mt-0.5" />
+                          <p className="text-base text-red-800">
+                            Harap isi semua pertanyaan sebelum menyelesaikan
+                            refleksi
+                          </p>
+                        </div>
+                      )}
+
+                      <div className="space-y-6">
+                        {currentComic.essays?.map((essay, index) => (
+                          <div
+                            key={essay.id}
+                            className="bg-white rounded-lg p-5 border border-purple-200 hover:border-purple-300 transition-colors"
+                          >
+                            <div className="flex items-start gap-3 mb-3">
+                              <span className="inline-flex items-center justify-center w-8 h-8 rounded-full bg-purple-500 text-white font-semibold text-sm flex-shrink-0">
+                                {index + 1}
+                              </span>
+                              <label className="block text-base font-semibold text-purple-900 flex-1">
+                                {essay.question}
+                              </label>
+                            </div>
+                            <textarea
+                              value={
+                                essayAnswers[currentPage]?.[essay.id] || ""
+                              }
+                              onChange={(e) =>
+                                handleEssayChange(essay.id, e.target.value)
+                              }
+                              placeholder={essay.placeholder}
+                              className="w-full px-4 py-3 border border-purple-300 rounded-lg text-base text-black focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent resize-none"
+                              rows={4}
+                            />
+                            <div className="text-sm text-purple-600 mt-2">
+                              {
+                                (essayAnswers[currentPage]?.[essay.id] || "")
+                                  .length
+                              }{" "}
+                              / 500 karakter
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+
+                      {/* Submit Button - Desktop */}
+                      <button
+                        onClick={handleClose}
+                        disabled={
+                          !currentComic.essays?.every(
+                            (essay) =>
+                              essayAnswers[currentPage]?.[essay.id] &&
+                              essayAnswers[currentPage][essay.id].trim() !== "",
+                          )
+                        }
+                        className="w-full mt-6 bg-purple-500 hover:bg-purple-600 disabled:bg-gray-300 disabled:cursor-not-allowed text-white font-semibold py-3 px-6 rounded-lg transition-colors text-lg"
+                      >
+                        ✓ Selesaikan Refleksi dan Misi
                       </button>
                     </div>
                   )}
@@ -1196,19 +1354,6 @@ export default function ComicStory({
         className="fixed bottom-0 left-0 right-0 z-40 flex items-center justify-between px-4 py-2 bg-blue-200 backdrop-blur-sm border-t border-gray-200"
         style={{ height: `${FOOTER_HEIGHT}px` }}
       >
-        {/* Tombol Kembali */}
-        <button
-          onClick={isReflectionPage ? handleClose : handlePrev}
-          disabled={currentPage === 0 && !isReflectionPage}
-          className={`px-3 py-1 text-sm font-medium rounded-lg ${
-            isReflectionPage
-              ? "bg-gray-200 hover:bg-gray-300 text-gray-800"
-              : "bg-gray-200 hover:bg-gray-300 disabled:bg-gray-100 disabled:text-gray-400"
-          }`}
-        >
-          {isReflectionPage ? "← Kembali ke Beranda" : "← Kembali"}
-        </button>
-
         {/* Page Indicator */}
         <span className="text-xs font-medium text-gray-600">
           {currentPage + 1}/{totalPages}

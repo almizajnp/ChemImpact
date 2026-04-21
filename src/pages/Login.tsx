@@ -17,6 +17,16 @@ export default function Login() {
     setLoading(true);
 
     try {
+      // Check for admin credentials
+      if (email === "admin@gmail.com" && password === "admin123") {
+        // Set admin profile manually
+        localStorage.setItem("userRole", "admin");
+        // Redirect to admin dashboard
+        navigate("/admin-dashboard");
+        return;
+      }
+
+      // Regular user login
       await login(email, password);
       navigate("/");
     } catch (err: any) {
@@ -119,6 +129,13 @@ export default function Login() {
             <div className="relative flex justify-center text-sm">
               <span className="px-2 bg-white text-gray-500">Atau</span>
             </div>
+          </div>
+
+          {/* Admin Note */}
+          <div className="bg-purple-50 border border-purple-200 rounded-lg p-3">
+            <p className="text-xs text-purple-700">
+              <strong>Admin:</strong> admin@gmail.com / admin123
+            </p>
           </div>
 
           {/* Register Link */}

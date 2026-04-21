@@ -7,14 +7,14 @@ import {
   onAuthStateChanged,
 } from "firebase/auth";
 import { auth, db } from "../config/firebase";
-import { ref, set, get, child } from "firebase/database";
+import { ref, set, get, child, remove } from "firebase/database";
 import { getStudentScore } from "../lib/firestore";
 
 interface UserProfile {
   uid: string;
   email: string;
   name: string;
-  role: "guru" | "siswa";
+  role: "guru" | "siswa" | "admin";
   score?: number;
   createdAt: string;
 }
@@ -23,7 +23,7 @@ interface AuthContextType {
   user: User | null;
   userProfile: UserProfile | null;
   loading: boolean;
-  role: "guru" | "siswa" | null;
+  role: "guru" | "siswa" | "admin" | null;
   register: (
     email: string,
     password: string,
@@ -32,6 +32,7 @@ interface AuthContextType {
   ) => Promise<void>;
   login: (email: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
+  deleteUser: (userId: string) => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -278,6 +279,21 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
+  const deleteUser = async (userId: string) => {
+    try {
+      // Delete user data from Realtime Database
+      await remove(ref(db, `users/${userId}`));
+      // Delete student scores if exists
+      await remove(ref(db, `studentScores/${userId}`));
+      // Delete student responses if exists
+      await remove(ref(db, `studentResponses/${userId}`));
+      console.log("✅ User data deleted successfully:", userId);
+    } catch (error) {
+      console.error("❌ Error deleting user:", error);
+      throw error;
+    }
+  };
+
   const value: AuthContextType = {
     user,
     userProfile,
@@ -286,6 +302,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     register,
     login,
     logout,
+    deleteUser,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

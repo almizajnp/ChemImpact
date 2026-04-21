@@ -5,6 +5,7 @@ import Login from "./pages/Login";
 import Register from "./pages/Register";
 import StudentDashboard from "./pages/StudentDashboard";
 import GuruDashboard from "./pages/GuruDashboard";
+import AdminDashboard from "./pages/AdminDashboard";
 import ClassDetail from "./pages/ClassDetail";
 import StudentClasses from "./pages/StudentClasses";
 
@@ -60,6 +61,10 @@ export default function App() {
                   userProfile,
                 );
               }
+              // Handle admin login
+              if (role === "admin") {
+                return <Navigate to="/admin-dashboard" />;
+              }
               const component =
                 role === "guru" ? <GuruDashboard /> : <StudentDashboard />;
               if (import.meta.env.DEV) {
@@ -109,6 +114,8 @@ export default function App() {
           </ProtectedRoute>
         }
       />
+
+      <Route path="/admin-dashboard" element={<AdminDashboard />} />
 
       {/* Catch all - redirect to home */}
       <Route path="*" element={<Navigate to="/" />} />
