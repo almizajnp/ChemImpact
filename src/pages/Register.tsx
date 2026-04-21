@@ -67,8 +67,6 @@ export default function Register() {
       }}
     >
       {/* Background Overlay */}
-      <div className="absolute inset-0 bg-black/30" />
-
       <div className="relative w-full max-w-md z-10">
         <div className="bg-white rounded-3xl shadow-2xl border border-gray-200 p-8 space-y-6">
           {/* Header */}
@@ -77,10 +75,10 @@ export default function Register() {
               <img
                 src="/images/logo.png"
                 alt="ChemImpact Logo"
-                className="w-20 h-20 object-contain"
+                className="w-60 h-30"
               />
             </div>
-            <h1 className="text-3xl font-bold text-gray-900">ChemImpact</h1>
+            <h1 className="text-3xl font-bold text-gray-900">Ayo Bergabung</h1>
             <p className="text-gray-600">Buat akun baru</p>
           </div>
 

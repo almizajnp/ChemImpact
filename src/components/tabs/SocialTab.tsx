@@ -355,7 +355,7 @@ export default function SocialTab({ classId }: SocialTabProps) {
 
   // ================= UI =================
   return (
-    <div className="flex flex-col w-full max-w-6xl mx-auto pt-6 pb-6 h-auto min-h-[600px] overflow-hidden bg-white rounded-2xl">
+    <div className="flex flex-col w-full pt-6 pb-6 h-auto min-h-[600px] overflow-hidden bg-white">
       {/* HEADER */}
       <div className="p-3 md:p-4 border-b flex justify-between items-center gap-2">
         <h2 className="font-bold flex items-center gap-2 text-sm md:text-base">
@@ -395,7 +395,7 @@ export default function SocialTab({ classId }: SocialTabProps) {
                   })
                 }
                 placeholder="Contoh: Dampak Limbah Industri pada Ekosistem"
-                className="w-full px-3 md:px-4 py-2 text-xs md:text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                className="w-full px-3 md:px-4 py-2 text-xs md:text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 text-black"
                 required
               />
             </div>
@@ -413,7 +413,7 @@ export default function SocialTab({ classId }: SocialTabProps) {
                   })
                 }
                 placeholder="Jelaskan masalah, studi kasus, atau pertanyaan untuk didiskusikan..."
-                className="w-full px-3 md:px-4 py-2 text-xs md:text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 resize-none"
+                className="w-full px-3 md:px-4 py-2 text-xs md:text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 resize-none text-black"
                 rows={3}
                 required
               />
@@ -533,7 +533,7 @@ export default function SocialTab({ classId }: SocialTabProps) {
                     className={`p-3 w-full text-left border-b transition-colors group relative ${
                       selectedTopicId === t.id
                         ? "bg-emerald-100 border-emerald-300"
-                        : "hover:bg-gray-100"
+                        : "hover:bg-gray-900"
                     }`}
                   >
                     <div className="font-medium text-xs md:text-sm text-gray-900 line-clamp-2">
@@ -590,18 +590,18 @@ export default function SocialTab({ classId }: SocialTabProps) {
           {selectedTopic ? (
             <>
               {/* TOPIC CONTENT */}
-              <div className="flex-1 min-h-0 overflow-y-auto p-3 md:p-6 space-y-4">
+              <div className="flex-1 min-h-0 overflow-y-auto pt-2 pb-8 px-3 md:px-6 space-y-4">
                 {/* Back Button for Mobile */}
-                <div className="md:hidden mb-4">
+                <div className="md:hidden mb-2 -mt-2">
                   <button
                     onClick={() => {
                       setShowTopicsList(true);
                       setSelectedTopicId("");
                       setSelectedTopic(null);
                     }}
-                    className="text-emerald-600 text-sm font-medium hover:text-emerald-700"
+                        className="inline-flex items-center gap-2 px-3 py-2 rounded-lg bg-red-50 text-emerald-700 text-sm font-medium hover:bg-emerald-100 transition-colors shadow-sm"
                   >
-                    ← Kembali ke Topik
+                    Kembali ke Topik
                   </button>
                 </div>
 
@@ -728,7 +728,7 @@ export default function SocialTab({ classId }: SocialTabProps) {
                           {/* Reply Input */}
                           <div className="flex gap-2 flex-col md:flex-row">
                             <input
-                              className="flex-1 border border-gray-300 rounded px-3 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                              className="flex-1 border border-gray-300 rounded px-3 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-emerald-500 text-black"
                               placeholder="Balas komentar..."
                               value={replyText[comment.id] || ""}
                               onChange={(e) =>
@@ -761,7 +761,7 @@ export default function SocialTab({ classId }: SocialTabProps) {
                   </label>
                   <div className="flex gap-2 flex-col md:flex-row">
                     <textarea
-                      className="flex-1 border border-gray-300 rounded px-3 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-emerald-500 resize-none"
+                      className="flex-1 border border-gray-300 rounded px-3 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-emerald-500 resize-none text-black"
                       rows={2}
                       placeholder="Tulis pemikiran atau pendapat Anda..."
                       value={newComment}

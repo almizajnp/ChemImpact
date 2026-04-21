@@ -62,7 +62,7 @@ export default function LeaderboardTab({ theme }: LeaderboardTabProps) {
   }
 
   return (
-    <div className="w-full max-w-4xl mx-auto p-4 md:p-6">
+    <div className="w-full max-w-4xl mx-auto pt-4 px-4 md:px-6 pb-24"> 
       {/* Header */}
       <div className="mb-8">
         <div className="flex items-center gap-3 mb-2">
