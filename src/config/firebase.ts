@@ -1,9 +1,9 @@
 import { initializeApp } from "firebase/app";
-import { getAnalytics } from "firebase/analytics";
+import { getAnalytics, isSupported } from "firebase/analytics";
 import { getAuth } from "firebase/auth";
 import { getDatabase } from "firebase/database";
 
-// Firebase configuration loaded from environment variables
+// Firebase configuration
 const firebaseConfig = {
   apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
   authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
@@ -15,16 +15,20 @@ const firebaseConfig = {
   databaseURL: import.meta.env.VITE_FIREBASE_DATABASE_URL,
 };
 
-// Validate Firebase config
-if (!firebaseConfig.apiKey || !firebaseConfig.projectId) {
-  console.error(
-    "❌ Firebase configuration is missing. Please check your .env.local file.",
-  );
-  console.error("See .env.example for required environment variables.");
-}
+// Debug (optional tapi bagus)
+console.log("PROJECT ID:", firebaseConfig.projectId);
 
+// Init app
 const app = initializeApp(firebaseConfig);
-const analytics = getAnalytics(app);
+
+// 🔥 FIX: Analytics hanya kalau didukung
+let analytics: any = null;
+isSupported().then((yes) => {
+  if (yes) {
+    analytics = getAnalytics(app);
+  }
+});
+
 export const auth = getAuth(app);
 export const db = getDatabase(app);
 
