@@ -29,7 +29,7 @@ export default function CRNavigation({
     { id: "materi", icon: <BookOpen size={22} />, label: "Materi" },
     { id: "battle", icon: <Swords size={32} />, label: "Battle", isMain: true },
     { id: "social", icon: <Users size={22} />, label: "Social" },
-    { id: "events", icon: <Tv size={22} />, label: "Events" },
+    { id: "events", icon: <Trophy size={22} />, label: "Leaderboard" },
   ];
 
   return (

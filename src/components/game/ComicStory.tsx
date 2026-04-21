@@ -484,11 +484,20 @@ export default function ComicStory({
   };
 
   const handleClose = async () => {
-    // Save responses if classId and siswaId are provided
-    if (classId && (siswaId || userProfile?.uid)) {
+    console.log("🔴 handleClose() called");
+    console.log("📋 Current state:", {
+      siswaId,
+      userProfile: userProfile?.uid,
+    });
+
+    // Save responses if siswaId is available
+    const finalSiswaId = siswaId || userProfile?.uid;
+    if (finalSiswaId) {
+      console.log("✅ Conditions met for saving (siswaId available)");
       try {
-        const finalSiswaId = siswaId || userProfile?.uid;
         const finalSiswaName = siswaName || userProfile?.name;
+
+        console.log("👤 Final IDs:", { finalSiswaId, finalSiswaName });
 
         // Flatten essay answers from Record<number, Record<string, string>> to Record<string, string>
         const flattenedEssayAnswers: Record<string, string> = {};
@@ -515,7 +524,15 @@ export default function ComicStory({
             ? essayAnswers[reflectionPageIndex] || {}
             : {};
 
-        await saveStudentResponse(classId, finalSiswaId!, finalSiswaName!, {
+        console.log("📊 Data to save:", {
+          essayCount: Object.keys(flattenedEssayAnswers).length,
+          multiChoiceCount: multiChoiceWithIndex.length,
+          reflectionCount: Object.keys(reflectionAnswers).length,
+          totalScore,
+        });
+
+        await saveStudentResponse(finalSiswaId, finalSiswaName, {
+          classId: classId || "",
           missionId: 1,
           missionName: "Ancaman Limbah Deterjen",
           essayAnswers: flattenedEssayAnswers,
@@ -527,7 +544,10 @@ export default function ComicStory({
         console.log("✅ Student response saved successfully");
       } catch (error) {
         console.error("❌ Error saving student response:", error);
+        alert("Gagal menyimpan jawaban. Silakan coba lagi.");
       }
+    } else {
+      console.error("❌ Cannot save - missing siswaId");
     }
 
     onClose();

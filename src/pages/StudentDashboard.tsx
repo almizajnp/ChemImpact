@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, createContext } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
-import { saveStudentScore } from "../lib/firestore";
+import { saveStudentScore, getStudentClasses } from "../lib/firestore";
 import CRHeader from "../components/layout/CRHeader";
 import CRNavigation from "../components/layout/CRNavigation";
 import StudentProfileModal from "../components/layout/StudentProfileModal";
@@ -9,6 +9,7 @@ import BattleTab from "../components/tabs/BattleTab";
 import DeckTab from "../components/tabs/DeckTab";
 import ShopTab from "../components/tabs/ShopTab";
 import SocialTab from "../components/tabs/SocialTab";
+import LeaderboardTab from "../components/tabs/LeaderboardTab";
 import DecisionSim from "../components/DecisionSim";
 import ComicStory from "../components/game/ComicStory";
 import { motion, AnimatePresence } from "motion/react";
@@ -39,6 +40,8 @@ export default function StudentDashboard() {
   const [isBattleMode, setIsBattleMode] = useState(false);
   const [selectedArenaId, setSelectedArenaId] = useState(1);
   const [totalScore, setTotalScore] = useState(0);
+  const [activeClassId, setActiveClassId] = useState<string | null>(null);
+  const [activeClassName, setActiveClassName] = useState<string | null>(null);
   const bgMusicRef = useRef<HTMLAudioElement | null>(null);
 
   // Initialize score dari userProfile saat component mount atau userProfile berubah
@@ -49,6 +52,24 @@ export default function StudentDashboard() {
     }
   }, [userProfile?.uid]); // Only run when user changes
 
+  // Load first class for social tab
+  useEffect(() => {
+    const loadFirstClass = async () => {
+      if (userProfile?.uid) {
+        try {
+          const classes = await getStudentClasses(userProfile.uid);
+          if (classes.length > 0) {
+            setActiveClassId(classes[0].id);
+            setActiveClassName(classes[0].name);
+          }
+        } catch (error) {
+          console.error("Error loading student classes:", error);
+        }
+      }
+    };
+    loadFirstClass();
+  }, [userProfile?.uid]);
+
   // Handle score updates dan simpan ke Firebase
   const handleScoreUpdate = async (points: number) => {
     const newScore = totalScore + points;
@@ -57,7 +78,12 @@ export default function StudentDashboard() {
     // Simpan skor ke Firebase Realtime Database
     if (userProfile?.uid) {
       try {
-        await saveStudentScore(userProfile.uid, newScore);
+        await saveStudentScore(
+          userProfile.uid,
+          newScore,
+          userProfile.name,
+          activeClassName || undefined,
+        );
         console.log(`💾 Score saved to Firebase: ${newScore}`);
       } catch (error) {
         console.error("❌ Failed to save score to Firebase:", error);
@@ -124,7 +150,32 @@ export default function StudentDashboard() {
       case "info":
         return <ShopTab currentBg={currentBg} theme={theme} />;
       case "social":
-        return <SocialTab currentBg={currentBg} theme={theme} />;
+        return activeClassId ? (
+          <div className="p-2 md:p-6 h-full">
+            <SocialTab classId={activeClassId} />
+          </div>
+        ) : (
+          <div className="flex items-center justify-center min-h-screen text-gray-500 font-clash text-center px-4">
+            <div>
+              <p className="mb-4 text-sm md:text-base">
+                Bergabunglah dengan kelas terlebih dahulu untuk mengakses forum
+                diskusi
+              </p>
+              <button
+                onClick={() => navigate("/student-classes")}
+                className="bg-white text-gray-900 px-4 md:px-6 py-2 md:py-3 rounded-lg hover:bg-gray-100 transition-colors font-medium text-sm md:text-base"
+              >
+                Gabung Kelas
+              </button>
+            </div>
+          </div>
+        );
+      case "events":
+        return (
+          <div className="p-2 md:p-6 h-full">
+            <LeaderboardTab theme={theme} />
+          </div>
+        );
       default:
         return (
           <div className="flex items-center justify-center min-h-screen text-gray-500 font-clash">
@@ -152,6 +203,10 @@ export default function StudentDashboard() {
         return { title: "Materi Pembelajaran" };
       case "info":
         return { title: "Info Pengembang" };
+      case "social":
+        return { title: "Forum Diskusi Kelas" };
+      case "events":
+        return { title: "Leaderboard" };
       case "battle":
         return { title: "ChemImpact" };
       default:
@@ -188,7 +243,7 @@ export default function StudentDashboard() {
         userProfile={userProfile}
       />
 
-      <main className="h-screen overflow-y-auto scrollbar-hide">
+      <main className="h-screen overflow-y-auto scrollbar-hide pt-20 pb-20">
         {renderTab()}
       </main>
 

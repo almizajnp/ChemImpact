@@ -3,17 +3,25 @@ import { getAnalytics } from "firebase/analytics";
 import { getAuth } from "firebase/auth";
 import { getDatabase } from "firebase/database";
 
+// Firebase configuration loaded from environment variables
 const firebaseConfig = {
-  apiKey: "AIzaSyCGGQuFFpy1niUq6pSS7-hUeILLEYhQFjY",
-  authDomain: "chemimpact-9c995.firebaseapp.com",
-  projectId: "chemimpact-9c995",
-  storageBucket: "chemimpact-9c995.firebasestorage.app",
-  messagingSenderId: "641738771422",
-  appId: "1:641738771422:web:c6756807ddce8c37abeb4f",
-  measurementId: "G-5JXDLS42EY",
-  databaseURL:
-    "https://chemimpact-9c995-default-rtdb.asia-southeast1.firebasedatabase.app",
+  apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
+  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
+  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
+  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
+  appId: import.meta.env.VITE_FIREBASE_APP_ID,
+  measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID,
+  databaseURL: import.meta.env.VITE_FIREBASE_DATABASE_URL,
 };
+
+// Validate Firebase config
+if (!firebaseConfig.apiKey || !firebaseConfig.projectId) {
+  console.error(
+    "❌ Firebase configuration is missing. Please check your .env.local file.",
+  );
+  console.error("See .env.example for required environment variables.");
+}
 
 const app = initializeApp(firebaseConfig);
 const analytics = getAnalytics(app);

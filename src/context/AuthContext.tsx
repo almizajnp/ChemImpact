@@ -42,21 +42,29 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    console.log("Setting up auth state listener");
+    if (import.meta.env.DEV) {
+      console.log("Setting up auth state listener");
+    }
     const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
-      console.log("Auth state changed - user:", currentUser?.email || "null");
+      if (import.meta.env.DEV) {
+        console.log("Auth state changed - user:", currentUser?.email || "null");
+      }
       if (currentUser) {
         setUser(currentUser);
 
         // Fetch user profile from Realtime Database
         try {
-          console.log("Fetching user profile for uid:", currentUser.uid);
+          if (import.meta.env.DEV) {
+            console.log("Fetching user profile for uid:", currentUser.uid);
+          }
           const userRef = ref(db, `users/${currentUser.uid}`);
           const snapshot = await get(userRef);
 
           if (snapshot.exists()) {
             const profile = snapshot.val() as UserProfile;
-            console.log("✅ Profile found in Realtime DB:", profile);
+            if (import.meta.env.DEV) {
+              console.log("✅ Profile found in Realtime DB:", profile);
+            }
 
             // Validate role
             if (profile.role !== "guru" && profile.role !== "siswa") {
@@ -69,7 +77,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
               try {
                 const studentScore = await getStudentScore(currentUser.uid);
                 profile.score = studentScore;
-                console.log(`✅ Loaded score for student: ${studentScore}`);
+                if (import.meta.env.DEV) {
+                  console.log(`✅ Loaded score for student: ${studentScore}`);
+                }
               } catch (error) {
                 console.error("❌ Error loading student score:", error);
                 profile.score = 0;
@@ -90,7 +100,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
               | "siswa"
               | null;
             if (savedRole) {
-              console.log("🔄 Using role from localStorage:", savedRole);
+              if (import.meta.env.DEV) {
+                console.log("🔄 Using role from localStorage:", savedRole);
+              }
               const fallbackProfile: UserProfile = {
                 uid: currentUser.uid,
                 email: currentUser.email || "",
@@ -100,16 +112,64 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
               };
               setUserProfile(fallbackProfile);
             } else {
-              console.error("❌ No profile found in DB or localStorage");
-              setUserProfile(null);
+              if (import.meta.env.DEV) {
+                console.warn(
+                  "⚠️ No profile found in DB or localStorage, creating default profile",
+                );
+              }
+              // Create default profile with siswa role if nothing exists
+              const defaultRole: "guru" | "siswa" = "siswa";
+              const defaultProfile: UserProfile = {
+                uid: currentUser.uid,
+                email: currentUser.email || "",
+                name: currentUser.email?.split("@")[0] || "Unknown User",
+                role: defaultRole,
+                createdAt: new Date().toISOString(),
+              };
+
+              try {
+                // Save default profile to database
+                await set(ref(db, `users/${currentUser.uid}`), defaultProfile);
+                if (import.meta.env.DEV) {
+                  console.log(
+                    "✅ Default profile created and saved to DB:",
+                    defaultProfile,
+                  );
+                }
+              } catch (dbError) {
+                console.error(
+                  "❌ Error saving default profile to DB:",
+                  dbError,
+                );
+              }
+
+              // Set profile immediately
+              setUserProfile(defaultProfile);
+              localStorage.setItem("userRole", defaultRole);
             }
           }
         } catch (error) {
           console.error("❌ Error fetching user profile:", error);
-          setUserProfile(null);
+          // Create a minimal fallback profile to prevent loading state
+          const fallbackProfile: UserProfile = {
+            uid: currentUser.uid,
+            email: currentUser.email || "",
+            name: currentUser.email?.split("@")[0] || "Unknown User",
+            role: "siswa",
+            createdAt: new Date().toISOString(),
+          };
+          if (import.meta.env.DEV) {
+            console.warn(
+              "⚠️ Using fallback profile due to error:",
+              fallbackProfile,
+            );
+          }
+          setUserProfile(fallbackProfile);
         }
       } else {
-        console.log("User logged out, clearing state");
+        if (import.meta.env.DEV) {
+          console.log("User logged out, clearing state");
+        }
         setUser(null);
         setUserProfile(null);
       }
@@ -126,15 +186,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     role: "guru" | "siswa",
   ) => {
     try {
-      console.log("🔄 Starting registration process...");
-      console.log(
-        "📝 Registration data - email:",
-        email,
-        "name:",
-        name,
-        "role:",
-        role,
-      );
+      if (import.meta.env.DEV) {
+        console.log("🔄 Starting registration process...");
+        console.log(
+          "📝 Registration data - email:",
+          email,
+          "name:",
+          name,
+          "role:",
+          role,
+        );
+      }
 
       // Validate role
       if (role !== "guru" && role !== "siswa") {
@@ -147,7 +209,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         password,
       );
       const newUser = userCredential.user;
-      console.log("✅ Firebase auth user created:", newUser.uid);
+      if (import.meta.env.DEV) {
+        console.log("✅ Firebase auth user created:", newUser.uid);
+      }
 
       // Store user profile in Realtime Database
       const userProfile: UserProfile = {
@@ -159,7 +223,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         createdAt: new Date().toISOString(),
       };
 
-      console.log("💾 Saving user profile to Realtime DB:", userProfile);
+      if (import.meta.env.DEV) {
+        console.log("💾 Saving user profile to Realtime DB:", userProfile);
+      }
       await set(ref(db, `users/${newUser.uid}`), userProfile);
       console.log("✅ User profile saved to Realtime DB successfully");
 

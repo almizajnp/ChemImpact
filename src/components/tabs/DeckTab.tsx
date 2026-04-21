@@ -157,7 +157,9 @@ export default function DeckTab({ currentBg = "bg.png", theme }: DeckTabProps) {
       (entries) => {
         entries.forEach((entry) => {
           if (entry.isIntersecting) {
-            const index = sectionRefs.current.indexOf(entry.target as HTMLElement);
+            const index = sectionRefs.current.indexOf(
+              entry.target as HTMLElement,
+            );
             if (index !== -1) {
               setActiveSection(index);
             }
@@ -192,9 +194,12 @@ export default function DeckTab({ currentBg = "bg.png", theme }: DeckTabProps) {
         backgroundAttachment: "fixed",
       }}
     >
-      <div className="sticky top-4 z-40 flex justify-center gap-3 mb-6 py-3 backdrop-blur-md rounded-full w-fit mx-auto px-6 shadow-sm border"
+      <div
+        className="sticky top-4 z-40 flex justify-center gap-3 mb-6 py-3 backdrop-blur-md rounded-full w-fit mx-auto px-6 shadow-sm border"
         style={{
-          backgroundColor: theme?.secondary ? `${theme.secondary}95` : "rgba(255,255,255,0.95)",
+          backgroundColor: theme?.secondary
+            ? `${theme.secondary}95`
+            : "rgba(255,255,255,0.95)",
           borderColor: theme?.primary ?? "#e5e7eb",
         }}
       >
@@ -213,10 +218,14 @@ export default function DeckTab({ currentBg = "bg.png", theme }: DeckTabProps) {
       </div>
 
       <section
-        ref={(el) => (sectionRefs.current[0] = el)}
+        ref={(el) => {
+          if (el) sectionRefs.current[0] = el;
+        }}
         className="rounded-2xl shadow-sm p-6 mb-8 scroll-mt-24 transition-all hover:shadow-md"
         style={{
-          backgroundColor: theme?.secondary ? `${theme.secondary}e0` : "#111827",
+          backgroundColor: theme?.secondary
+            ? `${theme.secondary}e0`
+            : "#111827",
         }}
       >
         <div className="flex items-center gap-3 mb-6">
@@ -234,19 +243,27 @@ export default function DeckTab({ currentBg = "bg.png", theme }: DeckTabProps) {
         </div>
 
         <div className="space-y-5">
-          <div className="rounded-3xl p-8 text-white shadow-xl border"
+          <div
+            className="rounded-3xl p-8 text-white shadow-xl border"
             style={{
               backgroundImage: `linear-gradient(135deg, ${theme?.primary ?? "#3b82f6"}, ${theme?.secondary ?? "#8b5cf6"})`,
               borderColor: theme?.primary ?? "#3b82f6",
             }}
           >
-            <h3 className="text-2xl font-bold mb-6">Green Chemistry bukan sekadar teori</h3>
+            <h3 className="text-2xl font-bold mb-6">
+              Green Chemistry bukan sekadar teori
+            </h3>
             <div className="space-y-4 text-base leading-relaxed">
               <p>
-                Green chemistry bukan sekedar teori namun pendekatan ilmu kimia yang menekankan pada perancangan dan proses kimia yang dapat mengurangi atau menghilangkan penggunaan dan pembentukan bahan kimia berbahaya.
+                Green chemistry bukan sekedar teori namun pendekatan ilmu kimia
+                yang menekankan pada perancangan dan proses kimia yang dapat
+                mengurangi atau menghilangkan penggunaan dan pembentukan bahan
+                kimia berbahaya.
               </p>
               <p>
-                Fokus dari GC sederhana namun powerful yaitu menggunakan bahan tidak berbahaya, design proses yang efisien, dan ciptakan produk yang mudah terurai tanpa meninggalkan kerusakan.
+                Fokus dari GC sederhana namun powerful yaitu menggunakan bahan
+                tidak berbahaya, design proses yang efisien, dan ciptakan produk
+                yang mudah terurai tanpa meninggalkan kerusakan.
               </p>
             </div>
           </div>
@@ -254,10 +271,14 @@ export default function DeckTab({ currentBg = "bg.png", theme }: DeckTabProps) {
       </section>
 
       <section
-        ref={(el) => (sectionRefs.current[1] = el)}
+        ref={(el) => {
+          if (el) sectionRefs.current[1] = el;
+        }}
         className="rounded-2xl shadow-sm p-6 mb-8 scroll-mt-24 transition-all hover:shadow-md"
         style={{
-          backgroundColor: theme?.secondary ? `${theme.secondary}e0` : "#111827",
+          backgroundColor: theme?.secondary
+            ? `${theme.secondary}e0`
+            : "#111827",
         }}
       >
         <div className="flex items-center gap-3 mb-6">
@@ -277,33 +298,61 @@ export default function DeckTab({ currentBg = "bg.png", theme }: DeckTabProps) {
         <div className="grid gap-6 lg:grid-cols-[2fr_1fr] items-start">
           <div className="space-y-5">
             <p className="text-white leading-relaxed text-lg">
-              Green Chemistry penting karena membantu membangun sistem kimia yang selaras dengan tujuan pembangunan berkelanjutan. Dengan merancang proses dan produk yang lebih aman, hemat sumber daya, dan ramah lingkungan, GC mendukung praktik industri dan penelitian yang tidak merusak ekosistem.
+              Green Chemistry penting karena membantu membangun sistem kimia
+              yang selaras dengan tujuan pembangunan berkelanjutan. Dengan
+              merancang proses dan produk yang lebih aman, hemat sumber daya,
+              dan ramah lingkungan, GC mendukung praktik industri dan penelitian
+              yang tidak merusak ekosistem.
             </p>
             <p className="text-white leading-relaxed text-lg">
-              Hubungan GC dengan Education for Sustainable Development (ESD) muncul saat pembelajaran kimia tidak hanya fokus pada teori, tetapi juga pada penerapan prinsip keberlanjutan dalam kehidupan sehari-hari. ESD melalui kimia hijau menguatkan kompetensi siswa untuk menjadi pelaku perubahan yang kritis, kreatif, dan bertanggung jawab.
+              Hubungan GC dengan Education for Sustainable Development (ESD)
+              muncul saat pembelajaran kimia tidak hanya fokus pada teori,
+              tetapi juga pada penerapan prinsip keberlanjutan dalam kehidupan
+              sehari-hari. ESD melalui kimia hijau menguatkan kompetensi siswa
+              untuk menjadi pelaku perubahan yang kritis, kreatif, dan
+              bertanggung jawab.
             </p>
           </div>
 
-          <div className="rounded-3xl border p-6 shadow-sm"
+          <div
+            className="rounded-3xl border p-6 shadow-sm"
             style={{
-              backgroundColor: theme?.primary ? `${theme.primary}d0` : "#1f2937",
+              backgroundColor: theme?.primary
+                ? `${theme.primary}d0`
+                : "#1f2937",
               borderColor: theme?.primary ? `${theme.primary}80` : "#4b5563",
             }}
           >
-            <h3 className="text-lg font-semibold text-white mb-4">Kaitan Green Chemistry dan Keberlanjutan</h3>
+            <h3 className="text-lg font-semibold text-white mb-4">
+              Kaitan Green Chemistry dan Keberlanjutan
+            </h3>
             <ul className="space-y-4">
               <li className="flex gap-3">
-                <span className="inline-flex items-center justify-center w-10 h-10 rounded-2xl bg-white/20 text-white">SDG</span>
+                <span className="inline-flex items-center justify-center w-10 h-10 rounded-2xl bg-white/20 text-white">
+                  SDG
+                </span>
                 <div>
-                  <p className="font-semibold text-white">Pembangunan Berkelanjutan</p>
-                  <p className="text-sm text-slate-200">GC mendukung tujuan seperti air bersih, konsumsi bertanggung jawab, dan aksi iklim.</p>
+                  <p className="font-semibold text-white">
+                    Pembangunan Berkelanjutan
+                  </p>
+                  <p className="text-sm text-slate-200">
+                    GC mendukung tujuan seperti air bersih, konsumsi bertanggung
+                    jawab, dan aksi iklim.
+                  </p>
                 </div>
               </li>
               <li className="flex gap-3">
-                <span className="inline-flex items-center justify-center w-10 h-10 rounded-2xl bg-white/20 text-white">ESD</span>
+                <span className="inline-flex items-center justify-center w-10 h-10 rounded-2xl bg-white/20 text-white">
+                  ESD
+                </span>
                 <div>
-                  <p className="font-semibold text-white">Education for Sustainable Development</p>
-                  <p className="text-sm text-slate-200">GC dalam ESD membentuk siswa yang mampu membuat keputusan kimia berkelanjutan.</p>
+                  <p className="font-semibold text-white">
+                    Education for Sustainable Development
+                  </p>
+                  <p className="text-sm text-slate-200">
+                    GC dalam ESD membentuk siswa yang mampu membuat keputusan
+                    kimia berkelanjutan.
+                  </p>
                 </div>
               </li>
             </ul>
@@ -312,10 +361,14 @@ export default function DeckTab({ currentBg = "bg.png", theme }: DeckTabProps) {
       </section>
 
       <section
-        ref={(el) => (sectionRefs.current[2] = el)}
+        ref={(el) => {
+          if (el) sectionRefs.current[2] = el;
+        }}
         className="rounded-2xl shadow-sm p-6 mb-8 scroll-mt-24 transition-all hover:shadow-md"
         style={{
-          backgroundColor: theme?.secondary ? `${theme.secondary}e0` : "#111827",
+          backgroundColor: theme?.secondary
+            ? `${theme.secondary}e0`
+            : "#111827",
         }}
       >
         <div className="flex items-center gap-3 mb-6">
@@ -337,24 +390,38 @@ export default function DeckTab({ currentBg = "bg.png", theme }: DeckTabProps) {
             <button
               key={card.id}
               type="button"
-              onClick={() => setFlippedCard(flippedCard === card.id ? null : card.id)}
+              onClick={() =>
+                setFlippedCard(flippedCard === card.id ? null : card.id)
+              }
               className="group perspective-1000 h-[320px]"
             >
               <motion.div
                 className="relative w-full h-full rounded-[28px] shadow-xl"
                 animate={{ rotateY: flippedCard === card.id ? 180 : 0 }}
-                transition={{ duration: 0.6, type: "spring", stiffness: 220, damping: 24 }}
+                transition={{
+                  duration: 0.6,
+                  type: "spring",
+                  stiffness: 220,
+                  damping: 24,
+                }}
                 style={{ transformStyle: "preserve-3d" }}
               >
                 <div
                   className={`absolute inset-0 rounded-[28px] border-2 p-6 text-gray-900 ${card.color}`}
-                  style={{ backfaceVisibility: "hidden", backgroundColor: "#fef3c7" }}
+                  style={{
+                    backfaceVisibility: "hidden",
+                    backgroundColor: "#fef3c7",
+                  }}
                 >
                   <div className="flex flex-col items-center justify-center h-full text-center">
                     <motion.div
                       className="rounded-3xl bg-white/80 p-4 shadow-inner mb-4 cursor-pointer"
                       animate={{ y: [0, -8, 0] }}
-                      transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
+                      transition={{
+                        duration: 3,
+                        repeat: Infinity,
+                        ease: "easeInOut",
+                      }}
                       whileHover={{ scale: 1.15, rotate: 360 }}
                     >
                       {card.icon}
@@ -363,7 +430,9 @@ export default function DeckTab({ currentBg = "bg.png", theme }: DeckTabProps) {
                       Prinsip {card.id}
                     </div>
                     <h3 className="text-xl font-bold mb-3">{card.title}</h3>
-                    <p className="text-sm text-gray-600 leading-relaxed mb-4">{card.summary}</p>
+                    <p className="text-sm text-gray-600 leading-relaxed mb-4">
+                      {card.summary}
+                    </p>
                     <div className="inline-flex items-center gap-2 rounded-full bg-gray-100 px-3 py-2 text-sm font-semibold text-gray-700">
                       penjelasan
                     </div>
@@ -372,13 +441,21 @@ export default function DeckTab({ currentBg = "bg.png", theme }: DeckTabProps) {
 
                 <div
                   className={`absolute inset-0 rounded-[28px] border-2 p-6 text-gray-900 ${card.color}`}
-                  style={{ backfaceVisibility: "hidden", transform: "rotateY(180deg)", backgroundColor: "#fef3c7" }}
+                  style={{
+                    backfaceVisibility: "hidden",
+                    transform: "rotateY(180deg)",
+                    backgroundColor: "#fef3c7",
+                  }}
                 >
                   <div className="flex flex-col items-center justify-center h-full text-center">
                     <motion.div
                       className="rounded-3xl bg-white/80 p-4 shadow-inner mb-4 cursor-pointer"
                       animate={{ y: [0, -8, 0] }}
-                      transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
+                      transition={{
+                        duration: 3,
+                        repeat: Infinity,
+                        ease: "easeInOut",
+                      }}
                       whileHover={{ scale: 1.15, rotate: 360 }}
                     >
                       {card.icon}
@@ -387,7 +464,9 @@ export default function DeckTab({ currentBg = "bg.png", theme }: DeckTabProps) {
                       {card.title}
                     </div>
                     <h3 className="text-xl font-bold mb-3">Penjelasan</h3>
-                    <p className="text-sm text-gray-600 leading-relaxed mb-4">{card.details}</p>
+                    <p className="text-sm text-gray-600 leading-relaxed mb-4">
+                      {card.details}
+                    </p>
                     <div className="inline-flex items-center gap-2 rounded-full bg-gray-100 px-3 py-2 text-sm font-semibold text-gray-700">
                       Klik lagi untuk tutup
                     </div>
@@ -400,10 +479,14 @@ export default function DeckTab({ currentBg = "bg.png", theme }: DeckTabProps) {
       </section>
 
       <section
-        ref={(el) => (sectionRefs.current[3] = el)}
+        ref={(el) => {
+          if (el) sectionRefs.current[3] = el;
+        }}
         className="rounded-2xl shadow-sm p-6 mb-8 scroll-mt-24 transition-all hover:shadow-md"
         style={{
-          backgroundColor: theme?.secondary ? `${theme.secondary}e0` : "#111827",
+          backgroundColor: theme?.secondary
+            ? `${theme.secondary}e0`
+            : "#111827",
         }}
       >
         <div className="flex items-center gap-3 mb-6">
@@ -421,9 +504,12 @@ export default function DeckTab({ currentBg = "bg.png", theme }: DeckTabProps) {
         </div>
 
         <div className="grid gap-4 md:grid-cols-2">
-          <div className="rounded-3xl border p-6 shadow-sm"
+          <div
+            className="rounded-3xl border p-6 shadow-sm"
             style={{
-              backgroundColor: theme?.primary ? `${theme.primary}d0` : "#111827",
+              backgroundColor: theme?.primary
+                ? `${theme.primary}d0`
+                : "#111827",
               borderColor: theme?.primary ? `${theme.primary}80` : "#4b5563",
             }}
           >
@@ -432,17 +518,28 @@ export default function DeckTab({ currentBg = "bg.png", theme }: DeckTabProps) {
                 <Droplet className="w-6 h-6" />
               </div>
               <div>
-                <h3 className="font-semibold text-white">GC Mengatasi Pencemaran Lingkungan Global</h3>
-                <p className="text-sm text-slate-200 mt-1">Peran kimia hijau dalam mengurangi limbah dan polusi air</p>
+                <h3 className="font-semibold text-white">
+                  GC Mengatasi Pencemaran Lingkungan Global
+                </h3>
+                <p className="text-sm text-slate-200 mt-1">
+                  Peran kimia hijau dalam mengurangi limbah dan polusi air
+                </p>
               </div>
             </div>
             <p className="text-slate-200 leading-relaxed text-sm">
-              Green Chemistry adalah solusi nyata untuk mengatasi permasalahan pencemaran lingkungan seperti eutrofikasi perairan (algal bloom), polusi tanah, dan kontaminasi bahan kimia berbahaya. Dengan menerapkan prinsip GC, kita bisa merancang produk dan proses yang tidak menghasilkan limbah beracun sejak dari awal.
+              Green Chemistry adalah solusi nyata untuk mengatasi permasalahan
+              pencemaran lingkungan seperti eutrofikasi perairan (algal bloom),
+              polusi tanah, dan kontaminasi bahan kimia berbahaya. Dengan
+              menerapkan prinsip GC, kita bisa merancang produk dan proses yang
+              tidak menghasilkan limbah beracun sejak dari awal.
             </p>
           </div>
-          <div className="rounded-3xl border p-6 shadow-sm"
+          <div
+            className="rounded-3xl border p-6 shadow-sm"
             style={{
-              backgroundColor: theme?.primary ? `${theme.primary}d0` : "#111827",
+              backgroundColor: theme?.primary
+                ? `${theme.primary}d0`
+                : "#111827",
               borderColor: theme?.primary ? `${theme.primary}80` : "#4b5563",
             }}
           >
@@ -451,17 +548,28 @@ export default function DeckTab({ currentBg = "bg.png", theme }: DeckTabProps) {
                 <BookOpen className="w-6 h-6" />
               </div>
               <div>
-                <h3 className="font-semibold text-white">Kompetensi Antisipatif dalam Green Chemistry</h3>
-                <p className="text-sm text-slate-200 mt-1">Thinking ahead untuk dampak jangka panjang dari setiap keputusan kimia.</p>
+                <h3 className="font-semibold text-white">
+                  Kompetensi Antisipatif dalam Green Chemistry
+                </h3>
+                <p className="text-sm text-slate-200 mt-1">
+                  Thinking ahead untuk dampak jangka panjang dari setiap
+                  keputusan kimia.
+                </p>
               </div>
             </div>
             <p className="text-slate-200 leading-relaxed text-sm">
-              Green Chemistry mengembangkan kemampuan kita buat mengantisipasi: melihat ke depan, memahami dampak jangka panjang, dan bikin keputusan yang bijak buat generasi mendatang. Ini skill penting di era perubahan iklim global.
+              Green Chemistry mengembangkan kemampuan kita buat mengantisipasi:
+              melihat ke depan, memahami dampak jangka panjang, dan bikin
+              keputusan yang bijak buat generasi mendatang. Ini skill penting di
+              era perubahan iklim global.
             </p>
           </div>
-          <div className="rounded-3xl border p-6 shadow-sm"
+          <div
+            className="rounded-3xl border p-6 shadow-sm"
             style={{
-              backgroundColor: theme?.primary ? `${theme.primary}d0` : "#111827",
+              backgroundColor: theme?.primary
+                ? `${theme.primary}d0`
+                : "#111827",
               borderColor: theme?.primary ? `${theme.primary}80` : "#4b5563",
             }}
           >
@@ -470,22 +578,32 @@ export default function DeckTab({ currentBg = "bg.png", theme }: DeckTabProps) {
                 <Globe2 className="w-6 h-6" />
               </div>
               <div>
-                <h3 className="font-semibold text-white">GC dan Pendidikan Pembangunan Berkelanjutan (ESD)</h3>
-                <p className="text-sm text-slate-200 mt-1">Mengembangkan literasi kimia untuk keberlanjutan</p>
+                <h3 className="font-semibold text-white">
+                  GC dan Pendidikan Pembangunan Berkelanjutan (ESD)
+                </h3>
+                <p className="text-sm text-slate-200 mt-1">
+                  Mengembangkan literasi kimia untuk keberlanjutan
+                </p>
               </div>
             </div>
             <p className="text-slate-200 leading-relaxed text-sm">
-              Green Chemistry adalah kunci dalam Education for Sustainable Development (ESD). Dengan mempelajari dan menerapkan 12 prinsip GC, siswa dapat membangun pemahaman kritis tentang bagaimana pilihan kimia mempengaruhi masa depan planet. ESD melalui GC menciptakan generasi yang sadar dan bertanggung jawab terhadap keberlanjutan.
+              Green Chemistry adalah kunci dalam Education for Sustainable
+              Development (ESD). Dengan mempelajari dan menerapkan 12 prinsip
+              GC, siswa dapat membangun pemahaman kritis tentang bagaimana
+              pilihan kimia mempengaruhi masa depan planet. ESD melalui GC
+              menciptakan generasi yang sadar dan bertanggung jawab terhadap
+              keberlanjutan.
             </p>
           </div>
         </div>
 
-        <div 
+        <div
           className="mt-8 rounded-3xl p-6 text-white shadow-xl"
           style={{
-            background: theme?.primary && theme?.secondary 
-              ? `linear-gradient(to right, ${theme.primary}, ${theme.secondary})`
-              : "linear-gradient(to right, #0ea5e9, #10b981)"
+            background:
+              theme?.primary && theme?.secondary
+                ? `linear-gradient(to right, ${theme.primary}, ${theme.secondary})`
+                : "linear-gradient(to right, #0ea5e9, #10b981)",
           }}
         >
           <div className="flex flex-col gap-4">
@@ -493,10 +611,16 @@ export default function DeckTab({ currentBg = "bg.png", theme }: DeckTabProps) {
               <div className="inline-flex items-center justify-center w-12 h-12 rounded-2xl bg-white/20">
                 <Lightbulb className="w-6 h-6" />
               </div>
-              <h3 className="text-xl font-semibold">Kenapa kamu harus tertarik?</h3>
+              <h3 className="text-xl font-semibold">
+                Kenapa kamu harus tertarik?
+              </h3>
             </div>
             <p className="leading-relaxed text-sm">
-              Green Chemistry memberi kamu kesempatan untuk melihat kimia sebagai kekuatan positif: menciptakan solusi, melindungi lingkungan, dan menjawab tantangan pembangunan berkelanjutan. Bila kamu belajar ini, kamu ikut membangun masa depan yang lebih bersih.
+              Green Chemistry memberi kamu kesempatan untuk melihat kimia
+              sebagai kekuatan positif: menciptakan solusi, melindungi
+              lingkungan, dan menjawab tantangan pembangunan berkelanjutan. Bila
+              kamu belajar ini, kamu ikut membangun masa depan yang lebih
+              bersih.
             </p>
           </div>
         </div>

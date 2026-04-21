@@ -9,6 +9,7 @@ import {
   orderByChild,
   equalTo,
   DataSnapshot,
+  onValue,
 } from "firebase/database";
 import { db } from "../config/firebase";
 import {
@@ -17,6 +18,9 @@ import {
   Comment,
   ClassMember,
   StudentResponse,
+  DiscussionTopic,
+  DiscussionComment,
+  DiscussionReply,
 } from "../types";
 
 // Generate unique class code
@@ -27,6 +31,63 @@ export const generateClassCode = (): string => {
 // Generate unique ID (like Firestore push)
 export const generateId = (): string => {
   return push(ref(db, ".info/connected")).key || Date.now().toString();
+};
+
+// ============ UTILITY FUNCTIONS ============
+
+/**
+ * Deteksi tipe embed dari URL
+ */
+export const detectEmbedType = (
+  url: string,
+): "youtube" | "image" | "article" | "website" | null => {
+  if (!url) return null;
+
+  const youtubePatterns = [
+    /youtube\.com\/watch/i,
+    /youtu\.be\//i,
+    /youtube\.com\/embed/i,
+  ];
+
+  const imagePatterns = [/\.(jpg|jpeg|png|gif|webp)$/i];
+  const articlePatterns = [/medium\.com/i, /dev\.to/i, /blog/i];
+
+  for (const pattern of youtubePatterns) {
+    if (pattern.test(url)) return "youtube";
+  }
+
+  for (const pattern of imagePatterns) {
+    if (pattern.test(url)) return "image";
+  }
+
+  for (const pattern of articlePatterns) {
+    if (pattern.test(url)) return "article";
+  }
+
+  // Default ke website jika bukan yang di atas
+  try {
+    new URL(url);
+    return "website";
+  } catch {
+    return null;
+  }
+};
+
+/**
+ * Konversi YouTube URL ke embed URL
+ */
+export const convertYouTubeUrl = (url: string): string => {
+  let videoId = "";
+
+  // Format: https://www.youtube.com/watch?v=VIDEO_ID
+  const match1 = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([\w-]+)/);
+  if (match1) videoId = match1[1];
+
+  // Format: https://youtu.be/VIDEO_ID
+  const match2 = url.match(/youtu\.be\/([\w-]+)/);
+  if (match2) videoId = match2[1];
+
+  return videoId ? `https://www.youtube.com/embed/${videoId}` : url;
 };
 
 // ============ CLASS OPERATIONS ============
@@ -246,6 +307,339 @@ export const deleteDiscussion = async (
   }
 };
 
+/*
+========================================
+DISCUSSION TOPIC OPERATIONS (REALTIME)
+========================================
+*/
+
+/**
+ * Membuat discussion topic baru dengan embed link handling
+ */
+export const createDiscussionTopic = async (
+  classId: string,
+  title: string,
+  description: string,
+  userId: string,
+  userName: string,
+  embedUrl?: string,
+): Promise<string> => {
+  const topicRef = push(ref(db, `discussionTopics/${classId}`));
+  const topicId = topicRef.key!;
+
+  // Validasi dan deteksi tipe embed
+  let embedType: "youtube" | "image" | "article" | "website" | undefined;
+  let processedEmbedUrl = embedUrl;
+
+  if (embedUrl) {
+    embedType = detectEmbedType(embedUrl) || undefined;
+
+    // Konversi YouTube URL ke embed format
+    if (embedType === "youtube") {
+      processedEmbedUrl = convertYouTubeUrl(embedUrl);
+    }
+  }
+
+  const topicData: DiscussionTopic = {
+    id: topicId,
+    classId,
+    title,
+    description,
+    optionalEmbedLink: processedEmbedUrl || undefined,
+    embedType,
+    status: "draft", // Guru membuat sebagai draft
+    createdBy: userId,
+    createdByName: userName,
+    createdAt: new Date().toISOString(),
+    commentCount: 0,
+    lastActivityAt: new Date().toISOString(),
+  };
+
+  await set(topicRef, topicData);
+  console.log("✅ Discussion topic created:", topicId);
+
+  return topicId;
+};
+
+/**
+ * Update discussion topic
+ */
+export const updateDiscussionTopic = async (
+  classId: string,
+  topicId: string,
+  data: Partial<DiscussionTopic>,
+) => {
+  const updateData = { ...data };
+
+  // Jika embed link diubah, deteksi ulang tipenya
+  if (data.optionalEmbedLink) {
+    const embedType = detectEmbedType(data.optionalEmbedLink);
+    updateData.embedType = embedType || undefined;
+
+    // Konversi YouTube URL jika diperlukan
+    if (embedType === "youtube") {
+      updateData.optionalEmbedLink = convertYouTubeUrl(data.optionalEmbedLink);
+    }
+  }
+
+  updateData.updatedAt = new Date().toISOString();
+
+  await update(ref(db, `discussionTopics/${classId}/${topicId}`), updateData);
+  console.log("✅ Discussion topic updated:", topicId);
+};
+
+/**
+ * Delete discussion topic
+ */
+export const deleteDiscussionTopic = async (
+  classId: string,
+  topicId: string,
+) => {
+  await remove(ref(db, `discussionTopics/${classId}/${topicId}`));
+  console.log("✅ Discussion topic deleted:", topicId);
+};
+
+/**
+ * Subscribe ke discussion topics dengan real-time updates
+ */
+export const subscribeToDiscussionTopics = (
+  classId: string,
+  callback: (topics: DiscussionTopic[]) => void,
+) => {
+  const topicsRef = ref(db, `discussionTopics/${classId}`);
+
+  return onValue(topicsRef, (snapshot) => {
+    if (!snapshot.exists()) {
+      callback([]);
+      return;
+    }
+
+    const topics: DiscussionTopic[] = [];
+
+    snapshot.forEach((child) => {
+      topics.push(child.val() as DiscussionTopic);
+    });
+
+    callback(
+      topics.sort(
+        (a, b) =>
+          new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
+      ),
+    );
+  });
+};
+
+/*
+========================================
+DISCUSSION COMMENT OPERATIONS
+========================================
+*/
+
+/**
+ * Tambah komentar pada discussion topic
+ * siswaId WAJIB ada untuk tracking identitas siswa
+ */
+export const addDiscussionComment = async (
+  classId: string,
+  topicId: string,
+  text: string,
+  siswaId: string, // PRIMARY IDENTITY - from userId (siswaId)
+  siswaName: string,
+  role: "teacher" | "student",
+) => {
+  const commentRef = push(
+    ref(db, `discussionTopics/${classId}/${topicId}/comments`),
+  );
+  const commentId = commentRef.key!;
+
+  const commentData: DiscussionComment = {
+    id: commentId,
+    topicId,
+    classId,
+    text,
+    siswaId, // PRIMARY IDENTITY
+    siswaName,
+    role,
+    createdAt: new Date().toISOString(),
+  };
+
+  await set(commentRef, commentData);
+
+  // Update comment count pada topic
+  const topicRef = ref(db, `discussionTopics/${classId}/${topicId}`);
+  const topicSnapshot = await get(topicRef);
+  if (topicSnapshot.exists()) {
+    const topic = topicSnapshot.val() as DiscussionTopic;
+    await update(topicRef, {
+      commentCount: (topic.commentCount || 0) + 1,
+      lastActivityAt: new Date().toISOString(),
+    });
+  }
+
+  console.log("✅ Comment added to topic:", topicId);
+};
+
+/**
+ * Delete komentar
+ */
+export const deleteDiscussionComment = async (
+  classId: string,
+  topicId: string,
+  commentId: string,
+) => {
+  await remove(
+    ref(db, `discussionTopics/${classId}/${topicId}/comments/${commentId}`),
+  );
+
+  // Update comment count
+  const topicRef = ref(db, `discussionTopics/${classId}/${topicId}`);
+  const topicSnapshot = await get(topicRef);
+  if (topicSnapshot.exists()) {
+    const topic = topicSnapshot.val() as DiscussionTopic;
+    await update(topicRef, {
+      commentCount: Math.max(0, (topic.commentCount || 1) - 1),
+    });
+  }
+
+  console.log("✅ Comment deleted:", commentId);
+};
+
+/**
+ * Subscribe ke comments pada topic dengan real-time updates
+ */
+export const subscribeToDiscussionComments = (
+  classId: string,
+  topicId: string,
+  callback: (comments: DiscussionComment[]) => void,
+) => {
+  const commentsRef = ref(
+    db,
+    `discussionTopics/${classId}/${topicId}/comments`,
+  );
+
+  return onValue(commentsRef, (snapshot) => {
+    if (!snapshot.exists()) {
+      callback([]);
+      return;
+    }
+
+    const comments: DiscussionComment[] = [];
+
+    snapshot.forEach((child) => {
+      comments.push(child.val() as DiscussionComment);
+    });
+
+    callback(
+      comments.sort(
+        (a, b) =>
+          new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime(),
+      ),
+    );
+  });
+};
+
+/*
+========================================
+DISCUSSION REPLY OPERATIONS
+========================================
+*/
+
+/**
+ * Tambah reply pada komentar
+ * siswaId WAJIB ada untuk tracking identitas user
+ */
+export const addDiscussionReply = async (
+  classId: string,
+  topicId: string,
+  commentId: string,
+  text: string,
+  siswaId: string, // PRIMARY IDENTITY - from userId
+  userName: string,
+  role: "teacher" | "student",
+) => {
+  const replyRef = push(
+    ref(
+      db,
+      `discussionTopics/${classId}/${topicId}/comments/${commentId}/replies`,
+    ),
+  );
+  const replyId = replyRef.key!;
+
+  const replyData: DiscussionReply = {
+    id: replyId,
+    commentId,
+    topicId,
+    classId,
+    text,
+    siswaId, // PRIMARY IDENTITY
+    userName,
+    role,
+    createdAt: new Date().toISOString(),
+  };
+
+  await set(replyRef, replyData);
+  console.log("✅ Reply added to comment:", commentId);
+};
+
+/**
+ * Delete reply pada komentar
+ */
+export const deleteDiscussionReply = async (
+  classId: string,
+  topicId: string,
+  commentId: string,
+  replyId: string,
+) => {
+  await remove(
+    ref(
+      db,
+      `discussionTopics/${classId}/${topicId}/comments/${commentId}/replies/${replyId}`,
+    ),
+  );
+  console.log("✅ Reply deleted:", replyId);
+};
+
+/**
+ * Subscribe ke replies pada komentar dengan real-time updates
+ */
+export const subscribeToDiscussionReplies = (
+  classId: string,
+  topicId: string,
+  commentId: string,
+  callback: (replies: DiscussionReply[]) => void,
+) => {
+  const repliesRef = ref(
+    db,
+    `discussionTopics/${classId}/${topicId}/comments/${commentId}/replies`,
+  );
+
+  return onValue(repliesRef, (snapshot) => {
+    if (!snapshot.exists()) {
+      callback([]);
+      return;
+    }
+
+    const replies: DiscussionReply[] = [];
+
+    snapshot.forEach((child) => {
+      replies.push(child.val() as DiscussionReply);
+    });
+
+    callback(
+      replies.sort(
+        (a, b) =>
+          new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime(),
+      ),
+    );
+  });
+};
+
+/*
+========================================
+HELPER
+========================================
+*/
+
 // ============ COMMENT OPERATIONS ============
 
 export const addComment = async (
@@ -432,13 +826,19 @@ export const getStudentScore = async (siswaId: string): Promise<number> => {
 export const saveStudentScore = async (
   siswaId: string,
   totalScore: number,
+  siswaName?: string,
+  kelas?: string,
 ): Promise<void> => {
   try {
-    const scoreData = {
+    const scoreData: any = {
       siswaId,
       totalScore,
       lastUpdated: new Date().toISOString(),
     };
+
+    // Tambahkan siswaName dan kelas jika disediakan
+    if (siswaName) scoreData.siswaName = siswaName;
+    if (kelas) scoreData.kelas = kelas;
 
     await set(ref(db, `studentScores/${siswaId}`), scoreData);
     console.log(`✅ Score saved for student ${siswaId}: ${totalScore} poin`);
@@ -479,18 +879,20 @@ export const addPointsToScore = async (
  * Menyimpan atau memperbarui jawaban siswa untuk sebuah misi
  */
 export const saveStudentResponse = async (
-  classId: string,
   siswaId: string,
   siswaName: string,
   response: Partial<StudentResponse>,
-): Promise<string> => {
+): Promise<void> => {
   try {
-    const responseId = push(ref(db, `studentResponses/${classId}`)).key;
-    if (!responseId) throw new Error("Failed to generate response ID");
+    console.log("🔵 saveStudentResponse called with:", {
+      siswaId,
+      siswaName,
+      responseKeys: Object.keys(response),
+    });
 
     const responseData: StudentResponse = {
-      id: responseId,
-      classId,
+      id: siswaId,
+      classId: response.classId || "",
       siswaId,
       siswaName,
       missionId: response.missionId || 1,
@@ -504,15 +906,77 @@ export const saveStudentResponse = async (
       lastModified: new Date().toISOString(),
     };
 
-    await set(
-      ref(db, `studentResponses/${classId}/${responseId}`),
-      responseData,
+    await set(ref(db, `studentResponses/${siswaId}`), responseData);
+    console.log(
+      `✅ Response saved for student ${siswaId} - Mission ${responseData.missionId}`,
     );
-    console.log(`✅ Student response saved:`, responseId);
-    return responseId;
   } catch (error) {
     console.error("❌ Error saving student response:", error);
     throw error;
+  }
+};
+
+// ============ LEADERBOARD OPERATIONS ============
+
+/**
+ * Subscribe ke semua student scores untuk leaderboard realtime
+ * Returns array dari student dengan score, sorted descending
+ */
+export interface StudentScore {
+  siswaId: string;
+  totalScore: number;
+  lastUpdated: string;
+  siswaName?: string;
+  kelas?: string;
+}
+
+export const subscribeToLeaderboard = (
+  callback: (students: StudentScore[]) => void,
+): (() => void) => {
+  try {
+    const unsubscribe = onValue(
+      ref(db, "studentScores"),
+      (snapshot) => {
+        if (!snapshot.exists()) {
+          callback([]);
+          return;
+        }
+
+        const scoresData = snapshot.val();
+        const studentsArray: StudentScore[] = [];
+
+        // Convert object to array and sort by score
+        for (const siswaId in scoresData) {
+          const data = scoresData[siswaId];
+          studentsArray.push({
+            siswaId,
+            totalScore: data.totalScore || 0,
+            lastUpdated: data.lastUpdated || new Date().toISOString(),
+            siswaName: data.siswaName || "Unknown Student",
+            kelas: data.kelas || "Unknown Class",
+          });
+        }
+
+        // Sort by score descending
+        const sortedStudents = studentsArray.sort(
+          (a, b) => b.totalScore - a.totalScore,
+        );
+
+        console.log(
+          `📊 Leaderboard updated with ${sortedStudents.length} students`,
+        );
+        callback(sortedStudents);
+      },
+      (error) => {
+        console.error("❌ Error subscribing to leaderboard:", error);
+        callback([]);
+      },
+    );
+
+    return unsubscribe;
+  } catch (error) {
+    console.error("❌ Error setting up leaderboard subscription:", error);
+    return () => {};
   }
 };
 
@@ -546,28 +1010,22 @@ export const getClassStudentResponses = async (
  * Mendapatkan jawaban dari seorang siswa tertentu di sebuah kelas
  */
 export const getStudentResponsesByStudent = async (
-  classId: string,
   siswaId: string,
-): Promise<StudentResponse[]> => {
+): Promise<StudentResponse | null> => {
   try {
-    const snapshot = await get(ref(db, `studentResponses/${classId}`));
-    if (!snapshot.exists()) return [];
+    console.log(`🔍 Fetching response for siswaId: ${siswaId}`);
+    const snapshot = await get(ref(db, `studentResponses/${siswaId}`));
+    if (!snapshot.exists()) {
+      console.log(`⚠️ No response found for student ${siswaId}`);
+      return null;
+    }
 
-    const responses: StudentResponse[] = [];
-    snapshot.forEach((childSnapshot) => {
-      const responseData = childSnapshot.val() as StudentResponse;
-      if (responseData.siswaId === siswaId) {
-        responses.push(responseData);
-      }
-    });
-
-    return responses.sort(
-      (a, b) =>
-        new Date(b.submittedAt).getTime() - new Date(a.submittedAt).getTime(),
-    );
+    const responseData = snapshot.val() as StudentResponse;
+    console.log(`✅ Found response for ${siswaId}`);
+    return responseData;
   } catch (error) {
-    console.error("❌ Error getting student responses by student:", error);
-    return [];
+    console.error("❌ Error getting student response:", error);
+    return null;
   }
 };
 
@@ -587,5 +1045,42 @@ export const getStudentResponseDetail = async (
   } catch (error) {
     console.error("❌ Error getting student response detail:", error);
     return null;
+  }
+};
+
+/**
+ * Cleanup test data - menghapus responses dengan siswaId pattern student-00X
+ */
+export const cleanupTestData = async (): Promise<number> => {
+  try {
+    console.log(`🧹 Starting cleanup for test data`);
+    const snapshot = await get(ref(db, `studentResponses`));
+    if (!snapshot.exists()) {
+      console.log("⚠️ No responses found");
+      return 0;
+    }
+
+    let deletedCount = 0;
+    const testDataPattern = /^student-\d{3}$/; // Matches: student-001, student-002, etc.
+    const deletePromises: Promise<void>[] = [];
+
+    snapshot.forEach((childSnapshot) => {
+      const siswaId = childSnapshot.key;
+      if (siswaId && testDataPattern.test(siswaId)) {
+        console.log(`🗑️ Marking for deletion: ${siswaId}`);
+        deletePromises.push(remove(ref(db, `studentResponses/${siswaId}`)));
+        deletedCount++;
+      }
+    });
+
+    // Execute all deletes in parallel
+    await Promise.all(deletePromises);
+    console.log(
+      `🎉 Cleanup complete! Deleted ${deletedCount} test data records`,
+    );
+    return deletedCount;
+  } catch (error) {
+    console.error("❌ Error during cleanup:", error);
+    throw error;
   }
 };

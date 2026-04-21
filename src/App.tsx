@@ -6,24 +6,30 @@ import Register from "./pages/Register";
 import StudentDashboard from "./pages/StudentDashboard";
 import GuruDashboard from "./pages/GuruDashboard";
 import ClassDetail from "./pages/ClassDetail";
+import StudentClasses from "./pages/StudentClasses";
 
 export default function App() {
   const { user, role, loading, userProfile } = useAuth();
 
-  console.log(
-    "App render - user:",
-    user?.email,
-    "role:",
-    role,
-    "userProfile:",
-    userProfile,
-    "loading:",
-    loading,
-  );
+  // Debug logging in development only
+  if (import.meta.env.DEV) {
+    console.log(
+      "App render - user:",
+      user?.email,
+      "role:",
+      role,
+      "userProfile:",
+      userProfile,
+      "loading:",
+      loading,
+    );
+  }
 
   // Wait for both auth and profile to be loaded
   if (loading || (user && !userProfile)) {
-    console.log("Still loading or waiting for profile...");
+    if (import.meta.env.DEV) {
+      console.log("Still loading or waiting for profile...");
+    }
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
@@ -46,18 +52,22 @@ export default function App() {
         element={
           <ProtectedRoute>
             {(() => {
-              console.log(
-                "Routing decision - role:",
-                role,
-                "userProfile:",
-                userProfile,
-              );
+              if (import.meta.env.DEV) {
+                console.log(
+                  "Routing decision - role:",
+                  role,
+                  "userProfile:",
+                  userProfile,
+                );
+              }
               const component =
                 role === "guru" ? <GuruDashboard /> : <StudentDashboard />;
-              console.log(
-                "Selected component:",
-                role === "guru" ? "GuruDashboard" : "StudentDashboard",
-              );
+              if (import.meta.env.DEV) {
+                console.log(
+                  "Selected component:",
+                  role === "guru" ? "GuruDashboard" : "StudentDashboard",
+                );
+              }
               return component;
             })()}
           </ProtectedRoute>
@@ -87,6 +97,15 @@ export default function App() {
         element={
           <ProtectedRoute>
             <ClassDetail />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/student-classes"
+        element={
+          <ProtectedRoute requiredRole="siswa">
+            <StudentClasses />
           </ProtectedRoute>
         }
       />

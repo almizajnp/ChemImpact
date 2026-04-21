@@ -2,11 +2,10 @@ import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { ChevronLeft, Play } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
-import { Class, Discussion } from "../types";
-import { getClassById, getDiscussions } from "../lib/firestore";
-import ClassDiscussionTab from "../components/ClassDiscussionTab";
+import { Class } from "../types";
+import { getClassById } from "../lib/firestore";
 import StudentProgressTab from "../components/StudentProgressTab";
-import DiscussionCard from "../components/DiscussionCard";
+import SocialTab from "../components/tabs/SocialTab";
 import ComicStory from "../components/game/ComicStory";
 
 type TabType = "missions" | "discussions" | "progress" | "info";
@@ -16,7 +15,6 @@ export default function ClassDetail() {
   const navigate = useNavigate();
   const { user, userProfile } = useAuth();
   const [classData, setClassData] = useState<Class | null>(null);
-  const [discussions, setDiscussions] = useState<Discussion[]>([]);
   const [activeTab, setActiveTab] = useState<TabType>("missions");
   const [loading, setLoading] = useState(true);
   const [isMissionActive, setIsMissionActive] = useState(false);
@@ -32,11 +30,6 @@ export default function ClassDetail() {
     try {
       const classInfo = await getClassById(classId!);
       setClassData(classInfo);
-
-      if (classInfo) {
-        const disc = await getDiscussions(classId!);
-        setDiscussions(disc);
-      }
     } catch (error) {
       console.error("Error loading class:", error);
       alert("Gagal memuat kelas");
@@ -79,9 +72,9 @@ export default function ClassDetail() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-50">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-50 flex flex-col">
       {/* Header */}
-      <div className="bg-white shadow-sm border-b">
+      <div className="bg-white shadow-sm border-b flex-shrink-0">
         <div className="max-w-6xl mx-auto px-6 py-6">
           <div className="flex items-center gap-4 mb-6">
             <button
@@ -125,7 +118,7 @@ export default function ClassDetail() {
       </div>
 
       {/* Navigation Tabs */}
-      <div className="bg-white border-b sticky top-0 z-10">
+      <div className="bg-white border-b flex-shrink-0">
         <div className="max-w-6xl mx-auto px-6">
           <div className="flex gap-8">
             <button
@@ -175,7 +168,9 @@ export default function ClassDetail() {
       </div>
 
       {/* Content */}
-      <div className="max-w-6xl mx-auto px-6 py-8">
+      <div
+        className={`flex-1 overflow-y-auto ${activeTab === "discussions" ? "p-0" : "px-6 py-8 max-w-6xl mx-auto w-full"}`}
+      >
         {isMissionActive && classId ? (
           <ComicStory
             onClose={handleMissionComplete}
@@ -256,40 +251,7 @@ export default function ClassDetail() {
               </div>
             )}
 
-            {activeTab === "discussions" &&
-              (isGuru ? (
-                <ClassDiscussionTab
-                  classId={classId!}
-                  discussions={discussions}
-                  guruId={userProfile!.uid}
-                  guruName={userProfile!.name}
-                  onDiscussionAdded={loadClassData}
-                  onDiscussionDeleted={loadClassData}
-                />
-              ) : (
-                // Student view: show discussions as cards
-                <div className="space-y-4">
-                  <h2 className="text-2xl font-bold text-gray-900 mb-6">
-                    Diskusi Kelas
-                  </h2>
-                  {discussions.length === 0 ? (
-                    <div className="text-center py-12 bg-white rounded-lg">
-                      <p className="text-gray-600">Belum ada diskusi</p>
-                    </div>
-                  ) : (
-                    discussions.map((discussion) => (
-                      <DiscussionCard
-                        key={discussion.id}
-                        classId={classId!}
-                        discussion={discussion}
-                        currentUserId={user!.uid}
-                        currentUserName={userProfile!.name}
-                        currentUserRole={userProfile!.role}
-                      />
-                    ))
-                  )}
-                </div>
-              ))}
+            {activeTab === "discussions" && <SocialTab classId={classId!} />}
 
             {activeTab === "progress" && isGuru && (
               <StudentProgressTab classId={classId!} />

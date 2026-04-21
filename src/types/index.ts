@@ -17,6 +17,50 @@ export interface Class {
   memberCount?: number;
 }
 
+// ============ DISCUSSION FORUM TYPES ============
+
+export interface DiscussionTopic {
+  id: string;
+  classId: string;
+  title: string;
+  description: string;
+  optionalEmbedLink?: string; // URL untuk YouTube, artikel, atau gambar
+  embedType?: "youtube" | "image" | "article" | "website"; // tipe embed yang terdeteksi
+  status: "draft" | "published"; // draft hanya guru, published untuk siswa
+  createdBy: string; // userId (guru)
+  createdByName: string;
+  createdAt: string;
+  updatedAt?: string;
+  commentCount: number;
+  lastActivityAt: string;
+}
+
+export interface DiscussionComment {
+  id: string;
+  topicId: string;
+  classId: string;
+  text: string;
+  siswaId: string; // PRIMARY IDENTITY - WAJIB ADA
+  siswaName: string;
+  role: "teacher" | "student";
+  createdAt: string;
+  updatedAt?: string;
+}
+
+export interface DiscussionReply {
+  id: string;
+  commentId: string;
+  topicId: string;
+  classId: string;
+  text: string;
+  siswaId: string; // PRIMARY IDENTITY - WAJIB ADA (dari userId/siswaId)
+  userName: string;
+  role: "teacher" | "student";
+  createdAt: string;
+  updatedAt?: string;
+}
+
+// Legacy types (untuk backward compatibility)
 export interface Discussion {
   id?: string;
   classId: string;
