@@ -44,7 +44,7 @@ const comicPages = [
     image: "/images/komik3.png",
     type: "image-with-essays",
     mapUrl:
-      "https://www.google.com/maps/embed?pb=!4v1776606725987!6m8!1m7!1sPRlQcvLqYVirwindRRErww!2m2!1d-7.272443457088635!2d112.7624425989235!3f78.48524830103521!4f-41.47947606161724!5f0.4000000000000002",
+      "https://www.google.com/maps/embed?pb=!4v1776790536773!6m8!1m7!1sCAoSHENJQUJJaENRZjVwM0hkeHB3TTR2c1BzSkpGUS0.!2m2!1d-7.9624586!2d112.620079!3f339.02706104571405!4f-34.98787368849105!5f0.4000000000000002",
     choices: [],
     essays: [
       {

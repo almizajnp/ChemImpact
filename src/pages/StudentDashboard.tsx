@@ -152,7 +152,7 @@ export default function StudentDashboard() {
       case "social":
         return activeClassId ? (
           <div className="p-2 md:p-6 h-full">
-            <SocialTab classId={activeClassId} />
+            <SocialTab classId={activeClassId} theme={theme} />
           </div>
         ) : (
           <div className="flex items-center justify-center min-h-screen text-gray-500 font-clash text-center px-4">

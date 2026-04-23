@@ -131,13 +131,6 @@ export default function Login() {
             </div>
           </div>
 
-          {/* Admin Note */}
-          <div className="bg-purple-50 border border-purple-200 rounded-lg p-3">
-            <p className="text-xs text-purple-700">
-              <strong>Admin:</strong> admin@gmail.com / admin123
-            </p>
-          </div>
-
           {/* Register Link */}
           <div className="text-center">
             <p className="text-gray-600 text-sm">

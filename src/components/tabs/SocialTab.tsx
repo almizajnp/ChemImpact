@@ -35,7 +35,7 @@ interface SocialTabProps {
   theme?: { id: string; name: string; primary: string; secondary: string };
 }
 
-export default function SocialTab({ classId }: SocialTabProps) {
+export default function SocialTab({ classId, theme }: SocialTabProps) {
   const { userProfile } = useAuth();
   const isTeacher = userProfile?.role === "guru";
 
@@ -355,28 +355,10 @@ export default function SocialTab({ classId }: SocialTabProps) {
 
   // ================= UI =================
   return (
-    <div className="flex flex-col w-full pt-6 pb-6 h-auto min-h-[600px] overflow-hidden bg-white">
-      {/* HEADER */}
-      <div className="p-3 md:p-4 border-b flex justify-between items-center gap-2">
-        <h2 className="font-bold flex items-center gap-2 text-sm md:text-base">
-          <MessageSquare size={16} className="md:w-[18px] md:h-[18px]" />
-          Forum Diskusi
-        </h2>
-        {isTeacher && !showCreateDiscussion && (
-          <button
-            onClick={() => setShowCreateDiscussion(true)}
-            className="flex items-center gap-1 md:gap-2 bg-emerald-600 text-white px-2 md:px-4 py-1.5 md:py-2 rounded-lg hover:bg-emerald-700 transition-colors font-medium text-xs md:text-sm"
-          >
-            <PlusCircle size={16} />
-            <span className="hidden sm:inline">Buat Diskusi</span>
-            <span className="sm:hidden">Buat</span>
-          </button>
-        )}
-      </div>
-
+    <div className="flex flex-col w-full pt-6 pb-6 h-auto min-h-[600px] overflow-hidden">
       {/* CREATE DISCUSSION FORM - for teachers */}
       {isTeacher && showCreateDiscussion && (
-        <div className="p-3 md:p-4 bg-emerald-50 border-b border-emerald-200">
+        <div className="p-3 md:p-4 bg-white/90 backdrop-blur-sm border-b border-gray-200">
           <h3 className="text-base md:text-lg font-bold text-gray-900 mb-4">
             Buat Topik Diskusi Baru
           </h3>
@@ -467,10 +449,15 @@ export default function SocialTab({ classId }: SocialTabProps) {
         </div>
       )}
 
-      <div className="flex flex-1 min-h-0 flex-col md:flex-row overflow-hidden">
-        {/* TOPICS SIDEBAR - Desktop & Mobile Grid */}
+      <div className="flex flex-1 min-h-0 flex-col overflow-hidden">
+        {/* TOPICS LIST - Card Grid for All Screens */}
         <div
-          className={`${showTopicsList ? "block" : "hidden"} md:block md:w-64 h-full overflow-y-auto border-b md:border-b-0 md:border-r bg-gray-50`}
+          className={`${showTopicsList ? "block" : "hidden"} h-full overflow-y-auto backdrop-blur-sm -mt-2`}
+          style={{
+            backgroundColor: theme?.secondary
+              ? `${theme.secondary}e6`
+              : "rgba(255, 255, 255, 0.9)",
+          }}
         >
           {loadingTopics ? (
             <div className="p-4 text-center text-gray-500 text-sm">
@@ -484,8 +471,8 @@ export default function SocialTab({ classId }: SocialTabProps) {
             </div>
           ) : (
             <>
-              {/* Mobile Grid View */}
-              <div className="md:hidden space-y-3 px-4 pt-4 pb-6 overflow-y-auto">
+              {/* Grid View - All Screens */}
+              <div className="space-y-3 px-10 pt-4 pb-22">
                 {topics.map((t) => (
                   <button
                     key={t.id}
@@ -493,7 +480,7 @@ export default function SocialTab({ classId }: SocialTabProps) {
                       setSelectedTopicId(t.id);
                       setShowTopicsList(false); // Switch to detail view
                     }}
-                    className="w-full bg-white rounded-xl shadow-lg p-5 text-left hover:shadow-xl transition-all duration-200 border-2 border-gray-300 hover:border-emerald-500 hover:scale-102 active:scale-98"
+                    className="w-full bg-white rounded-xl shadow-lg p-5 text-left hover:shadow-xl transition-all duration-200 border-2 border-gray-300 hover:border-emerald-500 group relative"
                   >
                     <div className="flex items-start justify-between gap-3 mb-2">
                       <h3 className="font-bold text-base text-gray-900 flex-1 line-clamp-2">
@@ -517,41 +504,16 @@ export default function SocialTab({ classId }: SocialTabProps) {
                         Buka →
                       </span>
                     </div>
-                  </button>
-                ))}
-              </div>
 
-              {/* Desktop List View */}
-              <div className="hidden md:block">
-                {topics.map((t) => (
-                  <button
-                    key={t.id}
-                    onClick={() => {
-                      setSelectedTopicId(t.id);
-                      setShowTopicsList(false);
-                    }}
-                    className={`p-3 w-full text-left border-b transition-colors group relative ${
-                      selectedTopicId === t.id
-                        ? "bg-emerald-100 border-emerald-300"
-                        : "hover:bg-gray-900"
-                    }`}
-                  >
-                    <div className="font-medium text-xs md:text-sm text-gray-900 line-clamp-2">
-                      {t.title}
-                    </div>
-                    <div className="text-xs text-gray-600 mt-1">
-                      💬 {t.commentCount} komentar
-                    </div>
-
-                    {/* Teacher action buttons */}
+                    {/* Teacher action buttons - shown on hover */}
                     {isTeacher && (
-                      <div className="flex gap-1 mt-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                      <div className="absolute top-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                         <button
                           onClick={(e) => {
                             e.stopPropagation();
                             handlePublishDiscussion(t);
                           }}
-                          className={`flex-1 text-xs px-2 py-1 rounded font-medium transition-colors ${
+                          className={`text-xs px-2 py-1 rounded font-medium transition-colors ${
                             t.status === "published"
                               ? "bg-gray-200 text-gray-700 hover:bg-gray-300"
                               : "bg-green-200 text-green-700 hover:bg-green-300"
@@ -564,15 +526,11 @@ export default function SocialTab({ classId }: SocialTabProps) {
                             e.stopPropagation();
                             handleDeleteDiscussion(t.id);
                           }}
-                          className="flex-1 text-xs px-2 py-1 bg-red-200 text-red-700 hover:bg-red-300 rounded font-medium transition-colors"
+                          className="text-xs px-2 py-1 bg-red-200 text-red-700 hover:bg-red-300 rounded font-medium transition-colors"
                         >
                           Hapus
                         </button>
                       </div>
-                    )}
-
-                    {!isTeacher && t.status === "draft" && (
-                      <div className="text-xs text-yellow-600 mt-1">Draft</div>
                     )}
                   </button>
                 ))}
@@ -584,24 +542,29 @@ export default function SocialTab({ classId }: SocialTabProps) {
         {/* MAIN CONTENT - TOPIC & COMMENTS */}
         <div
           className={`flex-1 flex flex-col overflow-hidden ${
-            !showTopicsList && selectedTopic ? "" : "hidden md:block"
+            !showTopicsList && selectedTopic ? "block" : "hidden"
           }`}
+          style={{
+            backgroundColor: theme?.secondary
+              ? `${theme.secondary}e6`
+              : "rgba(255, 255, 255, 0.9)",
+          }}
         >
           {selectedTopic ? (
             <>
               {/* TOPIC CONTENT */}
-              <div className="flex-1 min-h-0 overflow-y-auto pt-2 pb-8 px-3 md:px-6 space-y-4">
+              <div className="flex-1 min-h-0 overflow-y-auto pt-4 pb-18 px-3 md:px-6 space-y-4">
                 {/* Back Button for Mobile */}
-                <div className="md:hidden mb-2 -mt-2">
+                <div className="mb-2 -mt-0">
                   <button
                     onClick={() => {
                       setShowTopicsList(true);
                       setSelectedTopicId("");
                       setSelectedTopic(null);
                     }}
-                        className="inline-flex items-center gap-2 px-3 py-2 rounded-lg bg-red-50 text-emerald-700 text-sm font-medium hover:bg-emerald-100 transition-colors shadow-sm"
+                    className="inline-flex items-center gap-2 px-3 py-2 rounded-lg bg-red-50 text-emerald-700 text-sm font-medium hover:bg-emerald-100 transition-colors shadow-sm"
                   >
-                    Kembali ke Topik
+                    ← Kembali ke Topik
                   </button>
                 </div>
 
