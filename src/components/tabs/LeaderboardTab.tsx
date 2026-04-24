@@ -54,7 +54,7 @@ export default function LeaderboardTab({ theme }: LeaderboardTabProps) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[400px] px-4">
         <Trophy className="w-16 h-16 text-gray-300 mb-4" />
-        <p className="text-gray-600 font-clash text-center">
+        <p className="text-gray-600 font-clash text-justify">
           No student scores yet. Start playing to appear on the leaderboard!
         </p>
       </div>
@@ -62,19 +62,31 @@ export default function LeaderboardTab({ theme }: LeaderboardTabProps) {
   }
 
   return (
-    <div className="w-full max-w-4xl mx-auto pt-4 px-4 md:px-6 pb-24"> 
+    <div className="w-full max-w-4xl mx-auto pt-4 px-4 md:px-6 pb-24">
       {/* Header */}
-      <div className="mb-8">
-        <div className="flex items-center gap-3 mb-2">
-          <Medal size={32} style={{ color: theme?.primary }} />
-          <h1
-            className="text-3xl font-bold font-clash"
-            style={{ color: theme?.primary }}
-          >
-            Leaderboard
-          </h1>
-        </div>
-        <p className="text-gray-600 font-clash">Student rankings by score</p>
+      <div className="mb-8 flex flex-col items-center justify-center gap-3">
+        <Medal size={60} style={{ color: theme?.primary }} />
+        <h1
+          className="text-5xl font-black font-montserrat text-center tracking-wider"
+          style={{
+            color: theme?.primary || "rgb(59, 130, 246)",
+            WebkitTextStroke: `3px ${theme?.primary || "rgb(59, 130, 246)"}`,
+            textShadow: `
+              0 2px 0 rgba(255, 255, 255, 0.8),
+              2px 4px 0 rgba(0, 0, 0, 0.2),
+              4px 8px 15px rgba(${theme?.primary ? "59, 130, 246" : "0, 0, 0"}, 0.3),
+              -2px -2px 5px rgba(255, 255, 0, 0.4),
+              2px 2px 5px rgba(255, 100, 0, 0.4)
+            `,
+            filter: "drop-shadow(0 0 10px rgba(255, 150, 0, 0.6))",
+            letterSpacing: "0.05em",
+          }}
+        >
+          Leaderboard
+        </h1>
+        <p className="text-black -600 font-clash text-center">
+          Student rankings by score
+        </p>
       </div>
 
       {/* Leaderboard List */}
@@ -111,7 +123,7 @@ export default function LeaderboardTab({ theme }: LeaderboardTabProps) {
 
                     {/* Student Info */}
                     <div className="flex-1 min-w-0">
-                      <h3 className="text-lg font-bold text-white font-clash truncate">
+                      <h3 className="text-lg font-bold text-white font-poppins truncate">
                         {student.siswaName}
                       </h3>
                       <p className="text-sm text-white/80 font-clash">

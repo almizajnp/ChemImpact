@@ -101,6 +101,7 @@ export interface StudentResponse {
   missionId: number; // e.g., 1 for ComicStory
   missionName: string; // e.g., "Ancaman Limbah Deterjen"
   essayAnswers?: Record<string, string>; // {essayId: answer}
+  essayQuestions?: Record<string, string>; // {essayId: question}
   multiChoiceAnswers?: Array<{
     pageId: number;
     questionIndex: number;
@@ -109,6 +110,7 @@ export interface StudentResponse {
     choiceText?: string;
   }>;
   reflectionAnswers?: Record<string, string>; // {reflectionId: answer}
+  reflectionQuestions?: Record<string, string>; // {reflectionId: question}
   totalScore?: number;
   status: "in-progress" | "completed";
   submittedAt: Date | string;

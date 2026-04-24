@@ -24,7 +24,6 @@ import {
   getClassMembers,
   getStudentScore,
   getStudentResponsesByStudent,
-  cleanupTestData,
   createDiscussionTopic,
   subscribeToDiscussionTopics,
   updateDiscussionTopic,
@@ -71,9 +70,7 @@ export default function GuruDashboard() {
   const [loadingMembers, setLoadingMembers] = useState(false);
   const [selectedStudent, setSelectedStudent] =
     useState<StudentDetailData | null>(null);
-  const [filterStatus, setFilterStatus] = useState<
-    "all" | "completed" | "pending"
-  >("all");
+  const [filterStatus, setFilterStatus] = useState<"all" | "completed">("all");
 
   // Discussion Management States
   const [monitoringTab, setMonitoringTab] = useState<
@@ -337,27 +334,50 @@ export default function GuruDashboard() {
     setSelectedStudent({ member, responses, score });
   };
 
-  const handleCleanupTestData = async () => {
-    const confirmed = window.confirm(
-      "⚠️ Hapus semua test data (student-001, student-002, student-003)?\n\nIni akan menghapus semua responses dengan siswaId pattern student-00X dari database.",
-    );
+  const handleRefreshStudents = async () => {
+    if (!selectedClass) return;
 
-    if (!confirmed) return;
-
+    setLoadingMembers(true);
     try {
-      setLoadingMembers(true);
-      const deletedCount = await cleanupTestData();
-      alert(
-        `✅ Berhasil menghapus ${deletedCount} test data records!\n\nSilakan minta siswa submit misi lagi.`,
-      );
+      // Load class members
+      const members = await getClassMembers(selectedClass.id!);
+      console.log(`👥 Found ${members.length} members in class`);
+      setClassMembers(members);
 
-      // Reload monitoring data jika ada class yang dipilih
-      if (selectedClass) {
-        await handleOpenMonitoring(selectedClass);
+      // Load scores and responses for each member
+      const scoresMap: Record<string, number> = {};
+      const responsesMap: Record<string, StudentResponse | null> = {};
+
+      for (const member of members) {
+        try {
+          const score = await getStudentScore(member.siswaId);
+          scoresMap[member.siswaId] = score;
+
+          const response = await getStudentResponsesByStudent(member.siswaId);
+          console.log(
+            `✅ Loaded response for ${member.siswaName} (${member.siswaId}):`,
+            response,
+          );
+          responsesMap[member.siswaId] = response;
+        } catch (error) {
+          console.error(
+            `Error loading data for student ${member.siswaId}:`,
+            error,
+          );
+        }
       }
+
+      console.log(
+        `📊 Final responses map:`,
+        Object.entries(responsesMap).map(([id, resp]) => ({
+          siswaId: id,
+          hasResponse: !!resp,
+        })),
+      );
+      setMemberScores(scoresMap);
+      setMemberResponses(responsesMap as any);
     } catch (error) {
-      console.error("Error during cleanup:", error);
-      alert("❌ Gagal menghapus test data. Coba lagi.");
+      console.error("Error refreshing student data:", error);
     } finally {
       setLoadingMembers(false);
     }
@@ -398,12 +418,21 @@ export default function GuruDashboard() {
               <p className="font-semibold text-gray-900">{userProfile?.name}</p>
               <p className="text-sm text-gray-600">Guru Pengajar</p>
             </div>
-            <button
-              onClick={handleLogout}
-              className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
-            >
-              <LogOut className="w-6 h-6 text-gray-600" />
-            </button>
+            {selectedClass ? (
+              <button
+                onClick={() => setSelectedClass(null)}
+                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium text-sm"
+              >
+                Kembali
+              </button>
+            ) : (
+              <button
+                onClick={handleLogout}
+                className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+              >
+                <LogOut className="w-6 h-6 text-gray-600" />
+              </button>
+            )}
           </div>
         </div>
       </header>
@@ -448,7 +477,7 @@ export default function GuruDashboard() {
                     setFormData({ ...formData, name: e.target.value })
                   }
                   placeholder="Contoh: Kimia Organik XI IPA 1"
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-black"
                   required
                 />
               </div>
@@ -462,7 +491,7 @@ export default function GuruDashboard() {
                     setFormData({ ...formData, description: e.target.value })
                   }
                   placeholder="Jelaskan tujuan dan konten kelas..."
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none text-black"
                   rows={4}
                   required
                 />
@@ -559,17 +588,11 @@ export default function GuruDashboard() {
           <div className="space-y-6">
             <div className="flex items-center justify-between mb-6">
               <div>
-                <button
-                  onClick={() => setSelectedClass(null)}
-                  className="mb-4 text-blue-600 hover:text-blue-700 font-medium flex items-center gap-1"
-                >
-                  ← Kembali ke Kelas
-                </button>
                 <h3 className="text-2xl font-bold text-gray-900">
                   {selectedClass.name}
                 </h3>
-                <p className="text-gray-600 mt-1">
-                  Dashboard Pengelolaan Kelas
+                <p className="text-sm text-gray-600 mt-1">
+                  Kode: {selectedClass.classCode}
                 </p>
               </div>
             </div>
@@ -601,38 +624,53 @@ export default function GuruDashboard() {
             {/* Students Tab */}
             {monitoringTab === "students" && (
               <>
-                {/* Filter Tabs */}
-                <div className="flex gap-2 justify-between items-center mb-4">
+                {/* Filter Tabs & Refresh */}
+                <div className="flex items-center justify-between gap-4 mb-4">
                   <div className="flex gap-2">
-                    {(["all", "completed", "pending"] as const).map(
-                      (status) => (
-                        <button
-                          key={status}
-                          onClick={() => setFilterStatus(status)}
-                          className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-                            filterStatus === status
-                              ? "bg-blue-600 text-white"
-                              : "bg-gray-100 text-gray-600 hover:bg-gray-200"
-                          }`}
-                        >
-                          {status === "all"
-                            ? `Semua (${classMembers.length})`
-                            : status === "completed"
-                              ? `Selesai (${classMembers.filter((m) => getStudentStatus(m.siswaId) === "completed").length})`
-                              : `Pending (${classMembers.filter((m) => getStudentStatus(m.siswaId) === "pending").length})`}
-                        </button>
-                      ),
-                    )}
+                    {(["all", "completed"] as const).map((status) => (
+                      <button
+                        key={status}
+                        onClick={() => setFilterStatus(status)}
+                        className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+                          filterStatus === status
+                            ? "bg-blue-600 text-white"
+                            : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                        }`}
+                      >
+                        {status === "all"
+                          ? `Semua (${classMembers.length})`
+                          : `Selesai (${classMembers.filter((m) => getStudentStatus(m.siswaId) === "completed").length})`}
+                      </button>
+                    ))}
                   </div>
-
-                  {/* Cleanup Button */}
                   <button
-                    onClick={handleCleanupTestData}
-                    className="flex items-center gap-2 px-3 py-2 bg-red-100 text-red-700 rounded-lg hover:bg-red-200 transition-colors font-medium text-sm"
-                    title="Hapus test data (student-001, student-002, student-003)"
+                    onClick={handleRefreshStudents}
+                    disabled={loadingMembers}
+                    className="flex items-center gap-2 px-4 py-2 bg-blue-50 text-blue-600 hover:bg-blue-100 disabled:bg-gray-200 disabled:text-gray-500 rounded-lg transition-colors font-medium text-sm"
                   >
-                    <Trash2 size={16} />
-                    Hapus Test Data
+                    {loadingMembers ? (
+                      <>
+                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600"></div>
+                        Memuat...
+                      </>
+                    ) : (
+                      <>
+                        <svg
+                          className="w-4 h-4"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
+                          />
+                        </svg>
+                        Refresh
+                      </>
+                    )}
                   </button>
                 </div>
 
@@ -656,9 +694,6 @@ export default function GuruDashboard() {
                             Status
                           </th>
                           <th className="px-6 py-4 text-center text-sm font-semibold text-gray-700">
-                            Misi Selesai
-                          </th>
-                          <th className="px-6 py-4 text-center text-sm font-semibold text-gray-700">
                             Skor
                           </th>
                           <th className="px-6 py-4 text-center text-sm font-semibold text-gray-700">
@@ -670,7 +705,7 @@ export default function GuruDashboard() {
                         {filteredMembers.length === 0 ? (
                           <tr>
                             <td
-                              colSpan={6}
+                              colSpan={5}
                               className="px-6 py-8 text-center text-gray-500"
                             >
                               Tidak ada data siswa
@@ -681,8 +716,6 @@ export default function GuruDashboard() {
                             const status = getStudentStatus(member.siswaId);
                             const score = memberScores[member.siswaId] || 0;
                             const response = memberResponses[member.siswaId];
-                            const completedCount =
-                              status === "completed" ? 1 : 0;
 
                             return (
                               <tr
@@ -720,11 +753,6 @@ export default function GuruDashboard() {
                                       </>
                                     )}
                                   </div>
-                                </td>
-                                <td className="px-6 py-4 text-center">
-                                  <span className="inline-flex items-center justify-center w-8 h-8 rounded-full bg-blue-100 text-sm font-semibold text-blue-600">
-                                    {completedCount}
-                                  </span>
                                 </td>
                                 <td className="px-6 py-4 text-center">
                                   <div className="flex items-center justify-center gap-1">
@@ -792,7 +820,7 @@ export default function GuruDashboard() {
                             })
                           }
                           placeholder="Contoh: Dampak Limbah Industri pada Ekosistem"
-                          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 text-black"
                           required
                         />
                       </div>
@@ -810,7 +838,7 @@ export default function GuruDashboard() {
                             })
                           }
                           placeholder="Jelaskan masalah, studi kasus, atau pertanyaan untuk didiskusikan..."
-                          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 resize-none"
+                          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 resize-none text-black"
                           rows={5}
                           required
                         />
@@ -833,7 +861,7 @@ export default function GuruDashboard() {
                             })
                           }
                           placeholder="Contoh: https://youtu.be/... atau https://contoh.com/gambar.jpg"
-                          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 text-black"
                         />
                       </div>
 
@@ -1002,7 +1030,7 @@ export default function GuruDashboard() {
                   onClick={() => setSelectedStudent(null)}
                   className="p-1 hover:bg-gray-100 rounded-lg transition-colors"
                 >
-                  <X className="w-6 h-6" />
+                  <X className="w-6 h-6 text-red-600" />
                 </button>
               </div>
 
@@ -1035,7 +1063,7 @@ export default function GuruDashboard() {
 
                 {/* Mission Details */}
                 <div>
-                  <h3 className="text-lg font-bold text-gray-900 mb-4">
+                  <h3 className="text-lg font-bold text-black mb-4">
                     Detail Misi
                   </h3>
                   <div className="space-y-4">
@@ -1051,20 +1079,20 @@ export default function GuruDashboard() {
                         >
                           <div className="flex items-start justify-between mb-3">
                             <div>
-                              <h4 className="font-semibold text-gray-900">
+                              <h4 className="font-semibold text-black">
                                 {response.missionName}
                               </h4>
-                              <p className="text-xs text-gray-500 mt-1">
+                              <p className="text-xs text-black mt-1">
                                 {new Date(response.submittedAt).toLocaleString(
                                   "id-ID",
                                 )}
                               </p>
                             </div>
                             <div className="text-right">
-                              <p className="text-2xl font-bold text-blue-600">
+                              <p className="text-2xl font-bold text-black">
                                 {response.totalScore || 0}
                               </p>
-                              <p className="text-xs text-gray-500">poin</p>
+                              <p className="text-xs text-black">poin</p>
                             </div>
                           </div>
 
@@ -1072,7 +1100,7 @@ export default function GuruDashboard() {
                           {Object.keys(response.essayAnswers || {}).length >
                             0 && (
                             <div className="mt-3 pt-3 border-t border-gray-100">
-                              <p className="text-sm font-semibold text-gray-700 mb-2">
+                              <p className="text-sm font-semibold text-black mb-2">
                                 Jawaban Uraian:
                               </p>
                               <div className="space-y-2">
@@ -1083,8 +1111,15 @@ export default function GuruDashboard() {
                                     key={essayId}
                                     className="bg-gray-50 rounded p-2"
                                   >
-                                    <p className="text-xs text-gray-600">
-                                      <strong>ID {essayId}:</strong> {answer}
+                                    <p className="text-xs text-black mb-1">
+                                      <strong>Pertanyaan:</strong>
+                                    </p>
+                                    <p className="text-xs text-black mb-2">
+                                      {response.essayQuestions?.[essayId] ||
+                                        `Essay ${essayId}`}
+                                    </p>
+                                    <p className="text-xs text-black">
+                                      <strong>Jawaban:</strong> {answer}
                                     </p>
                                   </div>
                                 ))}
@@ -1096,7 +1131,7 @@ export default function GuruDashboard() {
                           {response.multiChoiceAnswers &&
                             response.multiChoiceAnswers.length > 0 && (
                               <div className="mt-3 pt-3 border-t border-gray-100">
-                                <p className="text-sm font-semibold text-gray-700 mb-2">
+                                <p className="text-sm font-semibold text-black mb-2">
                                   Jawaban Pilihan Ganda:
                                 </p>
                                 <div className="space-y-2">
@@ -1110,7 +1145,7 @@ export default function GuruDashboard() {
                                             : "bg-red-50 border border-red-200"
                                         }`}
                                       >
-                                        <p className="text-xs">
+                                        <p className="text-xs text-black">
                                           <strong>Soal {idx + 1}:</strong>{" "}
                                           {answer.choiceText}{" "}
                                           <span
@@ -1134,7 +1169,7 @@ export default function GuruDashboard() {
                           {Object.keys(response.reflectionAnswers || {})
                             .length > 0 && (
                             <div className="mt-3 pt-3 border-t border-gray-100">
-                              <p className="text-sm font-semibold text-gray-700 mb-2">
+                              <p className="text-sm font-semibold text-black mb-2">
                                 Refleksi:
                               </p>
                               <div className="space-y-2">
@@ -1145,9 +1180,16 @@ export default function GuruDashboard() {
                                     key={reflectionId}
                                     className="bg-blue-50 rounded p-2"
                                   >
-                                    <p className="text-xs text-gray-600">
-                                      <strong>ID {reflectionId}:</strong>{" "}
-                                      {answer}
+                                    <p className="text-xs text-black mb-1">
+                                      <strong>Pertanyaan:</strong>
+                                    </p>
+                                    <p className="text-xs text-black mb-2">
+                                      {response.reflectionQuestions?.[
+                                        reflectionId
+                                      ] || `Refleksi ${reflectionId}`}
+                                    </p>
+                                    <p className="text-xs text-black">
+                                      <strong>Jawaban:</strong> {answer}
                                     </p>
                                   </div>
                                 ))}
