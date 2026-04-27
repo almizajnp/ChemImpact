@@ -452,12 +452,7 @@ export default function SocialTab({ classId, theme }: SocialTabProps) {
       <div className="flex flex-1 min-h-0 flex-col overflow-hidden">
         {/* TOPICS LIST - Card Grid for All Screens */}
         <div
-          className={`${showTopicsList ? "block" : "hidden"} h-full overflow-y-auto backdrop-blur-sm -mt-2`}
-          style={{
-            backgroundColor: theme?.secondary
-              ? `${theme.secondary}e6`
-              : "rgba(255, 255, 255, 0.9)",
-          }}
+          className={`${showTopicsList ? "block" : "hidden"} h-full overflow-y-auto -mt-2`}
         >
           {loadingTopics ? (
             <div className="p-4 text-center text-gray-500 text-sm">
