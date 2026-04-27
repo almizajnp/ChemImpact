@@ -155,8 +155,8 @@ export default function StudentDashboard() {
             <SocialTab classId={activeClassId} theme={theme} />
           </div>
         ) : (
-          <div className="flex items-center justify-center min-h-screen text-gray-500 font-clash text-center px-4">
-            <div>
+          <div className="flex items-center justify-center min-h-screen px-4">
+            <div className="text-white-100 font-clash text-center px-6 py-4 rounded-2xl shadow-2xl max-w-md" style={{ backgroundColor: theme.primary }}>
               <p className="mb-4 text-sm md:text-base">
                 Bergabunglah dengan kelas terlebih dahulu untuk mengakses forum
                 diskusi

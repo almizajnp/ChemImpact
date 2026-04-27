@@ -65,27 +65,22 @@ export default function LeaderboardTab({ theme }: LeaderboardTabProps) {
     <div className="w-full max-w-4xl mx-auto pt-4 px-4 md:px-6 pb-24">
       {/* Header */}
       <div className="mb-8 flex flex-col items-center justify-center gap-3">
-        <Medal size={60} style={{ color: theme?.primary }} />
-        <h1
-          className="text-5xl font-black font-montserrat text-center tracking-wider"
+        <img
+          src="/images/ld.png"
+          alt="Leaderboard"
+          className="h-60 object-contain"
+        />
+        <p
+          className="text-white font-clash text-center px-4 py-2 rounded-xl shadow-lg"
           style={{
-            color: theme?.primary || "rgb(59, 130, 246)",
-            WebkitTextStroke: `3px ${theme?.primary || "rgb(59, 130, 246)"}`,
-            textShadow: `
-              0 2px 0 rgba(255, 255, 255, 0.8),
-              2px 4px 0 rgba(0, 0, 0, 0.2),
-              4px 8px 15px rgba(${theme?.primary ? "59, 130, 246" : "0, 0, 0"}, 0.3),
-              -2px -2px 5px rgba(255, 255, 0, 0.4),
-              2px 2px 5px rgba(255, 100, 0, 0.4)
-            `,
-            filter: "drop-shadow(0 0 10px rgba(255, 150, 0, 0.6))",
-            letterSpacing: "0.05em",
+            backgroundColor: theme?.primary
+              ? `${theme.primary}40`
+              : "rgba(59, 130, 246, 0.25)",
+            backdropFilter: "blur(10px)",
           }}
         >
-          Leaderboard
-        </h1>
-        <p className="text-black -600 font-clash text-center">
-          Student rankings by score
+          Peringkat siswa berdasarkan total skor yang diperoleh dari
+          menyelesaikan misi{" "}
         </p>
       </div>
 
@@ -164,8 +159,8 @@ export default function LeaderboardTab({ theme }: LeaderboardTabProps) {
       {/* Footer info */}
       <div className="mt-8 p-4 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl border-2 border-blue-200">
         <p className="text-sm text-gray-700 font-clash text-center">
-          💡 Rankings update in real-time! Score points by completing missions
-          and quizzes.
+          💡 Peringkat diperbarui secara real-time! Tunjukkan kemampuanmu dan
+          raih skor tertinggi!
         </p>
       </div>
     </div>

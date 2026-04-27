@@ -17,6 +17,7 @@ import {
   EyeOff,
   Link as LinkIcon,
   ExternalLink,
+  HelpCircle,
 } from "lucide-react";
 import {
   getGuruClasses,
@@ -71,6 +72,7 @@ export default function GuruDashboard() {
   const [selectedStudent, setSelectedStudent] =
     useState<StudentDetailData | null>(null);
   const [filterStatus, setFilterStatus] = useState<"all" | "completed">("all");
+  const [showGuidance, setShowGuidance] = useState(false);
 
   // Discussion Management States
   const [monitoringTab, setMonitoringTab] = useState<
@@ -389,11 +391,13 @@ export default function GuruDashboard() {
     return response.status === "completed" ? "completed" : "pending";
   };
 
-  const filteredMembers = classMembers.filter((member) => {
-    const status = getStudentStatus(member.siswaId);
-    if (filterStatus === "all") return true;
-    return status === filterStatus;
-  });
+  const filteredMembers = classMembers
+    .filter((member) => {
+      const status = getStudentStatus(member.siswaId);
+      if (filterStatus === "all") return true;
+      return status === filterStatus;
+    })
+    .sort((a, b) => a.siswaName.localeCompare(b.siswaName));
 
   const handleLogout = async () => {
     try {
@@ -413,11 +417,18 @@ export default function GuruDashboard() {
             <h1 className="text-3xl font-bold text-gray-900">ChemImpact</h1>
             <p className="text-gray-600 text-sm">Dashboard Guru</p>
           </div>
-          <div className="flex items-center gap-6">
+          <div className="flex items-center gap-4">
             <div className="text-right hidden md:block">
               <p className="font-semibold text-gray-900">{userProfile?.name}</p>
               <p className="text-sm text-gray-600">Guru Pengajar</p>
             </div>
+            <button
+              onClick={() => setShowGuidance(true)}
+              className="p-2 hover:bg-blue-50 rounded-lg transition-colors group"
+              title="Panduan Penggunaan Dashboard Guru"
+            >
+              <HelpCircle className="w-6 h-6 text-blue-600 group-hover:text-blue-800" />
+            </button>
             {selectedClass ? (
               <button
                 onClick={() => setSelectedClass(null)}
@@ -679,43 +690,38 @@ export default function GuruDashboard() {
                   <div className="flex items-center justify-center py-12">
                     <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-blue-600"></div>
                   </div>
+                ) : filteredMembers.length === 0 ? (
+                  <div className="text-center py-8 bg-white rounded-lg border-2 border-dashed border-gray-300">
+                    <p className="text-gray-500">Tidak ada data siswa</p>
+                  </div>
                 ) : (
-                  <div className="bg-white rounded-xl shadow-lg overflow-hidden">
-                    <table className="w-full">
-                      <thead>
-                        <tr className="border-b border-gray-200 bg-gray-50">
-                          <th className="px-6 py-4 text-left text-sm font-semibold text-gray-700">
-                            No.
-                          </th>
-                          <th className="px-6 py-4 text-left text-sm font-semibold text-gray-700">
-                            Nama Siswa
-                          </th>
-                          <th className="px-6 py-4 text-center text-sm font-semibold text-gray-700">
-                            Status
-                          </th>
-                          <th className="px-6 py-4 text-center text-sm font-semibold text-gray-700">
-                            Skor
-                          </th>
-                          <th className="px-6 py-4 text-center text-sm font-semibold text-gray-700">
-                            Aksi
-                          </th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {filteredMembers.length === 0 ? (
-                          <tr>
-                            <td
-                              colSpan={5}
-                              className="px-6 py-8 text-center text-gray-500"
-                            >
-                              Tidak ada data siswa
-                            </td>
+                  <>
+                    {/* Desktop Table View */}
+                    <div className="hidden md:block bg-white rounded-xl shadow-lg overflow-hidden">
+                      <table className="w-full">
+                        <thead>
+                          <tr className="border-b border-gray-200 bg-gray-50">
+                            <th className="px-6 py-4 text-left text-sm font-semibold text-gray-700">
+                              No.
+                            </th>
+                            <th className="px-6 py-4 text-left text-sm font-semibold text-gray-700">
+                              Nama Siswa
+                            </th>
+                            <th className="px-6 py-4 text-center text-sm font-semibold text-gray-700">
+                              Status
+                            </th>
+                            <th className="px-6 py-4 text-center text-sm font-semibold text-gray-700">
+                              Skor
+                            </th>
+                            <th className="px-6 py-4 text-center text-sm font-semibold text-gray-700">
+                              Aksi
+                            </th>
                           </tr>
-                        ) : (
-                          filteredMembers.map((member, index) => {
+                        </thead>
+                        <tbody>
+                          {filteredMembers.map((member, index) => {
                             const status = getStudentStatus(member.siswaId);
                             const score = memberScores[member.siswaId] || 0;
-                            const response = memberResponses[member.siswaId];
 
                             return (
                               <tr
@@ -773,11 +779,77 @@ export default function GuruDashboard() {
                                 </td>
                               </tr>
                             );
-                          })
-                        )}
-                      </tbody>
-                    </table>
-                  </div>
+                          })}
+                        </tbody>
+                      </table>
+                    </div>
+
+                    {/* Mobile Card View */}
+                    <div className="md:hidden space-y-3">
+                      {filteredMembers.map((member, index) => {
+                        const status = getStudentStatus(member.siswaId);
+                        const score = memberScores[member.siswaId] || 0;
+
+                        return (
+                          <div
+                            key={member.id}
+                            className="bg-white rounded-lg shadow border border-gray-200 p-4 hover:shadow-md transition-shadow"
+                          >
+                            {/* Header: No & Name */}
+                            <div className="flex items-start justify-between mb-3">
+                              <div>
+                                <div className="flex items-center gap-2">
+                                  <span className="text-xs font-semibold text-gray-500 bg-gray-100 px-2 py-1 rounded">
+                                    #{index + 1}
+                                  </span>
+                                  <h3 className="text-sm font-bold text-gray-900">
+                                    {member.siswaName}
+                                  </h3>
+                                </div>
+                                <p className="text-xs text-gray-500 mt-1">
+                                  ID: {member.siswaId.substring(0, 8)}...
+                                </p>
+                              </div>
+                              {/* Status Badge */}
+                              <div>
+                                {status === "completed" ? (
+                                  <div className="flex items-center gap-1 bg-green-100 text-green-700 px-2 py-1 rounded-full text-xs font-semibold">
+                                    <CheckCircle className="w-4 h-4" />
+                                    Selesai
+                                  </div>
+                                ) : (
+                                  <div className="flex items-center gap-1 bg-yellow-100 text-yellow-700 px-2 py-1 rounded-full text-xs font-semibold">
+                                    <Clock className="w-4 h-4" />
+                                    Proses
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+
+                            {/* Score & Action Row */}
+                            <div className="flex items-center justify-between pt-3 border-t border-gray-100">
+                              <div className="flex items-center gap-2">
+                                <Award className="w-4 h-4 text-yellow-600" />
+                                <span className="text-lg font-bold text-blue-600">
+                                  {score}
+                                </span>
+                                <span className="text-xs text-gray-600">
+                                  poin
+                                </span>
+                              </div>
+                              <button
+                                onClick={() => handleSelectStudent(member)}
+                                className="flex items-center gap-2 px-3 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700 transition-colors text-xs font-medium"
+                              >
+                                <Eye className="w-4 h-4" />
+                                Detail
+                              </button>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </>
                 )}
               </>
             )}
@@ -1015,37 +1087,41 @@ export default function GuruDashboard() {
 
         {/* Student Detail Modal */}
         {selectedStudent && (
-          <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-            <div className="bg-white rounded-xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
-              <div className="sticky top-0 bg-white border-b border-gray-200 px-6 py-4 flex justify-between items-center">
+          <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-2 md:p-4">
+            <div className="bg-white rounded-xl shadow-2xl max-w-4xl w-full max-h-[95vh] md:max-h-[90vh] overflow-y-auto">
+              <div className="sticky top-0 bg-white border-b border-gray-200 px-3 md:px-6 py-3 md:py-4 flex justify-between items-start md:items-center gap-3">
                 <div>
-                  <h2 className="text-2xl font-bold text-gray-900">
+                  <h2 className="text-lg md:text-2xl font-bold text-gray-900">
                     {selectedStudent.member.siswaName}
                   </h2>
-                  <p className="text-sm text-gray-600 mt-1">
+                  <p className="text-xs md:text-sm text-gray-600 mt-1">
                     Detail Aktivitas & Jawaban
                   </p>
                 </div>
                 <button
                   onClick={() => setSelectedStudent(null)}
-                  className="p-1 hover:bg-gray-100 rounded-lg transition-colors"
+                  className="p-1 hover:bg-gray-100 rounded-lg transition-colors shrink-0"
                 >
-                  <X className="w-6 h-6 text-red-600" />
+                  <X className="w-5 h-5 md:w-6 md:h-6 text-red-600" />
                 </button>
               </div>
 
-              <div className="p-6 space-y-6">
+              <div className="p-3 md:p-6 space-y-4 md:space-y-6">
                 {/* Summary Stats */}
-                <div className="grid grid-cols-3 gap-4">
-                  <div className="bg-blue-50 rounded-lg p-4">
-                    <p className="text-sm text-gray-600">Total Skor</p>
-                    <p className="text-3xl font-bold text-blue-600 mt-2">
+                <div className="grid grid-cols-3 gap-2 md:gap-4">
+                  <div className="bg-blue-50 rounded-lg p-3 md:p-4">
+                    <p className="text-xs md:text-sm text-gray-600">
+                      Total Skor
+                    </p>
+                    <p className="text-2xl md:text-3xl font-bold text-blue-600 mt-1 md:mt-2">
                       {selectedStudent.score}
                     </p>
                   </div>
-                  <div className="bg-green-50 rounded-lg p-4">
-                    <p className="text-sm text-gray-600">Misi Selesai</p>
-                    <p className="text-3xl font-bold text-green-600 mt-2">
+                  <div className="bg-green-50 rounded-lg p-3 md:p-4">
+                    <p className="text-xs md:text-sm text-gray-600">
+                      Misi Selesai
+                    </p>
+                    <p className="text-2xl md:text-3xl font-bold text-green-600 mt-1 md:mt-2">
                       {
                         selectedStudent.responses.filter(
                           (r) => r.status === "completed",
@@ -1053,9 +1129,11 @@ export default function GuruDashboard() {
                       }
                     </p>
                   </div>
-                  <div className="bg-purple-50 rounded-lg p-4">
-                    <p className="text-sm text-gray-600">Total Aktivitas</p>
-                    <p className="text-3xl font-bold text-purple-600 mt-2">
+                  <div className="bg-purple-50 rounded-lg p-3 md:p-4">
+                    <p className="text-xs md:text-sm text-gray-600">
+                      Total Aktivitas
+                    </p>
+                    <p className="text-2xl md:text-3xl font-bold text-purple-600 mt-1 md:mt-2">
                       {selectedStudent.responses.length}
                     </p>
                   </div>
@@ -1063,36 +1141,36 @@ export default function GuruDashboard() {
 
                 {/* Mission Details */}
                 <div>
-                  <h3 className="text-lg font-bold text-black mb-4">
+                  <h3 className="text-base md:text-lg font-bold text-black mb-3 md:mb-4">
                     Detail Misi
                   </h3>
-                  <div className="space-y-4">
+                  <div className="space-y-3 md:space-y-4">
                     {selectedStudent.responses.length === 0 ? (
-                      <p className="text-gray-600 text-center py-8">
+                      <p className="text-gray-600 text-center py-8 text-sm">
                         Siswa belum menyelesaikan misi apapun
                       </p>
                     ) : (
                       selectedStudent.responses.map((response) => (
                         <div
                           key={response.id}
-                          className="border border-gray-200 rounded-lg p-4 hover:bg-gray-50 transition-colors"
+                          className="border border-gray-200 rounded-lg p-3 md:p-4 hover:bg-gray-50 transition-colors"
                         >
                           <div className="flex items-start justify-between mb-3">
                             <div>
-                              <h4 className="font-semibold text-black">
+                              <h4 className="font-semibold text-sm md:text-base text-black">
                                 {response.missionName}
                               </h4>
-                              <p className="text-xs text-black mt-1">
+                              <p className="text-xs text-gray-600 mt-1">
                                 {new Date(response.submittedAt).toLocaleString(
                                   "id-ID",
                                 )}
                               </p>
                             </div>
                             <div className="text-right">
-                              <p className="text-2xl font-bold text-black">
+                              <p className="text-xl md:text-2xl font-bold text-black">
                                 {response.totalScore || 0}
                               </p>
-                              <p className="text-xs text-black">poin</p>
+                              <p className="text-xs text-gray-600">poin</p>
                             </div>
                           </div>
 
@@ -1100,7 +1178,7 @@ export default function GuruDashboard() {
                           {Object.keys(response.essayAnswers || {}).length >
                             0 && (
                             <div className="mt-3 pt-3 border-t border-gray-100">
-                              <p className="text-sm font-semibold text-black mb-2">
+                              <p className="text-xs md:text-sm font-semibold text-black mb-2">
                                 Jawaban Uraian:
                               </p>
                               <div className="space-y-2">
@@ -1109,17 +1187,20 @@ export default function GuruDashboard() {
                                 ).map(([essayId, answer]) => (
                                   <div
                                     key={essayId}
-                                    className="bg-gray-50 rounded p-2"
+                                    className="bg-gray-50 rounded p-2 md:p-3"
                                   >
                                     <p className="text-xs text-black mb-1">
                                       <strong>Pertanyaan:</strong>
                                     </p>
-                                    <p className="text-xs text-black mb-2">
+                                    <p className="text-xs text-black mb-2 line-clamp-2">
                                       {response.essayQuestions?.[essayId] ||
                                         `Essay ${essayId}`}
                                     </p>
                                     <p className="text-xs text-black">
-                                      <strong>Jawaban:</strong> {answer}
+                                      <strong>Jawaban:</strong>
+                                    </p>
+                                    <p className="text-xs text-gray-700 mt-1 line-clamp-3">
+                                      {answer}
                                     </p>
                                   </div>
                                 ))}
@@ -1131,7 +1212,7 @@ export default function GuruDashboard() {
                           {response.multiChoiceAnswers &&
                             response.multiChoiceAnswers.length > 0 && (
                               <div className="mt-3 pt-3 border-t border-gray-100">
-                                <p className="text-sm font-semibold text-black mb-2">
+                                <p className="text-xs md:text-sm font-semibold text-black mb-2">
                                   Jawaban Pilihan Ganda:
                                 </p>
                                 <div className="space-y-2">
@@ -1139,13 +1220,13 @@ export default function GuruDashboard() {
                                     (answer, idx) => (
                                       <div
                                         key={idx}
-                                        className={`rounded p-2 ${
+                                        className={`rounded p-2 md:p-3 text-xs ${
                                           answer.isCorrect
                                             ? "bg-green-50 border border-green-200"
                                             : "bg-red-50 border border-red-200"
                                         }`}
                                       >
-                                        <p className="text-xs text-black">
+                                        <p className="text-black">
                                           <strong>Soal {idx + 1}:</strong>{" "}
                                           {answer.choiceText}{" "}
                                           <span
@@ -1169,7 +1250,7 @@ export default function GuruDashboard() {
                           {Object.keys(response.reflectionAnswers || {})
                             .length > 0 && (
                             <div className="mt-3 pt-3 border-t border-gray-100">
-                              <p className="text-sm font-semibold text-black mb-2">
+                              <p className="text-xs md:text-sm font-semibold text-black mb-2">
                                 Refleksi:
                               </p>
                               <div className="space-y-2">
@@ -1178,18 +1259,21 @@ export default function GuruDashboard() {
                                 ).map(([reflectionId, answer]) => (
                                   <div
                                     key={reflectionId}
-                                    className="bg-blue-50 rounded p-2"
+                                    className="bg-blue-50 rounded p-2 md:p-3"
                                   >
                                     <p className="text-xs text-black mb-1">
                                       <strong>Pertanyaan:</strong>
                                     </p>
-                                    <p className="text-xs text-black mb-2">
+                                    <p className="text-xs text-black mb-2 line-clamp-2">
                                       {response.reflectionQuestions?.[
                                         reflectionId
                                       ] || `Refleksi ${reflectionId}`}
                                     </p>
                                     <p className="text-xs text-black">
-                                      <strong>Jawaban:</strong> {answer}
+                                      <strong>Jawaban:</strong>
+                                    </p>
+                                    <p className="text-xs text-gray-700 mt-1 line-clamp-3">
+                                      {answer}
                                     </p>
                                   </div>
                                 ))}
@@ -1227,7 +1311,7 @@ export default function GuruDashboard() {
                   onClick={() => setSelectedDiscussionForDetail(null)}
                   className="p-1 hover:bg-gray-100 rounded-lg transition-colors shrink-0"
                 >
-                  <X className="w-5 h-5 md:w-6 md:h-6" />
+                  <X className="w-5 h-5 md:w-6 md:h-6 text-black" />
                 </button>
               </div>
 
@@ -1367,6 +1451,254 @@ export default function GuruDashboard() {
                     </div>
                   )}
                 </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Guidance Modal */}
+        {showGuidance && (
+          <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-2 md:p-4">
+            <div className="bg-white rounded-xl shadow-2xl max-w-2xl w-full max-h-[95vh] overflow-y-auto">
+              {/* Modal Header */}
+              <div className="sticky top-0 bg-gradient-to-r from-blue-600 to-blue-800 px-4 md:px-6 py-4 md:py-5 flex justify-between items-start gap-3">
+                <div className="flex items-start gap-3">
+                  <HelpCircle className="w-6 h-6 md:w-7 md:h-7 text-white flex-shrink-0 mt-1" />
+                  <div>
+                    <h2 className="text-xl md:text-2xl font-bold text-white">
+                      Panduan Dashboard Guru
+                    </h2>
+                    <p className="text-blue-100 text-xs md:text-sm mt-1">
+                      Pelajari cara menggunakan sistem dashboard guru ChemImpact
+                    </p>
+                  </div>
+                </div>
+                <button
+                  onClick={() => setShowGuidance(false)}
+                  className="p-1 hover:bg-blue-700 rounded-lg transition-colors flex-shrink-0"
+                >
+                  <X className="w-5 h-5 md:w-6 md:h-6 text-white" />
+                </button>
+              </div>
+
+              {/* Modal Content */}
+              <div className="p-4 md:p-6 space-y-5 md:space-y-6">
+                {/* Section 1: Overview */}
+                <section className="border-b border-gray-200 pb-4 md:pb-5">
+                  <h3 className="text-base md:text-lg font-bold text-gray-900 mb-3 flex items-center gap-2">
+                    <span className="bg-blue-100 text-blue-600 rounded-full w-6 h-6 md:w-7 md:h-7 flex items-center justify-center text-xs md:text-sm font-bold flex-shrink-0">
+                      1
+                    </span>
+                    Ikhtisar Dashboard
+                  </h3>
+                  <p className="text-xs md:text-sm text-gray-700 leading-relaxed">
+                    Dashboard Guru adalah platform manajemen kelas yang
+                    memungkinkan Anda untuk membuat kelas, memantau progres
+                    siswa secara real-time, dan mengelola diskusi kelas. Semua
+                    data disimpan dan diperbarui secara langsung di database.
+                  </p>
+                </section>
+
+                {/* Section 2: Class Management */}
+                <section className="border-b border-gray-200 pb-4 md:pb-5">
+                  <h3 className="text-base md:text-lg font-bold text-gray-900 mb-3 flex items-center gap-2">
+                    <span className="bg-blue-100 text-blue-600 rounded-full w-6 h-6 md:w-7 md:h-7 flex items-center justify-center text-xs md:text-sm font-bold flex-shrink-0">
+                      2
+                    </span>
+                    Mengelola Kelas
+                  </h3>
+                  <div className="space-y-2 md:space-y-3">
+                    <div>
+                      <p className="text-xs md:text-sm font-semibold text-gray-900">
+                        📌 Buat Kelas Baru
+                      </p>
+                      <p className="text-xs md:text-sm text-gray-700 mt-1">
+                        Klik tombol "Buat Kelas Baru" untuk membuat kelas baru.
+                        Isi nama kelas dan deskripsi, lalu klik "Buat Kelas".
+                        Sistem akan otomatis menghasilkan kode kelas unik yang
+                        dapat dibagikan kepada siswa.
+                      </p>
+                    </div>
+                    <div>
+                      <p className="text-xs md:text-sm font-semibold text-gray-900">
+                        🔍 Lihat Monitoring
+                      </p>
+                      <p className="text-xs md:text-sm text-gray-700 mt-1">
+                        Klik "Lihat Monitoring" pada kartu kelas untuk melihat
+                        detail progres siswa dan forum diskusi kelas tersebut.
+                      </p>
+                    </div>
+                  </div>
+                </section>
+
+                {/* Section 3: Student Progress */}
+                <section className="border-b border-gray-200 pb-4 md:pb-5">
+                  <h3 className="text-base md:text-lg font-bold text-gray-900 mb-3 flex items-center gap-2">
+                    <span className="bg-blue-100 text-blue-600 rounded-full w-6 h-6 md:w-7 md:h-7 flex items-center justify-center text-xs md:text-sm font-bold flex-shrink-0">
+                      3
+                    </span>
+                    Memantau Progres Siswa
+                  </h3>
+                  <div className="space-y-2 md:space-y-3">
+                    <div>
+                      <p className="text-xs md:text-sm font-semibold text-gray-900">
+                        👥 Tab Progres Siswa
+                      </p>
+                      <p className="text-xs md:text-sm text-gray-700 mt-1">
+                        Lihat daftar semua siswa dalam kelas. Sistem menampilkan
+                        nama siswa, status penyelesaian (Selesai/Proses), dan
+                        skor total. Siswa diurutkan secara alfabetis berdasarkan
+                        nama.
+                      </p>
+                    </div>
+                    <div>
+                      <p className="text-xs md:text-sm font-semibold text-gray-900">
+                        🔎 Filter Status
+                      </p>
+                      <p className="text-xs md:text-sm text-gray-700 mt-1">
+                        Gunakan tombol filter "Semua" dan "Selesai" untuk
+                        melihat siswa berdasarkan status penyelesaian mereka.
+                      </p>
+                    </div>
+                    <div>
+                      <p className="text-xs md:text-sm font-semibold text-gray-900">
+                        📋 Detail Siswa
+                      </p>
+                      <p className="text-xs md:text-sm text-gray-700 mt-1">
+                        Klik tombol "Detail" untuk melihat jawaban lengkap
+                        siswa, termasuk jawaban uraian, pilihan ganda, dan
+                        refleksi. Pertanyaan dan jawaban ditampilkan
+                        bersama-sama agar mudah dipahami.
+                      </p>
+                    </div>
+                  </div>
+                </section>
+
+                {/* Section 4: Discussions */}
+                <section className="border-b border-gray-200 pb-4 md:pb-5">
+                  <h3 className="text-base md:text-lg font-bold text-gray-900 mb-3 flex items-center gap-2">
+                    <span className="bg-blue-100 text-blue-600 rounded-full w-6 h-6 md:w-7 md:h-7 flex items-center justify-center text-xs md:text-sm font-bold flex-shrink-0">
+                      4
+                    </span>
+                    Forum Diskusi Kelas
+                  </h3>
+                  <div className="space-y-2 md:space-y-3">
+                    <div>
+                      <p className="text-xs md:text-sm font-semibold text-gray-900">
+                        💬 Buat Topik Diskusi
+                      </p>
+                      <p className="text-xs md:text-sm text-gray-700 mt-1">
+                        Klik "Buat Topik Diskusi" untuk membuat pertanyaan atau
+                        studi kasus yang akan didiskusikan bersama. Anda dapat
+                        menambahkan video YouTube, gambar, artikel, atau link
+                        website sebagai pendukung diskusi.
+                      </p>
+                    </div>
+                    <div>
+                      <p className="text-xs md:text-sm font-semibold text-gray-900">
+                        📢 Publish/Unpublish
+                      </p>
+                      <p className="text-xs md:text-sm text-gray-700 mt-1">
+                        Topik diskusi dibuat dalam status "Draft" terlebih
+                        dahulu. Klik "Publish" untuk membuat topik terlihat oleh
+                        siswa. Klik "Unpublish" untuk menyembunyikannya.
+                      </p>
+                    </div>
+                    <div>
+                      <p className="text-xs md:text-sm font-semibold text-gray-900">
+                        👁️ Lihat Detail Diskusi
+                      </p>
+                      <p className="text-xs md:text-sm text-gray-700 mt-1">
+                        Klik "Lihat Detail" untuk melihat semua komentar dan
+                        balasan siswa terhadap topik diskusi. Anda dapat
+                        memantau kolaborasi dan diskusi antar siswa.
+                      </p>
+                    </div>
+                  </div>
+                </section>
+
+                {/* Section 5: Data Features */}
+                <section className="border-b border-gray-200 pb-4 md:pb-5">
+                  <h3 className="text-base md:text-lg font-bold text-gray-900 mb-3 flex items-center gap-2">
+                    <span className="bg-blue-100 text-blue-600 rounded-full w-6 h-6 md:w-7 md:h-7 flex items-center justify-center text-xs md:text-sm font-bold flex-shrink-0">
+                      5
+                    </span>
+                    Fitur Data & Penyimpanan
+                  </h3>
+                  <div className="space-y-2 md:space-y-3">
+                    <div>
+                      <p className="text-xs md:text-sm font-semibold text-gray-900">
+                        ✅ Penyimpanan Otomatis
+                      </p>
+                      <p className="text-xs md:text-sm text-gray-700 mt-1">
+                        Semua data siswa, termasuk jawaban, pertanyaan, dan
+                        refleksi, disimpan otomatis di database. Data tersedia
+                        untuk ditinjau kapan saja.
+                      </p>
+                    </div>
+                    <div>
+                      <p className="text-xs md:text-sm font-semibold text-gray-900">
+                        🔄 Refresh Data
+                      </p>
+                      <p className="text-xs md:text-sm text-gray-700 mt-1">
+                        Gunakan tombol "Refresh" untuk memperbarui data terbaru
+                        dari siswa tanpa menunggu auto-refresh sistem.
+                      </p>
+                    </div>
+                    <div>
+                      <p className="text-xs md:text-sm font-semibold text-gray-900">
+                        📱 Responsive Design
+                      </p>
+                      <p className="text-xs md:text-sm text-gray-700 mt-1">
+                        Dashboard dapat diakses dari desktop, tablet, dan mobile
+                        dengan tampilan yang menyesuaikan secara otomatis untuk
+                        pengalaman pengguna terbaik.
+                      </p>
+                    </div>
+                  </div>
+                </section>
+
+                {/* Section 6: Tips */}
+                <section>
+                  <h3 className="text-base md:text-lg font-bold text-gray-900 mb-3 flex items-center gap-2">
+                    <span className="bg-blue-100 text-blue-600 rounded-full w-6 h-6 md:w-7 md:h-7 flex items-center justify-center text-xs md:text-sm font-bold flex-shrink-0">
+                      💡
+                    </span>
+                    Tips & Trik
+                  </h3>
+                  <ul className="space-y-2 text-xs md:text-sm text-gray-700 list-disc list-inside">
+                    <li>
+                      Bagikan kode kelas dengan siswa agar mereka dapat
+                      bergabung ke kelas Anda
+                    </li>
+                    <li>
+                      Periksa progres siswa secara berkala menggunakan tombol
+                      Refresh
+                    </li>
+                    <li>
+                      Gunakan forum diskusi untuk mendorong interaksi dan
+                      kolaborasi antar siswa
+                    </li>
+                    <li>
+                      Review jawaban siswa secara detail untuk memberikan
+                      feedback yang lebih baik
+                    </li>
+                    <li>
+                      Buat topik diskusi yang relevan dengan materi pembelajaran
+                      untuk pemahaman lebih mendalam
+                    </li>
+                  </ul>
+                </section>
+              </div>
+
+              {/* Modal Footer */}
+              <div className="sticky bottom-0 bg-gray-50 border-t border-gray-200 px-4 md:px-6 py-3 md:py-4 flex justify-end">
+                <button
+                  onClick={() => setShowGuidance(false)}
+                  className="px-4 md:px-6 py-2 md:py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium text-sm md:text-base"
+                >
+                  Mengerti
+                </button>
               </div>
             </div>
           </div>

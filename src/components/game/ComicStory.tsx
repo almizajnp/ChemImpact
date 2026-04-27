@@ -512,12 +512,19 @@ export default function ComicStory({
         // Flatten essay answers from Record<number, Record<string, string>> to Record<string, string>
         // EXCLUDE reflection answers (only include observation/image-with-essays answers)
         const flattenedEssayAnswers: Record<string, string> = {};
+        const flattenedEssayQuestions: Record<string, string> = {};
         Object.entries(essayAnswers).forEach(([pageNum, answers]) => {
           const pageNumInt = parseInt(pageNum);
           // Skip reflection page when flattening
           if (pageNumInt !== reflectionPageIndex) {
+            const page = comicPages[pageNumInt];
             Object.entries(answers).forEach(([essayId, answer]) => {
               flattenedEssayAnswers[essayId] = answer;
+              // Find and store the question
+              const essay = page.essays?.find((e) => e.id === essayId);
+              if (essay) {
+                flattenedEssayQuestions[essayId] = essay.question;
+              }
             });
           }
         });
@@ -530,16 +537,31 @@ export default function ComicStory({
           }),
         );
 
-        // Extract reflection answers (only from reflection page)
+        // Extract reflection answers and questions (only from reflection page)
         const reflectionAnswers =
           reflectionPageIndex !== -1
             ? essayAnswers[reflectionPageIndex] || {}
             : {};
 
+        const reflectionQuestions: Record<string, string> = {};
+        if (reflectionPageIndex !== -1) {
+          const reflectionPage = comicPages[reflectionPageIndex];
+          Object.keys(reflectionAnswers).forEach((reflectionId) => {
+            const reflection = reflectionPage.essays?.find(
+              (e) => e.id === reflectionId,
+            );
+            if (reflection) {
+              reflectionQuestions[reflectionId] = reflection.question;
+            }
+          });
+        }
+
         console.log("📊 Data to save:", {
           essayCount: Object.keys(flattenedEssayAnswers).length,
+          essayQuestionCount: Object.keys(flattenedEssayQuestions).length,
           multiChoiceCount: multiChoiceWithIndex.length,
           reflectionCount: Object.keys(reflectionAnswers).length,
+          reflectionQuestionCount: Object.keys(reflectionQuestions).length,
           totalScore,
         });
 
@@ -548,8 +570,10 @@ export default function ComicStory({
           missionId: 1,
           missionName: "Ancaman Limbah Deterjen",
           essayAnswers: flattenedEssayAnswers,
+          essayQuestions: flattenedEssayQuestions,
           multiChoiceAnswers: multiChoiceWithIndex,
           reflectionAnswers: reflectionAnswers,
+          reflectionQuestions: reflectionQuestions,
           totalScore: totalScore,
           status: "completed",
         });
