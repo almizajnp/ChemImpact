@@ -12,6 +12,7 @@ import SocialTab from "../components/tabs/SocialTab";
 import LeaderboardTab from "../components/tabs/LeaderboardTab";
 import DecisionSim from "../components/DecisionSim";
 import ComicStory from "../components/game/ComicStory";
+import ComicStoryMisi2 from "../components/game/ComicStoryMisi2";
 import { motion, AnimatePresence } from "motion/react";
 import { X, Music, Image as ImageIcon, Palette } from "lucide-react";
 
@@ -39,6 +40,7 @@ export default function StudentDashboard() {
   const [activeTab, setActiveTab] = useState("battle");
   const [isBattleMode, setIsBattleMode] = useState(false);
   const [selectedArenaId, setSelectedArenaId] = useState(1);
+  const [selectedMission, setSelectedMission] = useState(1);
   const [totalScore, setTotalScore] = useState(0);
   const [activeClassId, setActiveClassId] = useState<string | null>(null);
   const [activeClassName, setActiveClassName] = useState<string | null>(null);
@@ -119,6 +121,15 @@ export default function StudentDashboard() {
     }
   };
 
+  const handleMissionChange = (missionId: number) => {
+    setSelectedMission(missionId);
+  };
+
+  const handleBattleClick = (missionId: number) => {
+    setSelectedMission(missionId);
+    setIsBattleMode(true);
+  };
+
   useEffect(() => {
     if (!bgMusicRef.current) {
       bgMusicRef.current = new Audio("/audio/bs.mp3");
@@ -141,8 +152,10 @@ export default function StudentDashboard() {
       case "battle":
         return (
           <BattleTab
-            onBattleClick={() => setIsBattleMode(true)}
+            onBattleClick={handleBattleClick}
             onArenaChange={(id) => setSelectedArenaId(id)}
+          selectedMission={selectedMission}
+          onMissionChange={handleMissionChange}
           />
         );
       case "materi":
@@ -186,15 +199,30 @@ export default function StudentDashboard() {
   };
 
   const renderBattleContent = () => {
-    if (selectedArenaId === 1) {
-      return (
-        <ComicStory
-          onClose={() => setIsBattleMode(false)}
-          onScoreUpdate={handleScoreUpdate}
-        />
-      );
+    switch (selectedMission) {
+      case 1:
+        return (
+          <ComicStory
+            onClose={() => setIsBattleMode(false)}
+            onScoreUpdate={handleScoreUpdate}
+            classId={activeClassId}
+            siswaId={userProfile?.uid}
+            siswaName={userProfile?.name || studentProfile?.name}
+          />
+        );
+      case 2:
+        return (
+          <ComicStoryMisi2
+            onClose={() => setIsBattleMode(false)}
+            onScoreUpdate={handleScoreUpdate}
+            classId={activeClassId}
+            siswaId={userProfile?.uid}
+            siswaName={userProfile?.name || studentProfile?.name}
+          />
+        );
+      default:
+        return <DecisionSim onComplete={() => setIsBattleMode(false)} />;
     }
-    return <DecisionSim onComplete={() => setIsBattleMode(false)} />;
   };
 
   const getHeaderProps = () => {
@@ -240,7 +268,7 @@ export default function StudentDashboard() {
         onClose={() => setIsProfileOpen(false)}
         profile={studentProfile}
         theme={theme}
-        userProfile={userProfile}
+        userProfile={userProfile as any}
       />
 
       <main className="h-screen overflow-y-auto scrollbar-hide pt-20 pb-20">

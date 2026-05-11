@@ -156,3 +156,6 @@ For issues, questions, or suggestions, please open an issue on GitHub.
 ---
 
 **Made with ❤️ for environmental education**
+
+
+openclaude --resume 11f38da7-8d4f-442e-a378-0c1d9ac72d41

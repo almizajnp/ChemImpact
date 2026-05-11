@@ -30,6 +30,18 @@ const arenas = [
     image: "/images/bersih.png",
     color: "#3498db",
   },
+  {
+    id: 2,
+    name: "Pencemaran Plastik",
+    image: "/images/0. Cover.jpeg",
+    color: "#9b59b6",
+  },
+  {
+    id: 3,
+    name: "COOMING SOON",
+    image: "/images/sungai.png",
+    color: "#9b59b6",
+  },
 ];
 
 const ArenaGraphic = ({ id, name, image, color = "#3498db" }: ArenaProps) => (
@@ -61,18 +73,25 @@ const ArenaGraphic = ({ id, name, image, color = "#3498db" }: ArenaProps) => (
   </div>
 );
 
+export interface BattleTabProps {
+  onBattleClick: (missionId: number) => void;
+  onArenaChange?: (id: number) => void;
+  selectedMission?: number;
+  onMissionChange?: (missionId: number) => void;
+}
+
 export default function BattleTab({
   onBattleClick,
   onArenaChange,
-}: {
-  onBattleClick: () => void;
-  onArenaChange?: (id: number) => void;
-}) {
+  selectedMission,
+  onMissionChange,
+}: BattleTabProps) {
   const { playSound } = useAudio();
-  const [arenaIndex, setArenaIndex] = useState(0);
+  const [arenaIndex, setArenaIndex] = useState((selectedMission || 1) - 1);
   const [selectedDesktopArena, setSelectedDesktopArena] = useState(
-    arenas[0].id,
+    arenas[(selectedMission || 1) - 1].id,
   );
+  const [currentMission, setCurrentMission] = useState(selectedMission || 1);
 
   const nextArena = () => {
     setArenaIndex((prev) => {
@@ -90,6 +109,24 @@ export default function BattleTab({
       onArenaChange?.(arenas[newIndex].id);
       return newIndex;
     });
+  };
+
+  const nextMission = () => {
+    const newMission = currentMission < 2 ? 2 : 1;
+    setCurrentMission(newMission);
+    setArenaIndex(newMission - 1);
+    setSelectedDesktopArena(arenas[newMission - 1].id);
+    onMissionChange?.(newMission);
+    playSound("/audio/pilih.mp3");
+  };
+
+  const prevMission = () => {
+    const newMission = currentMission > 1 ? 1 : 2;
+    setCurrentMission(newMission);
+    setArenaIndex(newMission - 1);
+    setSelectedDesktopArena(arenas[newMission - 1].id);
+    onMissionChange?.(newMission);
+    playSound("/audio/pilih.mp3");
   };
 
   return (
@@ -242,7 +279,7 @@ export default function BattleTab({
           className="w-48 shadow-[0_6px_0_#e65100,0_10px_10px_rgba(0,0,0,0.4)] active:shadow-[0_0_0_#e65100] active:translate-y-1.5 transition-all"
           onClick={() => {
             playSound("/audio/start.mp3");
-            onBattleClick();
+            onBattleClick(currentMission);
           }}
         >
           <span className="text-3xl drop-shadow-md text-stroke-lg">MULAI</span>
