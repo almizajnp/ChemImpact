@@ -66,7 +66,7 @@ export default function GuruDashboard() {
   const [classMembers, setClassMembers] = useState<ClassMember[]>([]);
   const [memberScores, setMemberScores] = useState<Record<string, number>>({});
   const [memberResponses, setMemberResponses] = useState<
-    Record<string, StudentResponse | null>
+    Record<string, StudentResponse[]>
   >({});
   const [loadingMembers, setLoadingMembers] = useState(false);
   const [selectedStudent, setSelectedStudent] =
@@ -290,19 +290,19 @@ export default function GuruDashboard() {
 
       // Load scores and responses for each member
       const scoresMap: Record<string, number> = {};
-      const responsesMap: Record<string, StudentResponse | null> = {};
+      const responsesMap: Record<string, StudentResponse[]> = {};
 
       for (const member of members) {
         try {
           const score = await getStudentScore(member.siswaId);
           scoresMap[member.siswaId] = score;
 
-          const response = await getStudentResponsesByStudent(member.siswaId);
+          const responses = await getStudentResponsesByStudent(member.siswaId);
           console.log(
-            `✅ Loaded response for ${member.siswaName} (${member.siswaId}):`,
-            response,
+            `✅ Loaded ${responses.length} responses for ${member.siswaName} (${member.siswaId}):`,
+            responses,
           );
-          responsesMap[member.siswaId] = response;
+          responsesMap[member.siswaId] = responses;
         } catch (error) {
           console.error(
             `Error loading data for student ${member.siswaId}:`,
@@ -315,7 +315,7 @@ export default function GuruDashboard() {
         `📊 Final responses map:`,
         Object.entries(responsesMap).map(([id, resp]) => ({
           siswaId: id,
-          hasResponse: !!resp,
+          hasResponse: resp.length > 0,
         })),
       );
       setMemberScores(scoresMap);
@@ -329,10 +329,9 @@ export default function GuruDashboard() {
 
   const handleSelectStudent = (member: ClassMember) => {
     const score = memberScores[member.siswaId] || 0;
-    const response = memberResponses[member.siswaId];
-    const responses = response ? [response] : [];
+    const responses = memberResponses[member.siswaId] || [];
     console.log(`👤 Selected student: ${member.siswaName} (${member.siswaId})`);
-    console.log(`📋 Response found:`, response);
+    console.log(`📋 Response found:`, responses);
     setSelectedStudent({ member, responses, score });
   };
 
@@ -348,19 +347,19 @@ export default function GuruDashboard() {
 
       // Load scores and responses for each member
       const scoresMap: Record<string, number> = {};
-      const responsesMap: Record<string, StudentResponse | null> = {};
+      const responsesMap: Record<string, StudentResponse[]> = {};
 
       for (const member of members) {
         try {
           const score = await getStudentScore(member.siswaId);
           scoresMap[member.siswaId] = score;
 
-          const response = await getStudentResponsesByStudent(member.siswaId);
+          const responses = await getStudentResponsesByStudent(member.siswaId);
           console.log(
-            `✅ Loaded response for ${member.siswaName} (${member.siswaId}):`,
-            response,
+            `✅ Loaded ${responses.length} responses for ${member.siswaName} (${member.siswaId}):`,
+            responses,
           );
-          responsesMap[member.siswaId] = response;
+          responsesMap[member.siswaId] = responses;
         } catch (error) {
           console.error(
             `Error loading data for student ${member.siswaId}:`,
@@ -373,7 +372,7 @@ export default function GuruDashboard() {
         `📊 Final responses map:`,
         Object.entries(responsesMap).map(([id, resp]) => ({
           siswaId: id,
-          hasResponse: !!resp,
+          hasResponse: resp.length > 0,
         })),
       );
       setMemberScores(scoresMap);
@@ -1142,148 +1141,175 @@ export default function GuruDashboard() {
                 {/* Mission Details */}
                 <div>
                   <h3 className="text-base md:text-lg font-bold text-black mb-3 md:mb-4">
-                    Detail Misi
+                    Detail Misi ({selectedStudent.responses.length})
                   </h3>
-                  <div className="space-y-3 md:space-y-4">
-                    {selectedStudent.responses.length === 0 ? (
-                      <p className="text-gray-600 text-center py-8 text-sm">
-                        Siswa belum menyelesaikan misi apapun
-                      </p>
-                    ) : (
-                      selectedStudent.responses.map((response) => (
+                  {selectedStudent.responses.length === 0 ? (
+                    <p className="text-gray-600 text-center py-8 text-sm">
+                      Siswa belum menyelesaikan misi apapun
+                    </p>
+                  ) : (
+                    <div className="space-y-4 md:space-y-6">
+                      {selectedStudent.responses.map((response, idx) => (
                         <div
                           key={response.id}
-                          className="border border-gray-200 rounded-lg p-3 md:p-4 hover:bg-gray-50 transition-colors"
+                          className="border-2 border-gray-300 rounded-xl overflow-hidden bg-white shadow-md"
                         >
-                          <div className="flex items-start justify-between mb-3">
-                            <div>
-                              <h4 className="font-semibold text-sm md:text-base text-black">
-                                {response.missionName}
-                              </h4>
-                              <p className="text-xs text-gray-600 mt-1">
-                                {new Date(response.submittedAt).toLocaleString(
-                                  "id-ID",
-                                )}
-                              </p>
-                            </div>
-                            <div className="text-right">
-                              <p className="text-xl md:text-2xl font-bold text-black">
-                                {response.totalScore || 0}
-                              </p>
-                              <p className="text-xs text-gray-600">poin</p>
+                          {/* Mission Header */}
+                          <div className="bg-gradient-to-r from-blue-600 to-blue-700 px-3 md:px-4 py-3 md:py-4">
+                            <div className="flex items-start justify-between gap-3">
+                              <div className="flex-1">
+                                <div className="flex items-center gap-2 mb-1">
+                                  <span className="inline-flex items-center justify-center w-6 h-6 md:w-8 md:h-8 bg-white text-blue-600 font-bold text-sm md:text-base rounded-full">
+                                    {idx + 1}
+                                  </span>
+                                  <h4 className="font-bold text-sm md:text-base text-white">
+                                    {response.missionName}
+                                  </h4>
+                                </div>
+                                <p className="text-xs text-blue-100 ml-8">
+                                  {new Date(
+                                    response.submittedAt,
+                                  ).toLocaleString("id-ID")}
+                                </p>
+                              </div>
+                              <div className="text-right">
+                                <p className="text-2xl md:text-3xl font-bold text-white">
+                                  {response.totalScore || 0}
+                                </p>
+                                <p className="text-xs text-blue-100">poin</p>
+                              </div>
                             </div>
                           </div>
 
-                          {/* Essay Answers */}
-                          {Object.keys(response.essayAnswers || {}).length >
-                            0 && (
-                            <div className="mt-3 pt-3 border-t border-gray-100">
-                              <p className="text-xs md:text-sm font-semibold text-black mb-2">
-                                Jawaban Uraian:
-                              </p>
-                              <div className="space-y-2">
-                                {Object.entries(
-                                  response.essayAnswers || {},
-                                ).map(([essayId, answer]) => (
-                                  <div
-                                    key={essayId}
-                                    className="bg-gray-50 rounded p-2 md:p-3"
-                                  >
-                                    <p className="text-xs text-black mb-1">
-                                      <strong>Pertanyaan:</strong>
-                                    </p>
-                                    <p className="text-xs text-black mb-2 line-clamp-2">
-                                      {response.essayQuestions?.[essayId] ||
-                                        `Essay ${essayId}`}
-                                    </p>
-                                    <p className="text-xs text-black">
-                                      <strong>Jawaban:</strong>
-                                    </p>
-                                    <p className="text-xs text-gray-700 mt-1 line-clamp-3">
-                                      {answer}
-                                    </p>
-                                  </div>
-                                ))}
-                              </div>
-                            </div>
-                          )}
-
-                          {/* Multi-choice Answers */}
-                          {response.multiChoiceAnswers &&
-                            response.multiChoiceAnswers.length > 0 && (
-                              <div className="mt-3 pt-3 border-t border-gray-100">
-                                <p className="text-xs md:text-sm font-semibold text-black mb-2">
-                                  Jawaban Pilihan Ganda:
-                                </p>
-                                <div className="space-y-2">
-                                  {response.multiChoiceAnswers.map(
-                                    (answer, idx) => (
-                                      <div
-                                        key={idx}
-                                        className={`rounded p-2 md:p-3 text-xs ${
-                                          answer.isCorrect
-                                            ? "bg-green-50 border border-green-200"
-                                            : "bg-red-50 border border-red-200"
-                                        }`}
-                                      >
-                                        <p className="text-black">
-                                          <strong>Soal {idx + 1}:</strong>{" "}
-                                          {answer.choiceText}{" "}
-                                          <span
-                                            className={
-                                              answer.isCorrect
-                                                ? "text-green-600"
-                                                : "text-red-600"
-                                            }
-                                          >
-                                            ({answer.isCorrect ? "✓" : "✗"})
-                                          </span>
-                                        </p>
-                                      </div>
-                                    ),
-                                  )}
+                          {/* Mission Content */}
+                          <div className="px-3 md:px-4 py-3 md:py-4 space-y-3 md:space-y-4">
+                            {/* Essay Answers */}
+                            {Object.keys(response.essayAnswers || {}).length >
+                              0 && (
+                              <div className="bg-amber-50 border border-amber-200 rounded-lg p-3 md:p-4">
+                                <div className="flex items-center gap-2 mb-3">
+                                  <div className="w-4 h-4 bg-amber-500 rounded-full"></div>
+                                  <p className="text-xs md:text-sm font-bold text-amber-900">
+                                    JAWABAN URAIAN
+                                  </p>
+                                </div>
+                                <div className="space-y-3">
+                                  {Object.entries(
+                                    response.essayAnswers || {},
+                                  ).map(([essayId, answer], qIdx) => (
+                                    <div
+                                      key={essayId}
+                                      className="bg-white rounded-lg p-3 border border-amber-100"
+                                    >
+                                      <p className="text-xs font-semibold text-amber-900 mb-1">
+                                        Pertanyaan {qIdx + 1}:
+                                      </p>
+                                      <p className="text-xs text-amber-800 mb-2 line-clamp-2">
+                                        {response.essayQuestions?.[essayId] ||
+                                          `Essay ${essayId}`}
+                                      </p>
+                                      <p className="text-xs font-semibold text-amber-900 mb-1">
+                                        Jawaban:
+                                      </p>
+                                      <p className="text-xs text-gray-700 bg-amber-50 rounded p-2 line-clamp-4">
+                                        {answer}
+                                      </p>
+                                    </div>
+                                  ))}
                                 </div>
                               </div>
                             )}
 
-                          {/* Reflection Answers */}
-                          {Object.keys(response.reflectionAnswers || {})
-                            .length > 0 && (
-                            <div className="mt-3 pt-3 border-t border-gray-100">
-                              <p className="text-xs md:text-sm font-semibold text-black mb-2">
-                                Refleksi:
-                              </p>
-                              <div className="space-y-2">
-                                {Object.entries(
-                                  response.reflectionAnswers || {},
-                                ).map(([reflectionId, answer]) => (
-                                  <div
-                                    key={reflectionId}
-                                    className="bg-blue-50 rounded p-2 md:p-3"
-                                  >
-                                    <p className="text-xs text-black mb-1">
-                                      <strong>Pertanyaan:</strong>
-                                    </p>
-                                    <p className="text-xs text-black mb-2 line-clamp-2">
-                                      {response.reflectionQuestions?.[
-                                        reflectionId
-                                      ] || `Refleksi ${reflectionId}`}
-                                    </p>
-                                    <p className="text-xs text-black">
-                                      <strong>Jawaban:</strong>
-                                    </p>
-                                    <p className="text-xs text-gray-700 mt-1 line-clamp-3">
-                                      {answer}
+                            {/* Multi-choice Answers */}
+                            {response.multiChoiceAnswers &&
+                              response.multiChoiceAnswers.length > 0 && (
+                                <div className="bg-emerald-50 border border-emerald-200 rounded-lg p-3 md:p-4">
+                                  <div className="flex items-center gap-2 mb-3">
+                                    <div className="w-4 h-4 bg-emerald-500 rounded-full"></div>
+                                    <p className="text-xs md:text-sm font-bold text-emerald-900">
+                                      JAWABAN PILIHAN GANDA (
+                                      {response.multiChoiceAnswers.length})
                                     </p>
                                   </div>
-                                ))}
+                                  <div className="space-y-2">
+                                    {response.multiChoiceAnswers.map(
+                                      (answer, idx) => (
+                                        <div
+                                          key={idx}
+                                          className={`rounded-lg p-2 md:p-3 text-xs border-2 ${
+                                            answer.isCorrect
+                                              ? "bg-green-50 border-green-300"
+                                              : "bg-red-50 border-red-300"
+                                          }`}
+                                        >
+                                          <div className="flex items-start gap-2">
+                                            <span
+                                              className={`font-bold mt-0.5 ${
+                                                answer.isCorrect
+                                                  ? "text-green-600"
+                                                  : "text-red-600"
+                                              }`}
+                                            >
+                                              {answer.isCorrect ? "✓" : "✗"}
+                                            </span>
+                                            <div className="flex-1">
+                                              <p className="font-semibold text-gray-900">
+                                                Soal {idx + 1}
+                                              </p>
+                                              <p className="text-gray-700 mt-1">
+                                                {answer.choiceText}
+                                              </p>
+                                            </div>
+                                          </div>
+                                        </div>
+                                      ),
+                                    )}
+                                  </div>
+                                </div>
+                              )}
+
+                            {/* Reflection Answers */}
+                            {Object.keys(response.reflectionAnswers || {})
+                              .length > 0 && (
+                              <div className="bg-indigo-50 border border-indigo-200 rounded-lg p-3 md:p-4">
+                                <div className="flex items-center gap-2 mb-3">
+                                  <div className="w-4 h-4 bg-indigo-500 rounded-full"></div>
+                                  <p className="text-xs md:text-sm font-bold text-indigo-900">
+                                    REFLEKSI
+                                  </p>
+                                </div>
+                                <div className="space-y-3">
+                                  {Object.entries(
+                                    response.reflectionAnswers || {},
+                                  ).map(([reflectionId, answer], rIdx) => (
+                                    <div
+                                      key={reflectionId}
+                                      className="bg-white rounded-lg p-3 border border-indigo-100"
+                                    >
+                                      <p className="text-xs font-semibold text-indigo-900 mb-1">
+                                        Refleksi {rIdx + 1}:
+                                      </p>
+                                      <p className="text-xs text-indigo-800 mb-2 line-clamp-2">
+                                        {response.reflectionQuestions?.[
+                                          reflectionId
+                                        ] || `Refleksi ${reflectionId}`}
+                                      </p>
+                                      <p className="text-xs font-semibold text-indigo-900 mb-1">
+                                        Jawaban:
+                                      </p>
+                                      <p className="text-xs text-gray-700 bg-indigo-50 rounded p-2 line-clamp-4">
+                                        {answer}
+                                      </p>
+                                    </div>
+                                  ))}
+                                </div>
                               </div>
-                            </div>
-                          )}
+                            )}
+                          </div>
                         </div>
-                      ))
-                    )}
-                  </div>
+                      ))}
+                    </div>
+                  )}
                 </div>
               </div>
             </div>

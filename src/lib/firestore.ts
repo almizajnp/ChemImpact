@@ -887,15 +887,17 @@ export const saveStudentResponse = async (
     console.log("🔵 saveStudentResponse called with:", {
       siswaId,
       siswaName,
+      missionId: response.missionId,
       responseKeys: Object.keys(response),
     });
 
+    const missionId = response.missionId || 1;
     const responseData: StudentResponse = {
-      id: siswaId,
+      id: `${siswaId}_mission_${missionId}`,
       classId: response.classId || "",
       siswaId,
       siswaName,
-      missionId: response.missionId || 1,
+      missionId: missionId,
       missionName: response.missionName || "Unknown",
       essayAnswers: response.essayAnswers || {},
       essayQuestions: response.essayQuestions || {},
@@ -908,9 +910,13 @@ export const saveStudentResponse = async (
       lastModified: new Date().toISOString(),
     };
 
-    await set(ref(db, `studentResponses/${siswaId}`), responseData);
+    // Store per mission: studentResponses/{siswaId}/{missionId}
+    await set(
+      ref(db, `studentResponses/${siswaId}/missions/${missionId}`),
+      responseData,
+    );
     console.log(
-      `✅ Response saved for student ${siswaId} - Mission ${responseData.missionId}`,
+      `✅ Response saved for student ${siswaId} - Mission ${missionId}`,
     );
   } catch (error) {
     console.error("❌ Error saving student response:", error);
@@ -1009,25 +1015,31 @@ export const getClassStudentResponses = async (
 };
 
 /**
- * Mendapatkan jawaban dari seorang siswa tertentu di sebuah kelas
+ * Mendapatkan SEMUA jawaban dari seorang siswa (dari semua misi)
  */
 export const getStudentResponsesByStudent = async (
   siswaId: string,
-): Promise<StudentResponse | null> => {
+): Promise<StudentResponse[]> => {
   try {
-    console.log(`🔍 Fetching response for siswaId: ${siswaId}`);
-    const snapshot = await get(ref(db, `studentResponses/${siswaId}`));
+    console.log(`🔍 Fetching all responses for siswaId: ${siswaId}`);
+    const snapshot = await get(ref(db, `studentResponses/${siswaId}/missions`));
     if (!snapshot.exists()) {
-      console.log(`⚠️ No response found for student ${siswaId}`);
-      return null;
+      console.log(`⚠️ No responses found for student ${siswaId}`);
+      return [];
     }
 
-    const responseData = snapshot.val() as StudentResponse;
-    console.log(`✅ Found response for ${siswaId}`);
-    return responseData;
+    const missionsData = snapshot.val();
+    const responses: StudentResponse[] = Object.values(missionsData);
+    // Sort by missionId ascending
+    responses.sort((a, b) => (a.missionId || 1) - (b.missionId || 1));
+    console.log(
+      `✅ Found ${responses.length} responses for ${siswaId}`,
+      responses.map((r) => `Mission ${r.missionId}`),
+    );
+    return responses;
   } catch (error) {
-    console.error("❌ Error getting student response:", error);
-    return null;
+    console.error("❌ Error getting student responses:", error);
+    return [];
   }
 };
 
@@ -1070,6 +1082,7 @@ export const cleanupTestData = async (): Promise<number> => {
       const siswaId = childSnapshot.key;
       if (siswaId && testDataPattern.test(siswaId)) {
         console.log(`🗑️ Marking for deletion: ${siswaId}`);
+        // Delete entire siswa directory including all their missions
         deletePromises.push(remove(ref(db, `studentResponses/${siswaId}`)));
         deletedCount++;
       }

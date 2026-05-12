@@ -11,7 +11,7 @@ import {
   ChevronLeft,
   ChevronRight,
 } from "lucide-react";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { useAudio } from "../../hooks/useAudio";
 
@@ -27,19 +27,19 @@ const arenas = [
   {
     id: 1,
     name: "Sungai Berbusa",
-    image: "/images/bersih.png",
+    image: "/images/c1.png",
     color: "#3498db",
   },
   {
     id: 2,
     name: "Pencemaran Plastik",
-    image: "/images/0. Cover.jpeg",
+    image: "/images/c2.png",
     color: "#9b59b6",
   },
   {
     id: 3,
-    name: "COOMING SOON",
-    image: "/images/sungai.png",
+    name: "Polusi Udara",
+    image: "/images/c3.png",
     color: "#9b59b6",
   },
 ];
@@ -93,11 +93,25 @@ export default function BattleTab({
   );
   const [currentMission, setCurrentMission] = useState(selectedMission || 1);
 
+  // Sync currentMission dengan selectedMission dari parent
+  useEffect(() => {
+    if (selectedMission) {
+      console.log(`🔄 BattleTab syncing: selectedMission=${selectedMission}`);
+      setCurrentMission(selectedMission);
+      setArenaIndex(selectedMission - 1);
+      setSelectedDesktopArena(arenas[selectedMission - 1].id);
+    }
+  }, [selectedMission]);
+
   const nextArena = () => {
     setArenaIndex((prev) => {
       const newIndex = (prev + 1) % arenas.length;
+      const newMissionId = newIndex + 1; // Arena ID = index + 1
       setSelectedDesktopArena(arenas[newIndex].id);
+      setCurrentMission(newMissionId);
       onArenaChange?.(arenas[newIndex].id);
+      onMissionChange?.(newMissionId); // Notify parent about mission change
+      console.log(`➡️ Next Arena: missionId=${newMissionId}`);
       return newIndex;
     });
   };
@@ -105,14 +119,18 @@ export default function BattleTab({
   const prevArena = () => {
     setArenaIndex((prev) => {
       const newIndex = (prev - 1 + arenas.length) % arenas.length;
+      const newMissionId = newIndex + 1; // Arena ID = index + 1
       setSelectedDesktopArena(arenas[newIndex].id);
+      setCurrentMission(newMissionId);
       onArenaChange?.(arenas[newIndex].id);
+      onMissionChange?.(newMissionId); // Notify parent about mission change
+      console.log(`⬅️ Prev Arena: missionId=${newMissionId}`);
       return newIndex;
     });
   };
 
   const nextMission = () => {
-    const newMission = currentMission < 2 ? 2 : 1;
+    const newMission = currentMission < arenas.length ? currentMission + 1 : 1;
     setCurrentMission(newMission);
     setArenaIndex(newMission - 1);
     setSelectedDesktopArena(arenas[newMission - 1].id);
@@ -121,7 +139,7 @@ export default function BattleTab({
   };
 
   const prevMission = () => {
-    const newMission = currentMission > 1 ? 1 : 2;
+    const newMission = currentMission > 1 ? currentMission - 1 : arenas.length;
     setCurrentMission(newMission);
     setArenaIndex(newMission - 1);
     setSelectedDesktopArena(arenas[newMission - 1].id);
@@ -248,7 +266,11 @@ export default function BattleTab({
                     ? "scale-110"
                     : "scale-100 opacity-75"
                 }`}
-                onClick={() => setSelectedDesktopArena(arena.id)}
+                onClick={() => {
+                  setSelectedDesktopArena(arena.id);
+                  setCurrentMission(arena.id);
+                  onMissionChange?.(arena.id);
+                }}
                 whileHover={{
                   scale: selectedDesktopArena === arena.id ? 1.15 : 1.05,
                 }}

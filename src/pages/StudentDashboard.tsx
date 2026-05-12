@@ -13,6 +13,7 @@ import LeaderboardTab from "../components/tabs/LeaderboardTab";
 import DecisionSim from "../components/DecisionSim";
 import ComicStory from "../components/game/ComicStory";
 import ComicStoryMisi2 from "../components/game/ComicStoryMisi2";
+import ComicStoryMisi3 from "../components/game/ComicStoryMisi3";
 import { motion, AnimatePresence } from "motion/react";
 import { X, Music, Image as ImageIcon, Palette } from "lucide-react";
 
@@ -41,6 +42,7 @@ export default function StudentDashboard() {
   const [isBattleMode, setIsBattleMode] = useState(false);
   const [selectedArenaId, setSelectedArenaId] = useState(1);
   const [selectedMission, setSelectedMission] = useState(1);
+  const [activeBattleMission, setActiveBattleMission] = useState(1); // Track mission saat bermain
   const [totalScore, setTotalScore] = useState(0);
   const [activeClassId, setActiveClassId] = useState<string | null>(null);
   const [activeClassName, setActiveClassName] = useState<string | null>(null);
@@ -122,13 +124,23 @@ export default function StudentDashboard() {
   };
 
   const handleMissionChange = (missionId: number) => {
+    console.log(`🎮 Mission changed to: ${missionId}`);
     setSelectedMission(missionId);
   };
 
   const handleBattleClick = (missionId: number) => {
+    console.log(`🎯 Battle clicked with missionId: ${missionId}`);
     setSelectedMission(missionId);
+    setActiveBattleMission(missionId); // Set mission yang akan dimainkan
     setIsBattleMode(true);
   };
+
+  // Track mission selection changes
+  useEffect(() => {
+    console.log(
+      `✅ StudentDashboard selectedMission updated to: ${selectedMission}`,
+    );
+  }, [selectedMission]);
 
   useEffect(() => {
     if (!bgMusicRef.current) {
@@ -154,8 +166,8 @@ export default function StudentDashboard() {
           <BattleTab
             onBattleClick={handleBattleClick}
             onArenaChange={(id) => setSelectedArenaId(id)}
-          selectedMission={selectedMission}
-          onMissionChange={handleMissionChange}
+            selectedMission={selectedMission}
+            onMissionChange={handleMissionChange}
           />
         );
       case "materi":
@@ -169,7 +181,10 @@ export default function StudentDashboard() {
           </div>
         ) : (
           <div className="flex items-center justify-center min-h-screen px-4">
-            <div className="text-white-100 font-clash text-center px-6 py-4 rounded-2xl shadow-2xl max-w-md" style={{ backgroundColor: theme.primary }}>
+            <div
+              className="text-white-100 font-clash text-center px-6 py-4 rounded-2xl shadow-2xl max-w-md"
+              style={{ backgroundColor: theme.primary }}
+            >
               <p className="mb-4 text-sm md:text-base">
                 Bergabunglah dengan kelas terlebih dahulu untuk mengakses forum
                 diskusi
@@ -199,7 +214,10 @@ export default function StudentDashboard() {
   };
 
   const renderBattleContent = () => {
-    switch (selectedMission) {
+    console.log(
+      `📺 Rendering battle content for activeBattleMission: ${activeBattleMission}`,
+    );
+    switch (activeBattleMission) {
       case 1:
         return (
           <ComicStory
@@ -213,6 +231,16 @@ export default function StudentDashboard() {
       case 2:
         return (
           <ComicStoryMisi2
+            onClose={() => setIsBattleMode(false)}
+            onScoreUpdate={handleScoreUpdate}
+            classId={activeClassId}
+            siswaId={userProfile?.uid}
+            siswaName={userProfile?.name || studentProfile?.name}
+          />
+        );
+      case 3:
+        return (
+          <ComicStoryMisi3
             onClose={() => setIsBattleMode(false)}
             onScoreUpdate={handleScoreUpdate}
             classId={activeClassId}
@@ -291,9 +319,11 @@ export default function StudentDashboard() {
           >
             <div className="p-4 flex justify-between items-center bg-[#2c3e50] border-b-4 border-black/20">
               <h2 className="font-clash text-2xl text-white text-stroke">
-                {selectedArenaId === 1
+                {activeBattleMission === 1
                   ? "MISSION: SAVE THE RIVER"
-                  : "BATTLE SIMULATION"}
+                  : activeBattleMission === 2
+                    ? "MISSION: PENCEMARAN PLASTIK"
+                    : "MISSION: POLUSI UDARA"}
               </h2>
               <button
                 onClick={() => setIsBattleMode(false)}

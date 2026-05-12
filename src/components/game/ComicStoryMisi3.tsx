@@ -10,7 +10,7 @@ import {
   AlertTriangle,
 } from "lucide-react";
 
-// Comic pages data for Mission 2
+// Comic pages data for Mission 3 - Air Pollution
 const comicPages = [
   {
     id: 0,
@@ -27,19 +27,13 @@ const comicPages = [
   {
     id: -1,
     type: "cover",
-    image: "/images/0. Cover.jpeg",
-    title: "Ancaman Limbah Plastik",
-    subtitle: "Bab 2: Mari Belajar Dampak Lingkungan",
+    image: "/images/cvp.jpeg",
+    title: "Ancaman Polusi Udara",
+    subtitle: "Bab 3: Mari Belajar Dampak Lingkungan",
   },
   {
     id: 1,
-    image: "/images/1.jpeg",
-    type: "image",
-    choices: [],
-  },
-  {
-    id: 2,
-    image: "/images/2.jpeg",
+    image: "/images/1p.jpeg",
     type: "image-with-essays",
     mapUrl:
       "https://www.google.com/maps/embed?pb=!4v1776790536773!6m8!1m7!1sCAoSHENJQUJJaENRZjVwM0hkeHB3TTR2c1BzSkpGUS0.!2m2!1d-7.9624586!2d112.620079!3f339.02706104571405!4f-34.98787368849105!5f0.4000000000000002",
@@ -85,8 +79,14 @@ const comicPages = [
     ],
   },
   {
+    id: 2,
+    image: "/images/2p.jpeg",
+    type: "image",
+    choices: [],
+  },
+  {
     id: 3,
-    image: "/images/3.jpeg",
+    image: "/images/3p.jpeg",
     type: "multichoice",
     choices: [
       {
@@ -110,7 +110,7 @@ const comicPages = [
       {
         id: "C",
         text: "Pilihan C",
-        isCorrect: true,
+        isCorrect: false,
         feedback:
           "Jawaban ini tepat! 🌿\nEmisi kendaraan yang terjadi terus-menerus dapat berkembang menjadi masalah besar bagi kualitas udara.\n🔮 Jika kondisi ini dibiarkan, pencemaran udara akan semakin parah, kualitas udara menurun, dan kesehatan masyarakat bisa terancam.\n🌱 Sebaliknya, jika emisi dikendalikan sejak awal, kualitas udara masih bisa dipertahankan di masa depan.",
         image: "/images/fb/1C.jpeg",
@@ -119,36 +119,36 @@ const comicPages = [
       {
         id: "D",
         text: "Pilihan D",
-        isCorrect: false,
+        isCorrect: true,
         feedback:
           "Jawaban ini tidak tepat.\nAtmosfer memiliki kemampuan menyebarkan polutan, namun terbatas.\n🔮 Jika beban pencemaran terus meningkat, kemampuan ini akan gagal, dan udara bisa mengalami kerusakan permanen di masa depan.",
         image: "/images/fb/1D.jpeg",
-        color: "red",
+        color: "green",
       },
     ],
   },
   {
     id: 4,
-    image: "/images/4.jpeg",
+    image: "/images/4p.jpeg",
     type: "multichoice",
     choices: [
       {
         id: "A",
         text: "Pilihan A",
-        isCorrect: false,
+        isCorrect: true,
         feedback:
           "Jawaban ini kurang tepat.\nAsap kendaraan mengandung polutan berbahaya yang tidak hilang begitu saja.\n🔮 Jika emisi terus dibuang, polutan akan terakumulasi di atmosfer dan menyebabkan masalah kesehatan jangka panjang.",
         image: "/images/fb/2A.jpeg",
-        color: "red",
+        color: "green",
       },
       {
         id: "B",
         text: "Pilihan B",
-        isCorrect: true,
+        isCorrect: false,
         feedback:
           "Jawaban ini belum tepat.\nPolusi udara yang terjadi terus-menerus dapat terakumulasi.\n🔮 Dalam jangka panjang, dampak yang awalnya kecil bisa berkembang menjadi pencemaran udara serius yang sulit dipulihkan.",
         image: "/images/fb/2B.jpeg",
-        color: "green",
+        color: "red",
       },
       {
         id: "C",
@@ -172,7 +172,7 @@ const comicPages = [
   },
   {
     id: 5,
-    image: "/images/5.jpeg",
+    image: "/images/5p.jpeg",
     type: "multichoice",
     choices: [
       {
@@ -187,20 +187,20 @@ const comicPages = [
       {
         id: "B",
         text: "Pilihan B",
-        isCorrect: false,
+        isCorrect: true,
         feedback:
           "Jawaban ini belum tepat.\nPolusi udara yang terjadi terus-menerus dapat terakumulasi.\n🔮 Dalam jangka panjang, dampak yang awalnya kecil bisa berkembang menjadi pencemaran udara serius yang sulit dipulihkan.",
         image: "/images/fb/2B.jpeg",
-        color: "red",
+        color: "green",
       },
       {
         id: "C",
         text: "Pilihan C",
-        isCorrect: true,
+        isCorrect: false,
         feedback:
           "Jawaban ini tepat! 🌿\nEmisi kendaraan yang terjadi terus-menerus dapat berkembang menjadi masalah besar bagi kualitas udara.\n🔮 Jika kondisi ini dibiarkan, pencemaran udara akan semakin parah, kualitas udara menurun, dan kesehatan masyarakat bisa terancam.\n🌱 Sebaliknya, jika emisi dikendalikan sejak awal, kualitas udara masih bisa dipertahankan di masa depan.",
         image: "/images/fb/2C.jpeg",
-        color: "green",
+        color: "red",
       },
       {
         id: "D",
@@ -215,7 +215,7 @@ const comicPages = [
   },
   {
     id: 6,
-    image: "/images/6.jpeg",
+    image: "/images/6p.jpeg",
     type: "multichoice",
     choices: [
       {
@@ -258,7 +258,7 @@ const comicPages = [
   },
   {
     id: 7,
-    image: "/images/7.jpeg",
+    image: "/images/7p.jpeg",
     type: "multichoice",
     choices: [
       {
@@ -273,20 +273,20 @@ const comicPages = [
       {
         id: "B",
         text: "Pilihan B",
-        isCorrect: false,
+        isCorrect: true,
         feedback:
           "Jawaban ini belum tepat.\nPolusi udara yang terjadi terus-menerus dapat terakumulasi.\n🔮 Dalam jangka panjang, dampak yang awalnya kecil bisa berkembang menjadi pencemaran udara serius yang sulit dipulihkan.",
         image: "/images/fb/2B.jpeg",
-        color: "red",
+        color: "green",
       },
       {
         id: "C",
         text: "Pilihan C",
-        isCorrect: true,
+        isCorrect: false,
         feedback:
           "Jawaban ini tepat! 🌿\nEmisi kendaraan yang terjadi terus-menerus dapat berkembang menjadi masalah besar bagi kualitas udara.\n🔮 Jika kondisi ini dibiarkan, pencemaran udara akan semakin parah, kualitas udara menurun, dan kesehatan masyarakat bisa terancam.\n🌱 Sebaliknya, jika emisi dikendalikan sejak awal, kualitas udara masih bisa dipertahankan di masa depan.",
         image: "/images/fb/2C.jpeg",
-        color: "green",
+        color: "red",
       },
       {
         id: "D",
@@ -301,7 +301,7 @@ const comicPages = [
   },
   {
     id: 8,
-    image: "/images/8.jpeg",
+    image: "/images/8p.jpeg",
     type: "image",
     choices: [],
   },
