@@ -15,25 +15,57 @@ const comicPages = [
   {
     id: 0,
     type: "instructions",
-    title: "Cara Membaca Komik Edukasi Ini",
+    title: "💨 Petualangan Edukasi Polusi Udara",
+    subtitle: "Bernafas Sehat di Masa Depan yang Berkelanjutan",
     instructions: [
-      "📖 Tekan atau sentuh bagian KANAN layar untuk melanjutkan ke halaman berikutnya",
-      "📖 Tekan atau sentuh bagian KIRI layar untuk kembali ke halaman sebelumnya",
-      "🎯 Pilih jawaban dengan mengklik bagian yang ditunjukkan atau tombol pilihan",
-      "✅ Baca feedback untuk memahami konsep yang diajarkan",
-      "🏆 Selesaikan semua halaman untuk menguasai topik ini",
+      {
+        icon: "⏭️",
+        title: "Navigasi Cerita",
+        description:
+          "Tekan tombol LANJUT (panah biru) di bagian bawah layar untuk melanjutkan ke halaman berikutnya",
+      },
+      {
+        icon: "🗺️",
+        title: "Jelajahi Lokasi",
+        description:
+          "Lihat Google Maps 360° untuk memahami dampak emisi kendaraan nyata",
+      },
+      {
+        icon: "✍️",
+        title: "Pengamatan Mendalam",
+        description:
+          "Jawab pertanyaan esai untuk menganalisis sumber polusi udara",
+      },
+      {
+        icon: "🎯",
+        title: "Tantangan Pilihan",
+        description:
+          "Pilih solusi terbaik dan pelajari cara menjaga kualitas udara",
+      },
+      {
+        icon: "💡",
+        title: "Baca Umpan Balik",
+        description:
+          "Setiap jawaban memberi wawasan tentang kesehatan pernapasan dan lingkungan",
+      },
+      {
+        icon: "🏆",
+        title: "Raih Kesempatan",
+        description:
+          "Selesaikan semua halaman dan ciptakan perubahan positif untuk udara bersih!",
+      },
     ],
   },
   {
     id: -1,
     type: "cover",
-    image: "/images/cvp.jpeg",
+    image: "/images/cvu.jpeg",
     title: "Ancaman Polusi Udara",
-    subtitle: "Bab 3: Mari Belajar Dampak Lingkungan",
+    subtitle: "Mari Belajar Dampak Lingkungan",
   },
   {
     id: 1,
-    image: "/images/1p.jpeg",
+    image: "/images/1u.jpeg",
     type: "image-with-essays",
     mapUrl:
       "https://www.google.com/maps/embed?pb=!4v1776790536773!6m8!1m7!1sCAoSHENJQUJJaENRZjVwM0hkeHB3TTR2c1BzSkpGUS0.!2m2!1d-7.9624586!2d112.620079!3f339.02706104571405!4f-34.98787368849105!5f0.4000000000000002",
@@ -80,13 +112,13 @@ const comicPages = [
   },
   {
     id: 2,
-    image: "/images/2p.jpeg",
+    image: "/images/2u.jpeg",
     type: "image",
     choices: [],
   },
   {
     id: 3,
-    image: "/images/3p.jpeg",
+    image: "/images/3u.jpeg",
     type: "multichoice",
     choices: [
       {
@@ -95,7 +127,7 @@ const comicPages = [
         isCorrect: true,
         feedback:
           "Jawaban ini kurang tepat.\nAsap kendaraan mengandung polutan berbahaya yang tidak hilang begitu saja.\n🔮 Jika emisi terus dibuang, polutan akan terakumulasi di atmosfer dan menyebabkan masalah kesehatan jangka panjang.",
-        image: "/images/fb/1A.jpeg",
+        image: "/images/fb/1UA.jpeg",
         color: "green",
       },
       {
@@ -104,7 +136,7 @@ const comicPages = [
         isCorrect: false,
         feedback:
           "Jawaban ini belum tepat.\nPolusi udara yang terjadi terus-menerus dapat terakumulasi.\n🔮 Dalam jangka panjang, dampak yang awalnya kecil bisa berkembang menjadi pencemaran udara serius yang sulit dipulihkan.",
-        image: "/images/fb/1B.jpeg",
+        image: "/images/fb/1UB.jpeg",
         color: "red",
       },
       {
@@ -113,7 +145,7 @@ const comicPages = [
         isCorrect: false,
         feedback:
           "Jawaban ini tepat! 🌿\nEmisi kendaraan yang terjadi terus-menerus dapat berkembang menjadi masalah besar bagi kualitas udara.\n🔮 Jika kondisi ini dibiarkan, pencemaran udara akan semakin parah, kualitas udara menurun, dan kesehatan masyarakat bisa terancam.\n🌱 Sebaliknya, jika emisi dikendalikan sejak awal, kualitas udara masih bisa dipertahankan di masa depan.",
-        image: "/images/fb/1C.jpeg",
+        image: "/images/fb/1UC.jpeg",
         color: "red",
       },
       {
@@ -122,14 +154,14 @@ const comicPages = [
         isCorrect: true,
         feedback:
           "Jawaban ini tidak tepat.\nAtmosfer memiliki kemampuan menyebarkan polutan, namun terbatas.\n🔮 Jika beban pencemaran terus meningkat, kemampuan ini akan gagal, dan udara bisa mengalami kerusakan permanen di masa depan.",
-        image: "/images/fb/1D.jpeg",
+        image: "/images/fb/1UD.jpeg",
         color: "green",
       },
     ],
   },
   {
     id: 4,
-    image: "/images/4p.jpeg",
+    image: "/images/4u.jpeg",
     type: "multichoice",
     choices: [
       {
@@ -138,7 +170,7 @@ const comicPages = [
         isCorrect: true,
         feedback:
           "Jawaban ini kurang tepat.\nAsap kendaraan mengandung polutan berbahaya yang tidak hilang begitu saja.\n🔮 Jika emisi terus dibuang, polutan akan terakumulasi di atmosfer dan menyebabkan masalah kesehatan jangka panjang.",
-        image: "/images/fb/2A.jpeg",
+        image: "/images/fb/2UA.jpeg",
         color: "green",
       },
       {
@@ -147,7 +179,7 @@ const comicPages = [
         isCorrect: false,
         feedback:
           "Jawaban ini belum tepat.\nPolusi udara yang terjadi terus-menerus dapat terakumulasi.\n🔮 Dalam jangka panjang, dampak yang awalnya kecil bisa berkembang menjadi pencemaran udara serius yang sulit dipulihkan.",
-        image: "/images/fb/2B.jpeg",
+        image: "/images/fb/2UB.jpeg",
         color: "red",
       },
       {
@@ -156,7 +188,7 @@ const comicPages = [
         isCorrect: false,
         feedback:
           "Jawaban ini tepat! 🌿\nEmisi kendaraan yang terjadi terus-menerus dapat berkembang menjadi masalah besar bagi kualitas udara.\n🔮 Jika kondisi ini dibiarkan, pencemaran udara akan semakin parah, kualitas udara menurun, dan kesehatan masyarakat bisa terancam.\n🌱 Sebaliknya, jika emisi dikendalikan sejak awal, kualitas udara masih bisa dipertahankan di masa depan.",
-        image: "/images/fb/2C.jpeg",
+        image: "/images/fb/2UC.jpeg",
         color: "red",
       },
       {
@@ -165,14 +197,14 @@ const comicPages = [
         isCorrect: false,
         feedback:
           "Jawaban ini tidak tepat.\nAtmosfer memiliki kemampuan menyebarkan polutan, namun terbatas.\n🔮 Jika beban pencemaran terus meningkat, kemampuan ini akan gagal, dan udara bisa mengalami kerusakan permanen di masa depan.",
-        image: "/images/fb/2D.jpeg",
+        image: "/images/fb/2UD.jpeg",
         color: "red",
       },
     ],
   },
   {
     id: 5,
-    image: "/images/5p.jpeg",
+    image: "/images/5u.jpeg",
     type: "multichoice",
     choices: [
       {
@@ -181,7 +213,7 @@ const comicPages = [
         isCorrect: false,
         feedback:
           "Jawaban ini kurang tepat.\nAsap kendaraan mengandung polutan berbahaya yang tidak hilang begitu saja.\n🔮 Jika emisi terus dibuang, polutan akan terakumulasi di atmosfer dan menyebabkan masalah kesehatan jangka panjang.",
-        image: "/images/fb/2A.jpeg",
+        image: "/images/fb/3UA.jpeg",
         color: "red",
       },
       {
@@ -190,7 +222,7 @@ const comicPages = [
         isCorrect: true,
         feedback:
           "Jawaban ini belum tepat.\nPolusi udara yang terjadi terus-menerus dapat terakumulasi.\n🔮 Dalam jangka panjang, dampak yang awalnya kecil bisa berkembang menjadi pencemaran udara serius yang sulit dipulihkan.",
-        image: "/images/fb/2B.jpeg",
+        image: "/images/fb/3UB.jpeg",
         color: "green",
       },
       {
@@ -199,7 +231,7 @@ const comicPages = [
         isCorrect: false,
         feedback:
           "Jawaban ini tepat! 🌿\nEmisi kendaraan yang terjadi terus-menerus dapat berkembang menjadi masalah besar bagi kualitas udara.\n🔮 Jika kondisi ini dibiarkan, pencemaran udara akan semakin parah, kualitas udara menurun, dan kesehatan masyarakat bisa terancam.\n🌱 Sebaliknya, jika emisi dikendalikan sejak awal, kualitas udara masih bisa dipertahankan di masa depan.",
-        image: "/images/fb/2C.jpeg",
+        image: "/images/fb/3UC.jpeg",
         color: "red",
       },
       {
@@ -208,14 +240,14 @@ const comicPages = [
         isCorrect: false,
         feedback:
           "Jawaban ini tidak tepat.\nAtmosfer memiliki kemampuan menyebarkan polutan, namun terbatas.\n🔮 Jika beban pencemaran terus meningkat, kemampuan ini akan gagal, dan udara bisa mengalami kerusakan permanen di masa depan.",
-        image: "/images/fb/2D.jpeg",
+        image: "/images/fb/3UD.jpeg",
         color: "red",
       },
     ],
   },
   {
     id: 6,
-    image: "/images/6p.jpeg",
+    image: "/images/6u.jpeg",
     type: "multichoice",
     choices: [
       {
@@ -224,7 +256,7 @@ const comicPages = [
         isCorrect: true,
         feedback:
           "Jawaban ini tidak tepat.\nKondisi lingkungan tidak akan tetap stabil tanpa adanya upaya menjaga.\n 🔮Jika tidak ada perubahan perilaku, pencemaran udara akan terus terjadi dan kualitas udara justru akan menurun dalam jangka panjang.",
-        image: "/images/fb/3A.jpeg",
+        image: "/images/fb/4UA.jpeg",
         color: "green",
       },
       {
@@ -233,7 +265,7 @@ const comicPages = [
         isCorrect: false,
         feedback:
           "Jawaban ini tepat!\nKondisi udara sangat dipengaruhi oleh perilaku manusia.\n 🔮 Jika masyarakat mulai menggunakan transportasi ramah lingkungan dan menjaga lingkungan, kualitas udara dapat membaik dan ekosistem bisa pulih secara bertahap di masa depan.💡 Ini menunjukkan bahwa tindakan saat ini dapat menghasilkan dampak positif jangka panjang.",
-        image: "/images/fb/3B.jpeg",
+        image: "/images/fb/4UB.jpeg",
         color: "red",
       },
       {
@@ -242,7 +274,7 @@ const comicPages = [
         isCorrect: false,
         feedback:
           "Jawaban ini kurang tepat.\nPerubahan lingkungan tidak terjadi secara acak, tetapi dipengaruhi oleh tindakan manusia.\n 🔮 Jika tidak ada pengelolaan yang jelas, kondisi udara cenderung akan terus memburuk, bukan berubah tanpa arah. ",
-        image: "/images/fb/3C.jpeg",
+        image: "/images/fb/4UC.jpeg",
         color: "red",
       },
       {
@@ -251,14 +283,14 @@ const comicPages = [
         isCorrect: false,
         feedback:
           "Jawaban ini tepat.\nJika tidak ada upaya perbaikan, pencemaran udara akan terus terakumulasi.\n 🔮 Dalam jangka panjang, udara bisa mengalami kerusakan parah, masalah pernapasan meningkat, dan kualitas hidup menurun.💡 Ini menunjukkan konsekuensi negatif dari tidak adanya tindakan saat ini.",
-        image: "/images/fb/3D.jpeg",
+        image: "/images/fb/4UD.jpeg",
         color: "red",
       },
     ],
   },
   {
     id: 7,
-    image: "/images/7p.jpeg",
+    image: "/images/7u.jpeg",
     type: "multichoice",
     choices: [
       {
@@ -267,7 +299,7 @@ const comicPages = [
         isCorrect: false,
         feedback:
           "Jawaban ini kurang tepat.\nAsap kendaraan mengandung polutan berbahaya yang tidak hilang begitu saja.\n🔮 Jika emisi terus dibuang, polutan akan terakumulasi di atmosfer dan menyebabkan masalah kesehatan jangka panjang.",
-        image: "/images/fb/2A.jpeg",
+        image: "/images/fb/5UA.jpeg",
         color: "red",
       },
       {
@@ -276,7 +308,7 @@ const comicPages = [
         isCorrect: true,
         feedback:
           "Jawaban ini belum tepat.\nPolusi udara yang terjadi terus-menerus dapat terakumulasi.\n🔮 Dalam jangka panjang, dampak yang awalnya kecil bisa berkembang menjadi pencemaran udara serius yang sulit dipulihkan.",
-        image: "/images/fb/2B.jpeg",
+        image: "/images/fb/5UB.jpeg",
         color: "green",
       },
       {
@@ -285,7 +317,7 @@ const comicPages = [
         isCorrect: false,
         feedback:
           "Jawaban ini tepat! 🌿\nEmisi kendaraan yang terjadi terus-menerus dapat berkembang menjadi masalah besar bagi kualitas udara.\n🔮 Jika kondisi ini dibiarkan, pencemaran udara akan semakin parah, kualitas udara menurun, dan kesehatan masyarakat bisa terancam.\n🌱 Sebaliknya, jika emisi dikendalikan sejak awal, kualitas udara masih bisa dipertahankan di masa depan.",
-        image: "/images/fb/2C.jpeg",
+        image: "/images/fb/5UC.jpeg",
         color: "red",
       },
       {
@@ -294,14 +326,14 @@ const comicPages = [
         isCorrect: false,
         feedback:
           "Jawaban ini tidak tepat.\nAtmosfer memiliki kemampuan menyebarkan polutan, namun terbatas.\n🔮 Jika beban pencemaran terus meningkat, kemampuan ini akan gagal, dan udara bisa mengalami kerusakan permanen di masa depan.",
-        image: "/images/fb/2D.jpeg",
+        image: "/images/fb/5UD.jpeg",
         color: "red",
       },
     ],
   },
   {
     id: 8,
-    image: "/images/8p.jpeg",
+    image: "/images/8u.jpeg",
     type: "image",
     choices: [],
   },
@@ -316,29 +348,29 @@ const comicPages = [
       {
         id: "r1",
         question:
-          "1. Apa aktivitas yang pernah kamu lakukan yang berhubungan dengan udara?",
-        placeholder: "Ceritakan pengalamanmu...",
+          "1. Setelah mempelajari misi tersebut, apakah kamu lebih menyadari dampak aktivitas manusia terhadap kualitas udara? Jelaskan.",
+        placeholder: "Jelaskan perasaanmu setelah mempelajari misi ini...",
         required: true,
       },
       {
         id: "r2",
         question:
-          "2. Apa dampak dari aktivitas yang kamu lakukan tersebut bagi udara?",
-        placeholder: "Jelaskan dampaknya...",
+          "2. Setelah mengamati permasalahan tersebut, apakah kamu merasa perlu mulai menerapkan kebiasaan yang lebih ramah lingkungan? Mengapa?",
+        placeholder: "Jelaskan pendapatmu...",
         required: true,
       },
       {
         id: "r3",
         question:
-          "3. Bagaimana kondisi udara di masa depan jika itu terus terjadi?",
-        placeholder: "Prediksi masa depan...",
+          "3. 3. Solusi apa yang paling sesuai dengan prinsip green chemistry untuk membantu mengurangi polusi udara? Jelaskan alasanmu.",
+        placeholder: "Jelaskan solusi yang kamu pilih dan alasanmu...",
         required: true,
       },
       {
         id: "r4",
         question:
-          "4. Apa yang akan kamu ubah mulai sekarang untuk udara yang lebih baik?",
-        placeholder: "Tuliskan komitmenmu...",
+          "4. 4. Tindakan apa yang dapat kamu lakukan untuk membantu menjaga kualitas udara di lingkungan sekitar?",
+        placeholder: "Jelaskan tindakan yang akan kamu lakukan...",
         required: true,
       },
     ],
@@ -685,7 +717,7 @@ export default function ComicStoryMisi2({
             ? "Panduan Membaca"
             : currentComic.type === "cover"
               ? "Cover Cerita"
-              : "Bab 2: Pencemaran Udara"}
+              : "Pencemaran Udara"}
         </div>
         <button
           onClick={handleClose}
@@ -706,7 +738,7 @@ export default function ComicStoryMisi2({
       >
         {/* Instructions Page */}
         {currentComic.type === "instructions" && (
-          <div className="w-full h-full flex flex-col items-center justify-center px-6 py-8 gap-6">
+          <div className="w-full h-full flex flex-col items-center justify-start overflow-y-auto px-2 sm:px-4 py-4 sm:py-6 md:py-8 gap-4 sm:gap-6 md:gap-8 pt-6 sm:pt-8">
             <AnimatePresence mode="wait">
               <motion.div
                 key={currentPage}
@@ -714,20 +746,73 @@ export default function ComicStoryMisi2({
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -20 }}
                 transition={{ duration: 0.3 }}
-                className="w-full max-w-2xl text-center flex flex-col items-center gap-6"
+                className="w-full max-w-4xl flex flex-col items-center gap-4 sm:gap-6 md:gap-8 pb-8"
               >
-                <h1 className="text-3xl md:text-4xl font-bold text-gray-900">
-                  {currentComic.title}
-                </h1>
-                <div className="w-full max-w-xl space-y-4">
-                  {currentComic.instructions?.map((instruction, idx) => (
-                    <div
-                      key={idx}
-                      className="p-4 bg-blue-50 border-2 border-blue-200 rounded-lg text-left text-sm md:text-base text-gray-700 leading-relaxed"
-                    >
-                      {instruction}
-                    </div>
-                  ))}
+                {/* Header */}
+                <div className="text-center w-full">
+                  <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold bg-gradient-to-r from-orange-600 to-amber-600 bg-clip-text text-transparent mb-1 sm:mb-2 line-clamp-2">
+                    {currentComic.title}
+                  </h1>
+                  {currentComic.subtitle && (
+                    <p className="text-xs sm:text-sm md:text-base text-gray-600 font-medium px-2">
+                      {currentComic.subtitle}
+                    </p>
+                  )}
+                </div>
+
+                {/* Instructions Grid */}
+                <div className="w-full grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-3 md:gap-4 px-0 sm:px-0">
+                  {(currentComic as any).instructions?.map(
+                    (instruction: any, idx: number) => (
+                      <motion.div
+                        key={idx}
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.3, delay: idx * 0.1 }}
+                        className="group relative bg-gradient-to-br from-orange-50 to-amber-50 border-2 border-orange-200 rounded-lg sm:rounded-xl p-3 sm:p-4 md:p-5 hover:shadow-lg hover:border-orange-400 transition-all duration-300 cursor-default"
+                      >
+                        {/* Background decoration */}
+                        <div className="absolute top-0 right-0 w-20 h-20 sm:w-24 sm:h-24 bg-orange-200/20 rounded-full -mr-6 sm:-mr-8 -mt-6 sm:-mt-8 group-hover:scale-150 transition-transform duration-300" />
+
+                        {/* Content */}
+                        <div className="relative z-10 flex gap-2 sm:gap-3 md:gap-4">
+                          <div className="text-2xl sm:text-3xl md:text-4xl flex-shrink-0">
+                            {instruction.icon}
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <h3 className="font-bold text-gray-900 mb-0.5 sm:mb-1 text-xs sm:text-sm md:text-base line-clamp-1">
+                              {instruction.title}
+                            </h3>
+                            <p className="text-gray-700 text-xs md:text-sm leading-relaxed line-clamp-3 sm:line-clamp-4">
+                              {instruction.description}
+                            </p>
+                          </div>
+                        </div>
+
+                        {/* Step indicator */}
+                        <div className="absolute bottom-1 right-2 sm:bottom-2 sm:right-3 w-6 h-6 sm:w-7 sm:h-7 bg-orange-200 rounded-full flex items-center justify-center text-xs font-bold text-orange-900">
+                          {idx + 1}
+                        </div>
+                      </motion.div>
+                    ),
+                  )}
+                </div>
+
+                {/* Progress Bar */}
+                <div className="w-full max-w-md px-4 sm:px-0">
+                  <div className="flex items-center gap-2 mb-2">
+                    <span className="text-xs sm:text-sm font-semibold text-gray-700">
+                      Siap untuk memulai?
+                    </span>
+                  </div>
+                  <div className="w-full h-2 bg-gray-200 rounded-full overflow-hidden">
+                    <motion.div
+                      initial={{ width: 0 }}
+                      animate={{ width: "100%" }}
+                      transition={{ duration: 1, delay: 0.5 }}
+                      className="h-full bg-gradient-to-r from-orange-500 to-amber-500"
+                    />
+                  </div>
                 </div>
               </motion.div>
             </AnimatePresence>
@@ -736,7 +821,7 @@ export default function ComicStoryMisi2({
 
         {/* Cover Page */}
         {currentComic.type === "cover" && (
-          <div className="w-full h-full flex flex-col items-center justify-center px-6 py-8 gap-6">
+          <div className="w-full h-full flex flex-col items-center justify-start overflow-y-auto px-2 sm:px-4 md:px-6 py-4 sm:py-6 md:py-8 gap-4 sm:gap-6 md:gap-8 pt-6 sm:pt-8">
             <AnimatePresence mode="wait">
               <motion.div
                 key={currentPage}
@@ -744,7 +829,7 @@ export default function ComicStoryMisi2({
                 animate={{ opacity: 1, scale: 1 }}
                 exit={{ opacity: 0, scale: 0.9 }}
                 transition={{ duration: 0.3 }}
-                className="w-full flex flex-col items-center gap-6"
+                className="w-full flex flex-col items-center gap-4 sm:gap-6 md:gap-8 pb-8"
               >
                 {/* Cover Image */}
                 <div
@@ -761,11 +846,13 @@ export default function ComicStoryMisi2({
                     className="w-full h-full object-contain"
                   />
                 </div>
-                <div className="text-center">
-                  <h2 className="text-2xl md:text-3xl font-bold text-gray-900">
+                <div className="text-center px-2 sm:px-0">
+                  <h2 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold text-gray-900 line-clamp-2">
                     {currentComic.title}
                   </h2>
-                  <p className="text-gray-600 mt-2">{currentComic.subtitle}</p>
+                  <p className="text-xs sm:text-sm md:text-base text-gray-600 mt-1 sm:mt-2">
+                    {currentComic.subtitle}
+                  </p>
                 </div>
               </motion.div>
             </AnimatePresence>

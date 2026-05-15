@@ -15,13 +15,45 @@ const comicPages = [
   {
     id: 0,
     type: "instructions",
-    title: "Cara Membaca Komik Edukasi Ini",
+    title: "♻️ Petualangan Edukasi Limbah Plastik",
+    subtitle: "Temukan Solusi Krisis Sampah Plastik Global",
     instructions: [
-      "📖 Tekan atau sentuh bagian KANAN layar untuk melanjutkan ke halaman berikutnya",
-      "📖 Tekan atau sentuh bagian KIRI layar untuk kembali ke halaman sebelumnya",
-      "🎯 Pilih jawaban dengan mengklik bagian yang ditunjukkan atau tombol pilihan",
-      "✅ Baca feedback untuk memahami konsep yang diajarkan",
-      "🏆 Selesaikan semua halaman untuk menguasai topik ini",
+      {
+        icon: "⏭️",
+        title: "Navigasi Cerita",
+        description:
+          "Tekan tombol LANJUT (panah biru) di bagian bawah layar untuk melanjutkan ke halaman berikutnya",
+      },
+      {
+        icon: "🗺️",
+        title: "Jelajahi Lokasi",
+        description:
+          "Lihat Google Maps 360° untuk memahami dampak nyata pencemaran plastik",
+      },
+      {
+        icon: "✍️",
+        title: "Pengamatan Mendalam",
+        description:
+          "Jawab pertanyaan esai untuk menganalisis akumulasi sampah plastik",
+      },
+      {
+        icon: "🎯",
+        title: "Tantangan Pilihan",
+        description:
+          "Pilih strategi terbaik dan pelajari konsekuensi lingkungan",
+      },
+      {
+        icon: "💡",
+        title: "Baca Umpan Balik",
+        description:
+          "Setiap jawaban memberi wawasan tentang ekonomi sirkular berkelanjutan",
+      },
+      {
+        icon: "🏆",
+        title: "Raih Kesempatan",
+        description:
+          "Selesaikan semua halaman dan jadilah agen perubahan lingkungan!",
+      },
     ],
   },
   {
@@ -29,7 +61,7 @@ const comicPages = [
     type: "cover",
     image: "/images/0. Cover.jpeg",
     title: "Ancaman Limbah Plastik",
-    subtitle: "Bab 2: Mari Belajar Dampak Lingkungan",
+    subtitle: "Mari Belajar Dampak Lingkungan",
   },
   {
     id: 1,
@@ -48,37 +80,38 @@ const comicPages = [
       {
         id: "essay1",
         question:
-          "1. Apa yang kamu amati pada kondisi udara di jalan tersebut?",
-        placeholder: "Jelaskan kondisi udara yang Anda amati...",
+          "1. Apa yang kamu amati pada kondisi lingkungan di lokasi tersebut?",
+        placeholder: "Jelaskan kondisi lingkungan yang Anda amati...",
         required: true,
       },
       {
         id: "essay2",
         question:
-          "2. Apakah terdapat tanda-tanda pencemaran udara yang terlihat? Jelaskan.",
-        placeholder: "Jelaskan tanda-tanda pencemaran udara yang Anda amati...",
+          "2. Apakah terdapat tanda-tanda pencemaran plastik pada lokasi yang diamati? Jelaskan.",
+        placeholder:
+          "Jelaskan tanda-tanda pencemaran plastik yang Anda amati...",
         required: true,
       },
       {
         id: "essay3",
         question:
-          "3. Menurutmu, aktivitas manusia apa saja yang kemungkinan berkontribusi terhadap kondisi tersebut?",
+          "3. Aktivitas manusia apa yang kemungkinan menyebabkan penumpukan sampah plastik di lokasi tersebut?",
         placeholder:
-          "Jelaskan aktivitas manusia yang mungkin menyebabkan pencemaran udara...",
+          "Jelaskan aktivitas manusia yang mungkin menyebabkan pencemaran plastik...",
         required: true,
       },
       {
         id: "essay4",
         question:
-          "4. Apa dampak yang mungkin terjadi terhadap manusia dan lingkungan di sekitar jalan tersebut?",
+          "4. Apa dampak yang mungkin terjadi jika sampah plastik terus menumpuk di lingkungan tersebut?",
         placeholder:
-          "Jelaskan dampak pencemaran udara terhadap manusia dan lingkungan...",
+          "Jelaskan dampak pencemaran plastik terhadap manusia dan lingkungan...",
         required: true,
       },
       {
         id: "essay5",
         question:
-          "5. Apa risiko yang dapat terjadi jika pencemaran udara ini diabaikan?",
+          "5. Apa risiko yang mungkin terjadi jika pencemaran plastik tersebut terus diabaikan?",
         placeholder: "Jelaskan risiko yang mungkin terjadi...",
         required: true,
       },
@@ -316,29 +349,29 @@ const comicPages = [
       {
         id: "r1",
         question:
-          "1. Apa aktivitas yang pernah kamu lakukan yang berhubungan dengan udara?",
-        placeholder: "Ceritakan pengalamanmu...",
+          "1. Setelah mempelajari misi tersebut, apakah kamu lebih menyadari dampak penggunaan plastik terhadap lingkungan?",
+        placeholder: "Jelaskan perasaanmu setelah mempelajari misi ini...",
         required: true,
       },
       {
         id: "r2",
         question:
-          "2. Apa dampak dari aktivitas yang kamu lakukan tersebut bagi udara?",
-        placeholder: "Jelaskan dampaknya...",
+          "2. Apakah kamu merasa penggunaan plastik dalam kehidupan sehari-hari perlu mulai dikurangi? Mengapa?",
+        placeholder: "Jelaskan pendapatmu...",
         required: true,
       },
       {
         id: "r3",
         question:
-          "3. Bagaimana kondisi udara di masa depan jika itu terus terjadi?",
+          "3. Solusi apa yang paling sesuai dengan prinsip green chemistry untuk membantu mengurangi pencemaran plastik? Jelaskan alasanmu.",
         placeholder: "Prediksi masa depan...",
         required: true,
       },
       {
         id: "r4",
         question:
-          "4. Apa yang akan kamu ubah mulai sekarang untuk udara yang lebih baik?",
-        placeholder: "Tuliskan komitmenmu...",
+          "4. Tindakan apa yang dapat kamu lakukan dalam kehidupan sehari-hari untuk membantu mengurangi pencemaran plastik?",
+        placeholder: "Jelaskan tindakan yang akan kamu lakukan...",
         required: true,
       },
     ],
@@ -685,7 +718,7 @@ export default function ComicStoryMisi2({
             ? "Panduan Membaca"
             : currentComic.type === "cover"
               ? "Cover Cerita"
-              : "Bab 2: Pencemaran Udara"}
+              : "Pencemaran Plastik"}
         </div>
         <button
           onClick={handleClose}
@@ -706,7 +739,7 @@ export default function ComicStoryMisi2({
       >
         {/* Instructions Page */}
         {currentComic.type === "instructions" && (
-          <div className="w-full h-full flex flex-col items-center justify-center px-6 py-8 gap-6">
+          <div className="w-full h-full flex flex-col items-center justify-start overflow-y-auto px-2 sm:px-4 py-4 sm:py-6 md:py-8 gap-4 sm:gap-6 md:gap-8 pt-6 sm:pt-8">
             <AnimatePresence mode="wait">
               <motion.div
                 key={currentPage}
@@ -714,20 +747,73 @@ export default function ComicStoryMisi2({
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -20 }}
                 transition={{ duration: 0.3 }}
-                className="w-full max-w-2xl text-center flex flex-col items-center gap-6"
+                className="w-full max-w-4xl flex flex-col items-center gap-4 sm:gap-6 md:gap-8 pb-8"
               >
-                <h1 className="text-3xl md:text-4xl font-bold text-gray-900">
-                  {currentComic.title}
-                </h1>
-                <div className="w-full max-w-xl space-y-4">
-                  {currentComic.instructions?.map((instruction, idx) => (
-                    <div
-                      key={idx}
-                      className="p-4 bg-blue-50 border-2 border-blue-200 rounded-lg text-left text-sm md:text-base text-gray-700 leading-relaxed"
-                    >
-                      {instruction}
-                    </div>
-                  ))}
+                {/* Header */}
+                <div className="text-center w-full">
+                  <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text text-transparent mb-1 sm:mb-2 line-clamp-2">
+                    {currentComic.title}
+                  </h1>
+                  {currentComic.subtitle && (
+                    <p className="text-xs sm:text-sm md:text-base text-gray-600 font-medium px-2">
+                      {currentComic.subtitle}
+                    </p>
+                  )}
+                </div>
+
+                {/* Instructions Grid */}
+                <div className="w-full grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-3 md:gap-4 px-0 sm:px-0">
+                  {(currentComic as any).instructions?.map(
+                    (instruction: any, idx: number) => (
+                      <motion.div
+                        key={idx}
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.3, delay: idx * 0.1 }}
+                        className="group relative bg-gradient-to-br from-green-50 to-emerald-50 border-2 border-green-200 rounded-lg sm:rounded-xl p-3 sm:p-4 md:p-5 hover:shadow-lg hover:border-green-400 transition-all duration-300 cursor-default"
+                      >
+                        {/* Background decoration */}
+                        <div className="absolute top-0 right-0 w-20 h-20 sm:w-24 sm:h-24 bg-green-200/20 rounded-full -mr-6 sm:-mr-8 -mt-6 sm:-mt-8 group-hover:scale-150 transition-transform duration-300" />
+
+                        {/* Content */}
+                        <div className="relative z-10 flex gap-2 sm:gap-3 md:gap-4">
+                          <div className="text-2xl sm:text-3xl md:text-4xl flex-shrink-0">
+                            {instruction.icon}
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <h3 className="font-bold text-gray-900 mb-0.5 sm:mb-1 text-xs sm:text-sm md:text-base line-clamp-1">
+                              {instruction.title}
+                            </h3>
+                            <p className="text-gray-700 text-xs md:text-sm leading-relaxed line-clamp-3 sm:line-clamp-4">
+                              {instruction.description}
+                            </p>
+                          </div>
+                        </div>
+
+                        {/* Step indicator */}
+                        <div className="absolute bottom-1 right-2 sm:bottom-2 sm:right-3 w-6 h-6 sm:w-7 sm:h-7 bg-green-200 rounded-full flex items-center justify-center text-xs font-bold text-green-900">
+                          {idx + 1}
+                        </div>
+                      </motion.div>
+                    ),
+                  )}
+                </div>
+
+                {/* Progress Bar */}
+                <div className="w-full max-w-md px-4 sm:px-0">
+                  <div className="flex items-center gap-2 mb-2">
+                    <span className="text-xs sm:text-sm font-semibold text-gray-700">
+                      Siap untuk memulai?
+                    </span>
+                  </div>
+                  <div className="w-full h-2 bg-gray-200 rounded-full overflow-hidden">
+                    <motion.div
+                      initial={{ width: 0 }}
+                      animate={{ width: "100%" }}
+                      transition={{ duration: 1, delay: 0.5 }}
+                      className="h-full bg-gradient-to-r from-green-500 to-emerald-500"
+                    />
+                  </div>
                 </div>
               </motion.div>
             </AnimatePresence>
@@ -736,7 +822,7 @@ export default function ComicStoryMisi2({
 
         {/* Cover Page */}
         {currentComic.type === "cover" && (
-          <div className="w-full h-full flex flex-col items-center justify-center px-6 py-8 gap-6">
+          <div className="w-full h-full flex flex-col items-center justify-start overflow-y-auto px-2 sm:px-4 md:px-6 py-4 sm:py-6 md:py-8 gap-4 sm:gap-6 md:gap-8 pt-6 sm:pt-8">
             <AnimatePresence mode="wait">
               <motion.div
                 key={currentPage}
@@ -744,7 +830,7 @@ export default function ComicStoryMisi2({
                 animate={{ opacity: 1, scale: 1 }}
                 exit={{ opacity: 0, scale: 0.9 }}
                 transition={{ duration: 0.3 }}
-                className="w-full flex flex-col items-center gap-6"
+                className="w-full flex flex-col items-center gap-4 sm:gap-6 md:gap-8 pb-8"
               >
                 {/* Cover Image */}
                 <div
@@ -761,11 +847,13 @@ export default function ComicStoryMisi2({
                     className="w-full h-full object-contain"
                   />
                 </div>
-                <div className="text-center">
-                  <h2 className="text-2xl md:text-3xl font-bold text-gray-900">
+                <div className="text-center px-2 sm:px-0">
+                  <h2 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold text-gray-900 line-clamp-2">
                     {currentComic.title}
                   </h2>
-                  <p className="text-gray-600 mt-2">{currentComic.subtitle}</p>
+                  <p className="text-xs sm:text-sm md:text-base text-gray-600 mt-1 sm:mt-2">
+                    {currentComic.subtitle}
+                  </p>
                 </div>
               </motion.div>
             </AnimatePresence>
