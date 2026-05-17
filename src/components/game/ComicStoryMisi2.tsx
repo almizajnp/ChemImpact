@@ -74,7 +74,7 @@ const comicPages = [
     image: "/images/2.jpeg",
     type: "image-with-essays",
     mapUrl:
-      "https://www.google.com/maps/embed?pb=!4v1776790536773!6m8!1m7!1sCAoSHENJQUJJaENRZjVwM0hkeHB3TTR2c1BzSkpGUS0.!2m2!1d-7.9624586!2d112.620079!3f339.02706104571405!4f-34.98787368849105!5f0.4000000000000002",
+      "https://www.google.com/maps/embed?pb=!4v1779018398667!6m8!1m7!1sCAoSHENJQUJJaENaQlN2NEt0aXBLREdDNHFEU1BYVTg.!2m2!1d-7.9634075!2d112.6093292!3f345.85177069095585!4f-15.096710782202791!5f0.6103671812558459",
     choices: [],
     essays: [
       {
@@ -214,7 +214,7 @@ const comicPages = [
         isCorrect: false,
         feedback:
           "Jawaban ini kurang tepat.\nAsap kendaraan mengandung polutan berbahaya yang tidak hilang begitu saja.\n🔮 Jika emisi terus dibuang, polutan akan terakumulasi di atmosfer dan menyebabkan masalah kesehatan jangka panjang.",
-        image: "/images/fb/2A.jpeg",
+        image: "/images/fb/3A.jpeg",
         color: "red",
       },
       {
@@ -223,7 +223,7 @@ const comicPages = [
         isCorrect: false,
         feedback:
           "Jawaban ini belum tepat.\nPolusi udara yang terjadi terus-menerus dapat terakumulasi.\n🔮 Dalam jangka panjang, dampak yang awalnya kecil bisa berkembang menjadi pencemaran udara serius yang sulit dipulihkan.",
-        image: "/images/fb/2B.jpeg",
+        image: "/images/fb/3B.jpeg",
         color: "red",
       },
       {
@@ -232,7 +232,7 @@ const comicPages = [
         isCorrect: true,
         feedback:
           "Jawaban ini tepat! 🌿\nEmisi kendaraan yang terjadi terus-menerus dapat berkembang menjadi masalah besar bagi kualitas udara.\n🔮 Jika kondisi ini dibiarkan, pencemaran udara akan semakin parah, kualitas udara menurun, dan kesehatan masyarakat bisa terancam.\n🌱 Sebaliknya, jika emisi dikendalikan sejak awal, kualitas udara masih bisa dipertahankan di masa depan.",
-        image: "/images/fb/2C.jpeg",
+        image: "/images/fb/3C.jpeg",
         color: "green",
       },
       {
@@ -241,7 +241,7 @@ const comicPages = [
         isCorrect: false,
         feedback:
           "Jawaban ini tidak tepat.\nAtmosfer memiliki kemampuan menyebarkan polutan, namun terbatas.\n🔮 Jika beban pencemaran terus meningkat, kemampuan ini akan gagal, dan udara bisa mengalami kerusakan permanen di masa depan.",
-        image: "/images/fb/2D.jpeg",
+        image: "/images/fb/3D.jpeg",
         color: "red",
       },
     ],
@@ -257,7 +257,7 @@ const comicPages = [
         isCorrect: true,
         feedback:
           "Jawaban ini tidak tepat.\nKondisi lingkungan tidak akan tetap stabil tanpa adanya upaya menjaga.\n 🔮Jika tidak ada perubahan perilaku, pencemaran udara akan terus terjadi dan kualitas udara justru akan menurun dalam jangka panjang.",
-        image: "/images/fb/3A.jpeg",
+        image: "/images/fb/4A.jpeg",
         color: "green",
       },
       {
@@ -266,7 +266,7 @@ const comicPages = [
         isCorrect: false,
         feedback:
           "Jawaban ini tepat!\nKondisi udara sangat dipengaruhi oleh perilaku manusia.\n 🔮 Jika masyarakat mulai menggunakan transportasi ramah lingkungan dan menjaga lingkungan, kualitas udara dapat membaik dan ekosistem bisa pulih secara bertahap di masa depan.💡 Ini menunjukkan bahwa tindakan saat ini dapat menghasilkan dampak positif jangka panjang.",
-        image: "/images/fb/3B.jpeg",
+        image: "/images/fb/4B.jpeg",
         color: "red",
       },
       {
@@ -275,7 +275,7 @@ const comicPages = [
         isCorrect: false,
         feedback:
           "Jawaban ini kurang tepat.\nPerubahan lingkungan tidak terjadi secara acak, tetapi dipengaruhi oleh tindakan manusia.\n 🔮 Jika tidak ada pengelolaan yang jelas, kondisi udara cenderung akan terus memburuk, bukan berubah tanpa arah. ",
-        image: "/images/fb/3C.jpeg",
+        image: "/images/fb/4C.jpeg",
         color: "red",
       },
       {
@@ -284,7 +284,7 @@ const comicPages = [
         isCorrect: false,
         feedback:
           "Jawaban ini tepat.\nJika tidak ada upaya perbaikan, pencemaran udara akan terus terakumulasi.\n 🔮 Dalam jangka panjang, udara bisa mengalami kerusakan parah, masalah pernapasan meningkat, dan kualitas hidup menurun.💡 Ini menunjukkan konsekuensi negatif dari tidak adanya tindakan saat ini.",
-        image: "/images/fb/3D.jpeg",
+        image: "/images/fb/4D.jpeg",
         color: "red",
       },
     ],
@@ -300,7 +300,7 @@ const comicPages = [
         isCorrect: false,
         feedback:
           "Jawaban ini kurang tepat.\nAsap kendaraan mengandung polutan berbahaya yang tidak hilang begitu saja.\n🔮 Jika emisi terus dibuang, polutan akan terakumulasi di atmosfer dan menyebabkan masalah kesehatan jangka panjang.",
-        image: "/images/fb/2A.jpeg",
+        image: "/images/fb/5A.jpeg",
         color: "red",
       },
       {
@@ -309,7 +309,7 @@ const comicPages = [
         isCorrect: false,
         feedback:
           "Jawaban ini belum tepat.\nPolusi udara yang terjadi terus-menerus dapat terakumulasi.\n🔮 Dalam jangka panjang, dampak yang awalnya kecil bisa berkembang menjadi pencemaran udara serius yang sulit dipulihkan.",
-        image: "/images/fb/2B.jpeg",
+        image: "/images/fb/5B.jpeg",
         color: "red",
       },
       {
@@ -318,7 +318,7 @@ const comicPages = [
         isCorrect: true,
         feedback:
           "Jawaban ini tepat! 🌿\nEmisi kendaraan yang terjadi terus-menerus dapat berkembang menjadi masalah besar bagi kualitas udara.\n🔮 Jika kondisi ini dibiarkan, pencemaran udara akan semakin parah, kualitas udara menurun, dan kesehatan masyarakat bisa terancam.\n🌱 Sebaliknya, jika emisi dikendalikan sejak awal, kualitas udara masih bisa dipertahankan di masa depan.",
-        image: "/images/fb/2C.jpeg",
+        image: "/images/fb/5C.jpeg",
         color: "green",
       },
       {
@@ -327,7 +327,7 @@ const comicPages = [
         isCorrect: false,
         feedback:
           "Jawaban ini tidak tepat.\nAtmosfer memiliki kemampuan menyebarkan polutan, namun terbatas.\n🔮 Jika beban pencemaran terus meningkat, kemampuan ini akan gagal, dan udara bisa mengalami kerusakan permanen di masa depan.",
-        image: "/images/fb/2D.jpeg",
+        image: "/images/fb/5D.jpeg",
         color: "red",
       },
     ],

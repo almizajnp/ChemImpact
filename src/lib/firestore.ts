@@ -956,13 +956,18 @@ export const subscribeToLeaderboard = (
         // Convert object to array and sort by score
         for (const siswaId in scoresData) {
           const data = scoresData[siswaId];
-          studentsArray.push({
-            siswaId,
-            totalScore: data.totalScore || 0,
-            lastUpdated: data.lastUpdated || new Date().toISOString(),
-            siswaName: data.siswaName || "Unknown Student",
-            kelas: data.kelas || "Unknown Class",
-          });
+          const score = data.totalScore || 0;
+
+          // Hanya tampilkan siswa yang memiliki poin > 0
+          if (score > 0) {
+            studentsArray.push({
+              siswaId,
+              totalScore: score,
+              lastUpdated: data.lastUpdated || new Date().toISOString(),
+              siswaName: data.siswaName || "Unknown Student",
+              kelas: data.kelas || "Unknown Class",
+            });
+          }
         }
 
         // Sort by score descending
@@ -985,6 +990,56 @@ export const subscribeToLeaderboard = (
   } catch (error) {
     console.error("❌ Error setting up leaderboard subscription:", error);
     return () => {};
+  }
+};
+
+/**
+ * Mendapatkan ranking siswa di leaderboard
+ * Returns nomor ranking (1, 2, 3, ...) atau -1 jika tidak ditemukan
+ */
+export const getStudentRank = async (siswaId: string): Promise<number> => {
+  try {
+    const snapshot = await get(ref(db, "studentScores"));
+    if (!snapshot.exists()) {
+      console.log(`⚠️ No scores found for ranking calculation`);
+      return -1;
+    }
+
+    const scoresData = snapshot.val();
+    const studentsArray: StudentScore[] = [];
+
+    // Convert object to array dan filter hanya yang score > 0
+    for (const id in scoresData) {
+      const data = scoresData[id];
+      const score = data.totalScore || 0;
+
+      if (score > 0) {
+        studentsArray.push({
+          siswaId: id,
+          totalScore: score,
+          lastUpdated: data.lastUpdated || new Date().toISOString(),
+          siswaName: data.siswaName || "Unknown Student",
+          kelas: data.kelas || "Unknown Class",
+        });
+      }
+    }
+
+    // Sort by score descending
+    const sortedStudents = studentsArray.sort(
+      (a, b) => b.totalScore - a.totalScore,
+    );
+
+    // Cari position siswa
+    const rank = sortedStudents.findIndex((student) => student.siswaId === siswaId);
+    const studentRank = rank !== -1 ? rank + 1 : -1;
+
+    console.log(
+      `🏆 Student ${siswaId} rank: #${studentRank} out of ${sortedStudents.length}`,
+    );
+    return studentRank;
+  } catch (error) {
+    console.error("❌ Error getting student rank:", error);
+    return -1;
   }
 };
 
@@ -1039,6 +1094,32 @@ export const getStudentResponsesByStudent = async (
     return responses;
   } catch (error) {
     console.error("❌ Error getting student responses:", error);
+    return [];
+  }
+};
+
+/**
+ * Mendapatkan misi yang sudah diselesaikan (status: "completed") untuk seorang siswa
+ */
+export const getCompletedMissions = async (
+  siswaId: string,
+): Promise<string[]> => {
+  try {
+    console.log(`🎯 Fetching completed missions for siswaId: ${siswaId}`);
+    const allResponses = await getStudentResponsesByStudent(siswaId);
+    
+    // Filter hanya misi yang status-nya "completed"
+    const completedMissions = allResponses
+      .filter((response) => response.status === "completed")
+      .map((response) => response.missionName);
+    
+    console.log(
+      `✅ Found ${completedMissions.length} completed missions:`,
+      completedMissions,
+    );
+    return completedMissions;
+  } catch (error) {
+    console.error("❌ Error getting completed missions:", error);
     return [];
   }
 };

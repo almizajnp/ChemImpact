@@ -9,6 +9,7 @@ import {
   Image,
   Play,
   ExternalLink,
+  SendHorizontal,
 } from "lucide-react";
 import { useAuth } from "../../context/AuthContext";
 import {
@@ -59,6 +60,8 @@ export default function SocialTab({ classId, theme }: SocialTabProps) {
   const [creatingReply, setCreatingReply] = useState<Record<string, boolean>>(
     {},
   );
+
+  const getInitial = (name?: string) => (name?.trim()?.[0] || "?").toUpperCase();
 
   // Discussion creation states
   const [showCreateDiscussion, setShowCreateDiscussion] = useState(false);
@@ -591,118 +594,140 @@ export default function SocialTab({ classId, theme }: SocialTabProps) {
                 </div>
 
                 {/* Comments Section */}
-                <div className="mt-6 pt-6 border-t">
-                  <h4 className="font-bold text-gray-900 mb-4 text-sm md:text-base">
+                <div className="mt-6 overflow-hidden rounded-2xl bg-white shadow-[0_18px_45px_rgba(15,23,42,0.16)] ring-1 ring-black/5">
+                  <div className="sticky top-0 z-10 flex items-center justify-center border-b border-gray-100 bg-white/95 px-4 py-3 backdrop-blur">
+                    <div className="absolute left-4 h-1 w-10 rounded-full bg-gray-300 md:hidden" />
+                    <h4 className="text-sm font-bold text-gray-950 md:text-base">
                     💭 Komentar ({selectedTopic.commentCount})
-                  </h4>
+                    </h4>
+                  </div>
 
                   {loadingComments ? (
-                    <div className="text-center text-gray-500 py-4 text-sm">
+                    <div className="px-4 py-10 text-center text-sm text-gray-500">
                       Memuat komentar...
                     </div>
                   ) : comments.length === 0 ? (
-                    <p className="text-center text-gray-500 text-xs md:text-sm py-4">
+                    <p className="px-4 py-10 text-center text-xs text-gray-500 md:text-sm">
                       Belum ada komentar. Jadilah yang pertama berkomentar!
                     </p>
                   ) : (
-                    <div className="space-y-3 md:space-y-4">
+                    <div className="divide-y divide-gray-100">
                       {comments.map((comment) => (
                         <div
                           key={comment.id}
-                          className="border border-gray-200 rounded-lg p-3 md:p-4 bg-white hover:shadow-sm transition-shadow"
+                          className="group px-4 py-4 transition-colors hover:bg-gray-50/70 md:px-5"
                         >
-                          {/* Comment Header */}
-                          <div className="flex justify-between items-start mb-2">
-                            <div>
-                              <p className="font-semibold text-sm md:text-base text-gray-900">
-                                {comment.siswaName}
-                              </p>
-                              <p className="text-xs text-gray-500">
-                                {new Date(comment.createdAt).toLocaleString(
-                                  "id-ID",
-                                )}
-                              </p>
+                          <div className="flex items-start gap-3">
+                            <div className="grid h-9 w-9 flex-shrink-0 place-items-center rounded-full bg-gradient-to-br from-pink-500 via-red-500 to-amber-400 text-sm font-extrabold text-white shadow-sm">
+                              {getInitial(comment.siswaName)}
                             </div>
-                            {isTeacher && (
-                              <button
-                                onClick={() => handleDeleteComment(comment.id)}
-                                className="text-red-500 hover:text-red-700 p-1"
-                                title="Hapus komentar"
-                              >
-                                <Trash2 size={14} />
-                              </button>
-                            )}
-                          </div>
-
-                          {/* Comment Text */}
-                          <p className="text-xs md:text-sm text-gray-700 mb-3">
-                            {comment.text}
-                          </p>
-
-                          {/* Replies */}
-                          {(commentReplies[comment.id] || []).length > 0 && (
-                            <div className="ml-2 md:ml-4 space-y-2 md:space-y-3 mb-3 border-l-2 border-gray-200 pl-3 md:pl-4">
-                              {(commentReplies[comment.id] || []).map(
-                                (reply) => (
-                                  <div
-                                    key={reply.id}
-                                    className="bg-gray-50 rounded p-2 md:p-3"
+                            <div className="min-w-0 flex-1">
+                              <div className="flex items-start justify-between gap-3">
+                                <div className="min-w-0">
+                                  <p className="truncate text-xs font-semibold text-gray-500 md:text-sm">
+                                    {comment.siswaName}
+                                  </p>
+                                  <p className="mt-1 text-sm leading-relaxed text-gray-950 md:text-base">
+                                    {comment.text}
+                                  </p>
+                                </div>
+                                {isTeacher && (
+                                  <button
+                                    onClick={() =>
+                                      handleDeleteComment(comment.id)
+                                    }
+                                    className="rounded-full p-2 text-gray-400 opacity-100 transition hover:bg-red-50 hover:text-red-600 md:opacity-0 md:group-hover:opacity-100"
+                                    title="Hapus komentar"
                                   >
-                                    <div className="flex justify-between items-start">
-                                      <div>
-                                        <p className="font-medium text-xs md:text-sm text-gray-900">
-                                          {reply.userName}
-                                        </p>
-                                        <p className="text-xs text-gray-500">
-                                          {new Date(
-                                            reply.createdAt,
-                                          ).toLocaleString("id-ID")}
-                                        </p>
-                                      </div>
-                                      {isTeacher && (
-                                        <button
-                                          onClick={() =>
-                                            handleDeleteReply(
-                                              comment.id,
-                                              reply.id,
-                                            )
-                                          }
-                                          className="text-red-500 hover:text-red-700 p-1"
-                                          title="Hapus balasan"
-                                        >
-                                          <X size={12} />
-                                        </button>
-                                      )}
-                                    </div>
-                                    <p className="text-xs text-gray-700 mt-2">
-                                      {reply.text}
-                                    </p>
-                                  </div>
-                                ),
-                              )}
-                            </div>
-                          )}
+                                    <Trash2 size={15} />
+                                  </button>
+                                )}
+                              </div>
 
-                          {/* Reply Input */}
-                          <div className="flex gap-2 flex-col md:flex-row">
-                            <input
-                              className="flex-1 border border-gray-300 rounded px-3 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-emerald-500 text-black"
-                              placeholder="Balas komentar..."
-                              value={replyText[comment.id] || ""}
-                              onChange={(e) =>
-                                setReplyText((p) => ({
-                                  ...p,
-                                  [comment.id]: e.target.value,
-                                }))
-                              }
-                            />
-                            <button
-                              onClick={() => handleAddReply(comment.id)}
-                              disabled={creatingReply[comment.id]}
-                              className="bg-emerald-600 hover:bg-emerald-700 text-white px-3 md:px-4 py-2 rounded text-xs font-medium disabled:bg-gray-400 transition-colors"
-                            >
-                              {creatingReply[comment.id] ? "..." : "Balas"}
-                            </button>
+                              <div className="mt-2 flex items-center gap-3 text-[11px] font-semibold text-gray-400 md:text-xs">
+                                <span>
+                                  {new Date(comment.createdAt).toLocaleString(
+                                    "id-ID",
+                                  )}
+                                </span>
+                                <span>Balas</span>
+                              </div>
+
+                              {(commentReplies[comment.id] || []).length >
+                                0 && (
+                                <div className="mt-3 space-y-3 border-l border-gray-200 pl-3">
+                                  {(commentReplies[comment.id] || []).map(
+                                    (reply) => (
+                                      <div
+                                        key={reply.id}
+                                        className="flex items-start gap-2"
+                                      >
+                                        <div className="grid h-7 w-7 flex-shrink-0 place-items-center rounded-full bg-gray-200 text-[11px] font-bold text-gray-700">
+                                          {getInitial(reply.userName)}
+                                        </div>
+                                        <div className="min-w-0 flex-1 rounded-2xl bg-gray-100 px-3 py-2">
+                                          <div className="flex items-start justify-between gap-2">
+                                            <div className="min-w-0">
+                                              <p className="truncate text-[11px] font-semibold text-gray-500">
+                                                {reply.userName}
+                                              </p>
+                                              <p className="mt-1 text-xs leading-relaxed text-gray-900 md:text-sm">
+                                                {reply.text}
+                                              </p>
+                                              <p className="mt-1 text-[10px] font-medium text-gray-400">
+                                                {new Date(
+                                                  reply.createdAt,
+                                                ).toLocaleString("id-ID")}
+                                              </p>
+                                            </div>
+                                            {isTeacher && (
+                                              <button
+                                                onClick={() =>
+                                                  handleDeleteReply(
+                                                    comment.id,
+                                                    reply.id,
+                                                  )
+                                                }
+                                                className="rounded-full p-1 text-gray-400 hover:bg-white hover:text-red-600"
+                                                title="Hapus balasan"
+                                              >
+                                                <X size={12} />
+                                              </button>
+                                            )}
+                                          </div>
+                                        </div>
+                                      </div>
+                                    ),
+                                  )}
+                                </div>
+                              )}
+
+                              <div className="mt-3 flex items-center gap-2 rounded-full bg-gray-100 px-3 py-2">
+                                <input
+                                  className="min-w-0 flex-1 bg-transparent text-xs text-gray-950 placeholder:text-gray-400 focus:outline-none md:text-sm"
+                                  placeholder="Balas komentar..."
+                                  value={replyText[comment.id] || ""}
+                                  onChange={(e) =>
+                                    setReplyText((p) => ({
+                                      ...p,
+                                      [comment.id]: e.target.value,
+                                    }))
+                                  }
+                                />
+                                <button
+                                  onClick={() => handleAddReply(comment.id)}
+                                  disabled={creatingReply[comment.id]}
+                                  className="grid h-8 w-8 flex-shrink-0 place-items-center rounded-full bg-gray-950 text-white transition hover:bg-pink-600 disabled:bg-gray-300"
+                                  title="Balas"
+                                >
+                                  {creatingReply[comment.id] ? (
+                                    <span className="text-xs">...</span>
+                                  ) : (
+                                    <SendHorizontal size={15} />
+                                  )}
+                                </button>
+                              </div>
+                            </div>
                           </div>
                         </div>
                       ))}
@@ -713,24 +738,29 @@ export default function SocialTab({ classId, theme }: SocialTabProps) {
 
               {/* ADD COMMENT SECTION */}
               {!isTeacher && selectedTopic.status === "published" && (
-                <div className="p-3 md:p-4 border-t bg-gray-50 flex-shrink-0">
-                  <label className="text-xs font-semibold text-gray-700 block mb-2">
-                    Berikan Komentar Anda
-                  </label>
-                  <div className="flex gap-2 flex-col md:flex-row">
+                <div className="flex-shrink-0 border-t bg-white/95 p-3 shadow-[0_-12px_30px_rgba(15,23,42,0.08)] backdrop-blur md:p-4">
+                  <div className="flex items-end gap-2 rounded-2xl border border-gray-200 bg-gray-100 px-3 py-2">
+                    <div className="grid h-9 w-9 flex-shrink-0 place-items-center rounded-full bg-gray-950 text-sm font-extrabold text-white">
+                      {getInitial(userProfile?.name || userProfile?.email)}
+                    </div>
                     <textarea
-                      className="flex-1 border border-gray-300 rounded px-3 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-emerald-500 resize-none text-black"
+                      className="min-h-[42px] flex-1 resize-none bg-transparent px-1 py-2 text-sm text-gray-950 placeholder:text-gray-400 focus:outline-none"
                       rows={2}
-                      placeholder="Tulis pemikiran atau pendapat Anda..."
+                      placeholder="Tambahkan komentar..."
                       value={newComment}
                       onChange={(e) => setNewComment(e.target.value)}
                     />
                     <button
                       onClick={handleAddComment}
                       disabled={creatingComment || !newComment.trim()}
-                      className="bg-emerald-600 hover:bg-emerald-700 text-white px-3 md:px-4 py-2 rounded font-medium disabled:bg-gray-400 transition-colors text-xs md:text-sm h-fit whitespace-nowrap"
+                      className="grid h-10 w-10 flex-shrink-0 place-items-center rounded-full bg-pink-600 text-white transition hover:bg-pink-700 disabled:bg-gray-300"
+                      title="Kirim komentar"
                     >
-                      {creatingComment ? "..." : "Kirim"}
+                      {creatingComment ? (
+                        <span className="text-xs font-bold">...</span>
+                      ) : (
+                        <SendHorizontal size={18} />
+                      )}
                     </button>
                   </div>
                 </div>

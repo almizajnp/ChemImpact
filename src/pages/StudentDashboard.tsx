@@ -1,7 +1,12 @@
 import { useState, useEffect, useRef, createContext } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
-import { saveStudentScore, getStudentClasses } from "../lib/firestore";
+import {
+  saveStudentScore,
+  getStudentClasses,
+  getCompletedMissions,
+  getStudentRank,
+} from "../lib/firestore";
 import CRHeader from "../components/layout/CRHeader";
 import CRNavigation from "../components/layout/CRNavigation";
 import StudentProfileModal from "../components/layout/StudentProfileModal";
@@ -46,6 +51,8 @@ export default function StudentDashboard() {
   const [totalScore, setTotalScore] = useState(0);
   const [activeClassId, setActiveClassId] = useState<string | null>(null);
   const [activeClassName, setActiveClassName] = useState<string | null>(null);
+  const [completedMissions, setCompletedMissions] = useState<string[]>([]);
+  const [studentRank, setStudentRank] = useState<number>(-1);
   const bgMusicRef = useRef<HTMLAudioElement | null>(null);
 
   // Initialize score dari userProfile saat component mount atau userProfile berubah
@@ -55,6 +62,38 @@ export default function StudentDashboard() {
       console.log(`📊 Loaded student score from profile: ${userProfile.score}`);
     }
   }, [userProfile?.uid]); // Only run when user changes
+
+  // Load completed missions dari database
+  useEffect(() => {
+    const loadCompletedMissions = async () => {
+      if (userProfile?.uid) {
+        try {
+          const missions = await getCompletedMissions(userProfile.uid);
+          setCompletedMissions(missions);
+          console.log(`🏆 Loaded ${missions.length} completed missions`);
+        } catch (error) {
+          console.error("Error loading completed missions:", error);
+        }
+      }
+    };
+    loadCompletedMissions();
+  }, [userProfile?.uid]);
+
+  // Load student rank dari database
+  useEffect(() => {
+    const loadStudentRank = async () => {
+      if (userProfile?.uid) {
+        try {
+          const rank = await getStudentRank(userProfile.uid);
+          setStudentRank(rank);
+          console.log(`🥇 Loaded student rank: ${rank}`);
+        } catch (error) {
+          console.error("Error loading student rank:", error);
+        }
+      }
+    };
+    loadStudentRank();
+  }, [userProfile?.uid]);
 
   // Load first class for social tab
   useEffect(() => {
@@ -96,22 +135,24 @@ export default function StudentDashboard() {
   };
 
   // Calculate rank based on score
-  const calculateRank = (score: number): string => {
-    if (score < 5) return "Pemula";
-    if (score >= 5 && score <= 15) return "Expert";
-    return "Master";
+  const calculateRank = (rank: number): string => {
+    if (rank === -1) return "Tidak Terperingkat";
+    return `Peringkat #${rank}`;
   };
 
   const studentProfile = {
     name: "Alya Rahma Putri",
     kelas: "X IPA 3",
     score: totalScore,
-    rank: calculateRank(totalScore),
-    achievements: [
-      "Menyelesaikan Misi Sungai Bersih",
-      "Menjaga Konsumsi Air",
-      "Juara Peringkat Lingkungan",
-    ],
+    rank: calculateRank(studentRank),
+    achievements:
+      completedMissions.length > 0
+        ? completedMissions.map((mission) => `✅ Menyelesaikan Misi ${mission}`)
+        : [
+            "🎯 Belum ada misi yang diselesaikan",
+            "💡 Mulai bermain untuk membuka pencapaian",
+            "🚀 Tingkatkan skor dengan menyelesaikan misi",
+          ],
   };
 
   const handleLogout = async () => {
