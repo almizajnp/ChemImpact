@@ -143,7 +143,7 @@ const comicPages = [
       {
         id: "C",
         text: "Pilihan C",
-        isCorrect: true,
+        isCorrect: false,
         feedback:
           "Jawaban ini tepat! 🌿\nEmisi kendaraan yang terjadi terus-menerus dapat berkembang menjadi masalah besar bagi kualitas udara.\n🔮 Jika kondisi ini dibiarkan, pencemaran udara akan semakin parah, kualitas udara menurun, dan kesehatan masyarakat bisa terancam.\n🌱 Sebaliknya, jika emisi dikendalikan sejak awal, kualitas udara masih bisa dipertahankan di masa depan.",
         image: "/images/fb/1C.jpeg",
