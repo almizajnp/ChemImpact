@@ -362,14 +362,14 @@ const comicPages = [
       {
         id: "r3",
         question:
-          "3. 3. Solusi apa yang paling sesuai dengan prinsip green chemistry untuk membantu mengurangi polusi udara? Jelaskan alasanmu.",
+          "3. Solusi apa yang paling sesuai dengan prinsip green chemistry untuk membantu mengurangi polusi udara? Jelaskan alasanmu.",
         placeholder: "Jelaskan solusi yang kamu pilih dan alasanmu...",
         required: true,
       },
       {
         id: "r4",
         question:
-          "4. 4. Tindakan apa yang dapat kamu lakukan untuk membantu menjaga kualitas udara di lingkungan sekitar?",
+          "4. Tindakan apa yang dapat kamu lakukan untuk membantu menjaga kualitas udara di lingkungan sekitar?",
         placeholder: "Jelaskan tindakan yang akan kamu lakukan...",
         required: true,
       },
@@ -615,8 +615,8 @@ export default function ComicStoryMisi2({
 
         await saveStudentResponse(finalSiswaId, finalSiswaName, {
           classId: classId || "",
-          missionId: 2,
-          missionName: "Pencemaran Plastik",
+          missionId: 3,
+          missionName: "Polusi Udara",
           essayAnswers: flattenedEssayAnswers,
           essayQuestions: flattenedEssayQuestions,
           multiChoiceAnswers: multiChoiceWithIndex,
@@ -1361,7 +1361,7 @@ export default function ComicStoryMisi2({
                         }
                         className="w-full mt-6 bg-purple-500 hover:bg-purple-600 disabled:bg-gray-300 disabled:cursor-not-allowed text-white font-semibold py-3 px-6 rounded-lg transition-colors text-lg"
                       >
-                        ✓ Selesaikan Refleksi dan Misi 2
+                        ✓ Selesaikan Refleksi dan Misi
                       </button>
                     </div>
                   )}
