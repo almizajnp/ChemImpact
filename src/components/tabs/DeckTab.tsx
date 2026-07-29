@@ -1,4 +1,4 @@
-﻿import React, { useRef, useState, useEffect } from "react";
+import React, { useRef, useState, useEffect } from "react";
 import { motion } from "motion/react";
 import {
   BookOpen,
@@ -28,14 +28,14 @@ const principleCards = [
     summary:
       "Lebih baik mencegah limbah sejak awal daripada harus mengolah atau membersihkan limbah yang timbul.",
     details:
-      "Contohnya membawa botol minum sendiri lebih baik daripada mengolah limbah botol plastik yang menumpuk.",
+      "Contohnya dalam praktikum kimia SMA, bahan digunakan dalam jumlah kecil sehingga perubahan reaksi tetap dapat diamati dengan baik namun limbah kimia yang dihasilkan jauh lebih sedikit.",
     icon: <ShieldCheck size={38} className="text-emerald-700" />,
     color: "from-emerald-50 to-emerald-100 border-emerald-300",
   },
   {
     id: 2,
     title: "Ekonomi Atom",
-    summary: "Memaksimalkan penggunaan atom dalam reaksi.",
+    summary: "Proses kimia sebisa mungkin agar atom pada reaktan menjadi produk akhir yg diinginkan.",
     details:
       "Contohnya dalam kegiatan memasak, idealnya seluruh bahan yang kita digunakan menjadi bagian dari makanan tanpa menghasilkan sisa. Dalam reaksi kimia, kita usahakan atom-atom awal menjadi bagian dari produk akhir.",
     icon: <Layers size={38} className="text-cyan-700" />,
@@ -46,7 +46,7 @@ const principleCards = [
     title: "Sintesis Kimia Lebih Aman",
     summary: "Metode sintesis harus dirancang dengan meminimalkan zat beracun.",
     details:
-      "Contohnya, dalam pembuatan sabun digunakan bahan dan proses yang tidak menghasilkan zat berbahaya, sehingga aman bagi kesehatan dan lingkungan.",
+      "Contohnya pada praktikum kimia SMA, asam asetat (cuka) digunakan sebagai pengganti HCl pekat sehingga percobaan tetap mencapai tujuan pembelajaran dengan risiko yang lebih rendah bagi siswa dan lingkungan.",
     icon: <Leaf size={38} className="text-lime-700" />,
     color: "from-lime-50 to-lime-100 border-lime-300",
   },
@@ -56,7 +56,7 @@ const principleCards = [
     summary:
       "Produk kimia harus dirancang dengan efektif dan tidak berbahaya bagi manusia dan lingkungan.",
     details:
-      "Contohnya menggunakan produk sabun yang efektif membersihkan namun tidak membahayakan seperti menyebabkan iritasi kulit.",
+      "Contohnya, deterjen Gentle Gen berbahan dasar tumbuhan tetap efektif membersihkan noda, tetapi diformulasikan dengan bahan yang lebih aman sehingga mengurangi risiko iritasi kulit dan dampak terhadap lingkungan.",
     icon: <Sparkles size={38} className="text-yellow-600" />,
     color: "from-yellow-50 to-yellow-100 border-yellow-300",
   },
@@ -76,7 +76,7 @@ const principleCards = [
     summary:
       "Kebutuhan energi dalam proses kimia harus diminimalkan dengan mempertimbangkan dampak lingkungan dan ekonomi.",
     details:
-      "Contohnya memasak menggunakan api secukupnya atau menggunakan peralatan hemat energi karena reaksi pada suhu dan tekanan rendah dapat menghemat energi.",
+      "Contohnya pada praktikum kimia SMA, percobaan dipilih yang dapat berlangsung pada suhu ruang sehingga tidak memerlukan pemanasan dan penggunaan energi dapat diminimalkan.",
     icon: <BatteryCharging size={38} className="text-orange-600" />,
     color: "from-orange-50 to-orange-100 border-orange-300",
   },
@@ -96,7 +96,7 @@ const principleCards = [
     summary:
       "Menggunaan bahan kimia derivatif sebaiknya dihindari atau diminimalkan karena menambah tahapan, energi, dan limbah.",
     details:
-      "Contohnya memilih cara paling sederhana tanpa banyak langkah tambahan; dalam kimia hal ini berarti menghindari penggunaan bahan tambahan yang tidak perlu karena dapat menambah limbah.",
+      "Contohnya, praktikum di SMA dirancang sesederhana mungkin tanpa tahapan reaksi tambahan sehingga penggunaan bahan kimia, energi, dan limbah dapat diminimalkan.",
     icon: <BookOpen size={38} className="text-violet-700" />,
     color: "from-violet-50 to-violet-100 border-violet-300",
   },
@@ -106,7 +106,7 @@ const principleCards = [
     summary:
       "Katalis dapat mengurangi energi, bahan pereaksi, waktu reaksi, serta meningkatkan keamanan reaksi.",
     details:
-      "Contohnya pada pembuatan roti atau tempe digunakan ragi sebagai katalis yang mempercepat proses fermentasi",
+      "Contohnya, pada praktikum penguraian hidrogen peroksida (H₂O₂), digunakan katalis MnO₂ untuk mempercepat reaksi tanpa ikut habis bereaksi.",
     icon: <Flame size={38} className="text-red-600" />,
     color: "from-red-50 to-red-100 border-red-300",
   },
@@ -116,7 +116,7 @@ const principleCards = [
     summary:
       "Produk kimia harus dirancang agar mudah terurai setelah digunakan dan tidak menghasilkan zat berbahaya di lingkungan.",
     details:
-      "Contohnya penggunaan daun pisang sebagai pembungkus makanan merupakan contoh bahan yang mudah terurai di alam. Setelah dibuang, bahan tersebut tidak mencemari lingkungan karena dapat terdegradasi secara alami.",
+      "Contohnya, plastik biodegradable berbahan dasar pati singkong dirancang dapat terurai oleh mikroorganisme setelah digunakan sehingga mengurangi pencemaran lingkungan.",
     icon: <Recycle size={38} className="text-cyan-700" />,
     color: "from-cyan-50 to-cyan-100 border-cyan-300",
   },
@@ -126,7 +126,7 @@ const principleCards = [
     summary:
       "Memantau real-time untuk mengendalikan proses dan mencegah terbentuknya zat berbahaya.",
     details:
-      "Contohnya saat memasak, kita harus terus memantau makanan agar tidak gosong. Dalam proses kimia, pemantauan dilakukan secara terus-menerus agar jika mulai terbentuk zat berbahaya, proses dapat segera dihentikan atau dikendalikan.",
+      "Contohnya, pada praktikum titrasi, perubahan warna indikator diamati secara langsung untuk mengetahui titik akhir reaksi sehingga penggunaan larutan tidak berlebihan dan limbah dapat diminimalkan.",
     icon: <Globe size={38} className="text-blue-700" />,
     color: "from-blue-50 to-blue-100 border-blue-300",
   },
@@ -217,11 +217,10 @@ export default function DeckTab({ currentBg = "bg.png", theme }: DeckTabProps) {
           <button
             key={index}
             onClick={() => scrollToSection(index)}
-            className={`w-3 h-3 rounded-full transition-all duration-300 ${
-              activeSection === index
-                ? "bg-emerald-600 scale-125 w-6"
-                : "bg-gray-300 hover:bg-gray-400"
-            }`}
+            className={`w-3 h-3 rounded-full transition-all duration-300 ${activeSection === index
+              ? "bg-emerald-600 scale-125 w-6"
+              : "bg-gray-300 hover:bg-gray-400"
+              }`}
             aria-label={`Go to section ${index + 1}`}
           />
         ))}
@@ -271,10 +270,7 @@ export default function DeckTab({ currentBg = "bg.png", theme }: DeckTabProps) {
                 kimia berbahaya.
               </p>
               <p>
-                Fokus dari Green Chemistry sederhana namun powerful yaitu
-                menggunakan bahan tidak berbahaya, desain proses yang efisien,
-                dan menciptakan produk yang mudah terurai tanpa meninggalkan
-                kerusakan.
+                Green Chemistry memiliki fokus yang sederhana tetapi sangat powerful yaitu, memastikan bahwa kimia ikut andil dalam menciptakan masa depan yang lebih bersih, sehat, dan berkelanjutan.
               </p>
             </div>
           </div>
@@ -309,11 +305,7 @@ export default function DeckTab({ currentBg = "bg.png", theme }: DeckTabProps) {
         <div className="grid gap-6 lg:grid-cols-[2fr_1fr] items-start">
           <div className="space-y-5">
             <p className="text-white leading-relaxed text-lg">
-              Green Chemistry penting karena membantu membangun sistem kimia
-              yang selaras dengan tujuan pembangunan berkelanjutan. Dengan
-              merancang proses dan produk yang lebih aman, hemat sumber daya,
-              dan ramah lingkungan, Green Chemistry mendukung praktik industri
-              dan penelitian yang tidak merusak ekosistem.
+              Green Chemistry penting karena memastikan bahwa kegiatan kimia dapat memberikan manfaat sekaligus meminimalkan dampak terhadap lingkungan. Dengan demikian, Green Chemistry menjadi salah satu upaya untuk mendukung pembangunan berkelanjutan.
             </p>
             <p className="text-white leading-relaxed text-lg">
               Hubungan Green Chemistry dengan Education for Sustainable
@@ -463,12 +455,12 @@ export default function DeckTab({ currentBg = "bg.png", theme }: DeckTabProps) {
                   style={{
                     backfaceVisibility: "hidden",
                     transform: "rotateY(180deg)",
-                    backgroundColor: "#fef3c7",
+                    backgroundColor: "#d1fae5",
                   }}
                 >
                   <div className="flex flex-col items-center justify-center h-full text-center">
                     <motion.div
-                      className="rounded-3xl bg-white/80 p-4 shadow-inner mb-4 cursor-pointer"
+                      className="rounded-3xl bg-white p-4 shadow-sm mb-4 cursor-pointer"
                       animate={{ y: [0, -8, 0] }}
                       transition={{
                         duration: 3,
@@ -479,14 +471,14 @@ export default function DeckTab({ currentBg = "bg.png", theme }: DeckTabProps) {
                     >
                       {card.icon}
                     </motion.div>
-                    <div className="text-xs uppercase tracking-[0.3em] text-gray-500 font-semibold mb-2">
+                    <div className="text-xs uppercase tracking-[0.3em] text-emerald-800 font-bold mb-2">
                       {card.title}
                     </div>
-                    <h3 className="text-xl font-bold mb-3">Penjelasan</h3>
-                    <p className="text-sm text-gray-600 leading-relaxed mb-4">
+                    <h3 className="text-xl font-bold text-emerald-950 mb-3">Penjelasan</h3>
+                    <p className="text-sm text-emerald-900 leading-relaxed mb-4 font-medium">
                       {card.details}
                     </p>
-                    <div className="inline-flex items-center gap-2 rounded-full bg-gray-100 px-3 py-2 text-sm font-semibold text-gray-700">
+                    <div className="inline-flex items-center gap-2 rounded-full bg-emerald-600 text-white px-3 py-2 text-sm font-semibold shadow-sm hover:bg-emerald-700 transition-colors">
                       Klik lagi untuk tutup
                     </div>
                   </div>
@@ -546,11 +538,7 @@ export default function DeckTab({ currentBg = "bg.png", theme }: DeckTabProps) {
               </div>
             </div>
             <p className="text-slate-200 leading-relaxed text-sm">
-              Green Chemistry adalah solusi nyata untuk mengatasi permasalahan
-              pencemaran lingkungan seperti eutrofikasi perairan (algal bloom),
-              polusi tanah, dan kontaminasi bahan kimia berbahaya. Dengan
-              menerapkan prinsip Green Chemistry, kita bisa merancang produk dan
-              proses yang tidak menghasilkan limbah beracun sejak dari awal.
+              Green Chemistry adalah solusi nyata untuk mengatasi permasalahan pencemaran lingkungan seperti eutrofikasi perairan (algal bloom), polusi tanah, dan kontaminasi bahan kimia berbahaya. Dengan menerapkan prinsip Green Chemistry, kita bisa merancang produk dan proses yang tidak menghasilkan limbah beracun sejak dari awal.
             </p>
           </div>
           <div
@@ -577,10 +565,7 @@ export default function DeckTab({ currentBg = "bg.png", theme }: DeckTabProps) {
               </div>
             </div>
             <p className="text-slate-200 leading-relaxed text-sm">
-              Green Chemistry mengembangkan kemampuan kita buat mengantisipasi:
-              melihat ke depan, memahami dampak jangka panjang, dan bikin
-              keputusan yang bijak buat generasi mendatang. Ini skill penting di
-              era perubahan iklim global.
+              Green Chemistry membantu mengembangkan kompetensi antisipatif, yaitu kemampuan untuk memprediksi dampak suatu tindakan, mempertimbangkan berbagai kemungkinan di masa depan, dan mengambil keputusan yang bertanggung jawab demi keberlanjutan lingkungan serta kesejahteraan generasi mendatang.
             </p>
           </div>
           <div

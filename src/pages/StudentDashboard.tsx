@@ -326,6 +326,7 @@ export default function StudentDashboard() {
     >
       <CRHeader
         title={headerProps.title}
+        siswaName={userProfile?.name || studentProfile?.name}
         onProfileClick={() => setIsProfileOpen(true)}
         onSettingsClick={() => setIsSettingsOpen(true)}
         onLogoutClick={handleLogout}

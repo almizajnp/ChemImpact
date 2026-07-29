@@ -4,12 +4,14 @@ import { useAudio } from "../../hooks/useAudio";
 
 export default function CRHeader({
   title,
+  siswaName,
   onProfileClick,
   onSettingsClick,
   onLogoutClick,
   theme,
 }: {
   title?: string;
+  siswaName?: string;
   onProfileClick?: () => void;
   onSettingsClick?: () => void;
   onLogoutClick?: () => void;
@@ -49,11 +51,11 @@ export default function CRHeader({
             onProfileClick?.();
           }}
         >
-          <div className="w-10 h-10 bg-blue-500 rounded-full border-2 border-white shadow-lg flex items-center justify-center overflow-hidden">
-            <User size={24} className="text-white" />
+          <div className="w-10 h-10 bg-blue-500 rounded-full border-2 border-white shadow-lg flex items-center justify-center overflow-hidden font-bold text-white">
+            {siswaName ? siswaName.trim()[0].toUpperCase() : <User size={24} className="text-white" />}
           </div>
-          <span className="font-clash text-white text-base tracking-wide drop-shadow-md">
-            Siswa
+          <span className="font-clash text-white text-base tracking-wide drop-shadow-md max-w-[120px] truncate">
+            {siswaName || "Siswa"}
           </span>
         </button>
 
@@ -69,11 +71,11 @@ export default function CRHeader({
               onProfileClick?.();
             }}
           >
-            <div className="w-10 h-10 bg-blue-500 rounded-full border-2 border-white shadow-lg flex items-center justify-center overflow-hidden">
-              <User size={24} className="text-white" />
+            <div className="w-10 h-10 bg-blue-500 rounded-full border-2 border-white shadow-lg flex items-center justify-center overflow-hidden font-bold text-white text-lg">
+              {siswaName ? siswaName.trim()[0].toUpperCase() : <User size={24} className="text-white" />}
             </div>
-            <span className="font-clash text-white text-lg tracking-wide drop-shadow-md">
-              Siswa
+            <span className="font-clash text-white text-lg tracking-wide drop-shadow-md max-w-[160px] truncate">
+              {siswaName || "Siswa"}
             </span>
           </button>
           <button

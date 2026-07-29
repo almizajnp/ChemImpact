@@ -340,13 +340,11 @@ export const createDiscussionTopic = async (
     }
   }
 
-  const topicData: DiscussionTopic = {
+  const topicData: Record<string, any> = {
     id: topicId,
     classId,
     title,
     description,
-    optionalEmbedLink: processedEmbedUrl || undefined,
-    embedType,
     status: "draft", // Guru membuat sebagai draft
     createdBy: userId,
     createdByName: userName,
@@ -354,6 +352,13 @@ export const createDiscussionTopic = async (
     commentCount: 0,
     lastActivityAt: new Date().toISOString(),
   };
+
+  if (processedEmbedUrl) {
+    topicData.optionalEmbedLink = processedEmbedUrl;
+  }
+  if (embedType) {
+    topicData.embedType = embedType;
+  }
 
   await set(topicRef, topicData);
   console.log("✅ Discussion topic created:", topicId);
@@ -369,12 +374,14 @@ export const updateDiscussionTopic = async (
   topicId: string,
   data: Partial<DiscussionTopic>,
 ) => {
-  const updateData = { ...data };
+  const updateData: Record<string, any> = { ...data };
 
   // Jika embed link diubah, deteksi ulang tipenya
   if (data.optionalEmbedLink) {
     const embedType = detectEmbedType(data.optionalEmbedLink);
-    updateData.embedType = embedType || undefined;
+    if (embedType) {
+      updateData.embedType = embedType;
+    }
 
     // Konversi YouTube URL jika diperlukan
     if (embedType === "youtube") {
@@ -383,6 +390,13 @@ export const updateDiscussionTopic = async (
   }
 
   updateData.updatedAt = new Date().toISOString();
+
+  // Strip properties dengan nilai undefined sebelum menyimpan ke Firebase Realtime DB
+  Object.keys(updateData).forEach((key) => {
+    if (updateData[key] === undefined) {
+      delete updateData[key];
+    }
+  });
 
   await update(ref(db, `discussionTopics/${classId}/${topicId}`), updateData);
   console.log("✅ Discussion topic updated:", topicId);
@@ -737,12 +751,20 @@ export const addClassMember = async (
 
     await set(ref(db, `classMembers/${classId}/${memberId}`), memberData);
 
-    // Increment memberCount in class
+    // Increment memberCount in class & sync class name to studentScores
     const classRef = ref(db, `classes/${classId}`);
     const classSnapshot = await get(classRef);
     if (classSnapshot.exists()) {
       const classData = classSnapshot.val() as Class;
       await update(classRef, { memberCount: (classData.memberCount || 0) + 1 });
+
+      if (classData.name) {
+        const scoreRef = ref(db, `studentScores/${siswaId}`);
+        const scoreSnapshot = await get(scoreRef);
+        if (scoreSnapshot.exists()) {
+          await update(scoreRef, { kelas: classData.name });
+        }
+      }
     }
 
     console.log("✅ Member added:", memberId);
@@ -944,7 +966,7 @@ export const subscribeToLeaderboard = (
   try {
     const unsubscribe = onValue(
       ref(db, "studentScores"),
-      (snapshot) => {
+      async (snapshot) => {
         if (!snapshot.exists()) {
           callback([]);
           return;
@@ -953,19 +975,64 @@ export const subscribeToLeaderboard = (
         const scoresData = snapshot.val();
         const studentsArray: StudentScore[] = [];
 
-        // Convert object to array and sort by score
+        // Snapshot pembantu untuk resolving kelas otomatis
+        let classMembersSnap: any = null;
+        let classesSnap: any = null;
+
         for (const siswaId in scoresData) {
           const data = scoresData[siswaId];
           const score = data.totalScore || 0;
 
-          // Hanya tampilkan siswa yang memiliki poin > 0
           if (score > 0) {
+            let studentClass = data.kelas;
+
+            // Jika kelas belum ada atau masih fallback default
+            if (
+              !studentClass ||
+              studentClass === "Unknown Class" ||
+              studentClass === "Siswa"
+            ) {
+              try {
+                if (!classMembersSnap) {
+                  classMembersSnap = await get(ref(db, "classMembers"));
+                  classesSnap = await get(ref(db, "classes"));
+                }
+
+                if (classMembersSnap?.exists() && classesSnap?.exists()) {
+                  const classMembersData = classMembersSnap.val();
+                  const classesData = classesSnap.val();
+
+                  for (const cId in classMembersData) {
+                    const members = classMembersData[cId];
+                    let found = false;
+                    for (const mId in members) {
+                      if (members[mId]?.siswaId === siswaId) {
+                        const targetClass = classesData[cId];
+                        if (targetClass?.name) {
+                          studentClass = targetClass.name;
+                          found = true;
+                          // Sync ke Realtime DB agar tersimpan permanen
+                          update(ref(db, `studentScores/${siswaId}`), {
+                            kelas: targetClass.name,
+                          }).catch(() => {});
+                          break;
+                        }
+                      }
+                    }
+                    if (found) break;
+                  }
+                }
+              } catch (err) {
+                console.warn("Auto-resolve class failed for:", siswaId, err);
+              }
+            }
+
             studentsArray.push({
               siswaId,
               totalScore: score,
               lastUpdated: data.lastUpdated || new Date().toISOString(),
-              siswaName: data.siswaName || "Unknown Student",
-              kelas: data.kelas || "Unknown Class",
+              siswaName: data.siswaName || "Siswa",
+              kelas: studentClass || "Siswa",
             });
           }
         }
@@ -1018,8 +1085,8 @@ export const getStudentRank = async (siswaId: string): Promise<number> => {
           siswaId: id,
           totalScore: score,
           lastUpdated: data.lastUpdated || new Date().toISOString(),
-          siswaName: data.siswaName || "Unknown Student",
-          kelas: data.kelas || "Unknown Class",
+          siswaName: data.siswaName || "Siswa",
+          kelas: data.kelas || "Siswa",
         });
       }
     }

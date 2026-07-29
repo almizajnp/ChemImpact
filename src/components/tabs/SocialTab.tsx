@@ -358,7 +358,7 @@ export default function SocialTab({ classId, theme }: SocialTabProps) {
 
   // ================= UI =================
   return (
-    <div className="flex flex-col w-full pt-6 pb-6 h-auto min-h-[600px] overflow-hidden">
+    <div className="flex flex-col w-full pt-6 pb-28 md:pb-32 min-h-[650px] overflow-hidden">
       {/* CREATE DISCUSSION FORM - for teachers */}
       {isTeacher && showCreateDiscussion && (
         <div className="p-3 md:p-4 bg-white/90 backdrop-blur-sm border-b border-gray-200">
@@ -452,69 +452,89 @@ export default function SocialTab({ classId, theme }: SocialTabProps) {
         </div>
       )}
 
-      <div className="flex flex-1 min-h-0 flex-col overflow-hidden">
-        {/* TOPICS LIST - Card Grid for All Screens */}
+      <div className="flex flex-1 min-h-0 flex-col lg:flex-row gap-5 overflow-hidden">
+        {/* TOPICS SIDEBAR / LIST */}
         <div
-          className={`${showTopicsList ? "block" : "hidden"} h-full overflow-y-auto -mt-2`}
+          className={`${
+            showTopicsList ? "block" : "hidden lg:block"
+          } w-full lg:w-[340px] flex-shrink-0 h-full flex flex-col bg-white/80 backdrop-blur-md rounded-3xl border border-slate-200/80 shadow-sm p-4 overflow-hidden`}
         >
+          <div className="flex items-center justify-between pb-3 mb-2 border-b border-slate-100">
+            <h3 className="font-bold text-slate-900 text-sm md:text-base flex items-center gap-2">
+              📌 Topik Diskusi
+            </h3>
+            <span className="text-xs bg-emerald-100 text-emerald-800 font-bold px-2.5 py-0.5 rounded-full">
+              {topics.length} Topik
+            </span>
+          </div>
+
           {loadingTopics ? (
-            <div className="p-4 text-center text-gray-500 text-sm">
+            <div className="p-8 text-center text-slate-400 text-sm">
               Memuat topik...
             </div>
           ) : topics.length === 0 ? (
-            <div className="p-4 text-center text-gray-500 text-xs md:text-sm">
+            <div className="p-8 text-center text-slate-500 text-xs md:text-sm">
               {isTeacher
-                ? "Belum ada topik diskusi"
+                ? "Belum ada topik diskusi. Klik 'Buat Topik Baru' di atas."
                 : "Menunggu guru membuat topik diskusi..."}
             </div>
           ) : (
-            <>
-              {/* Grid View - All Screens */}
-              <div className="space-y-3 px-10 pt-4 pb-22">
-                {topics.map((t) => (
+            <div className="flex-1 overflow-y-auto space-y-3 pr-1">
+              {topics.map((t) => {
+                const isSelected = selectedTopicId === t.id;
+                return (
                   <button
                     key={t.id}
                     onClick={() => {
                       setSelectedTopicId(t.id);
-                      setShowTopicsList(false); // Switch to detail view
+                      setShowTopicsList(false); // Switch to detail view on mobile
                     }}
-                    className="w-full bg-white rounded-xl shadow-lg p-5 text-left hover:shadow-xl transition-all duration-200 border-2 border-gray-300 hover:border-emerald-500 group relative"
+                    className={`w-full text-left p-4 rounded-2xl transition-all duration-200 group relative border ${
+                      isSelected
+                        ? "bg-emerald-50/70 border-emerald-500 shadow-md ring-1 ring-emerald-500/20"
+                        : "bg-white border-slate-200/80 hover:border-emerald-300 hover:shadow-md"
+                    }`}
                   >
-                    <div className="flex items-start justify-between gap-3 mb-2">
-                      <h3 className="font-bold text-base text-gray-900 flex-1 line-clamp-2">
+                    <div className="flex items-start justify-between gap-2 mb-2">
+                      <h3
+                        className={`font-bold text-sm line-clamp-2 transition-colors ${
+                          isSelected
+                            ? "text-emerald-950"
+                            : "text-slate-900 group-hover:text-emerald-700"
+                        }`}
+                      >
                         {t.title}
                       </h3>
                       {t.status !== "published" && !isTeacher && (
-                        <span className="text-xs text-yellow-600 font-bold bg-yellow-50 px-2 py-1 rounded-full flex-shrink-0">
+                        <span className="text-[10px] text-amber-700 font-bold bg-amber-100/80 px-2 py-0.5 rounded-full flex-shrink-0">
                           Draft
                         </span>
                       )}
                     </div>
-                    <p className="text-sm text-gray-700 mb-4 line-clamp-3">
+                    <p className="text-xs text-slate-600 mb-3 line-clamp-2 leading-relaxed">
                       {t.description}
                     </p>
-                    <div className="flex items-center justify-between pt-3 border-t border-gray-200">
-                      <span className="text-xs text-gray-500 font-medium">
-                        💬 {t.commentCount}{" "}
-                        {t.commentCount === 1 ? "komentar" : "komentar"}
+                    <div className="flex items-center justify-between pt-2.5 border-t border-slate-100 text-xs">
+                      <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-slate-100 text-slate-600 font-medium text-[11px]">
+                        💬 {t.commentCount} komentar
                       </span>
-                      <span className="text-xs text-emerald-600 font-medium">
+                      <span className="text-xs font-semibold text-emerald-600 group-hover:translate-x-0.5 transition-transform">
                         Buka →
                       </span>
                     </div>
 
                     {/* Teacher action buttons - shown on hover */}
                     {isTeacher && (
-                      <div className="absolute top-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                      <div className="absolute top-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity bg-white/90 backdrop-blur-sm p-1 rounded-lg shadow-sm border border-slate-200">
                         <button
                           onClick={(e) => {
                             e.stopPropagation();
                             handlePublishDiscussion(t);
                           }}
-                          className={`text-xs px-2 py-1 rounded font-medium transition-colors ${
+                          className={`text-[11px] px-2 py-0.5 rounded font-medium transition-colors ${
                             t.status === "published"
-                              ? "bg-gray-200 text-gray-700 hover:bg-gray-300"
-                              : "bg-green-200 text-green-700 hover:bg-green-300"
+                              ? "bg-slate-100 text-slate-700 hover:bg-slate-200"
+                              : "bg-emerald-100 text-emerald-700 hover:bg-emerald-200"
                           }`}
                         >
                           {t.status === "published" ? "Unpublish" : "Publish"}
@@ -524,110 +544,136 @@ export default function SocialTab({ classId, theme }: SocialTabProps) {
                             e.stopPropagation();
                             handleDeleteDiscussion(t.id);
                           }}
-                          className="text-xs px-2 py-1 bg-red-200 text-red-700 hover:bg-red-300 rounded font-medium transition-colors"
+                          className="text-[11px] px-2 py-0.5 bg-rose-100 text-rose-700 hover:bg-rose-200 rounded font-medium transition-colors"
                         >
                           Hapus
                         </button>
                       </div>
                     )}
                   </button>
-                ))}
-              </div>
-            </>
+                );
+              })}
+            </div>
           )}
         </div>
 
-        {/* MAIN CONTENT - TOPIC & COMMENTS */}
+        {/* MAIN CONTENT - TOPIC & COMMENTS CHANNEL */}
         <div
-          className={`flex-1 flex flex-col overflow-hidden ${
-            !showTopicsList && selectedTopic ? "block" : "hidden"
+          className={`flex-1 flex flex-col overflow-hidden rounded-3xl border border-slate-200/80 shadow-sm ${
+            !showTopicsList && selectedTopic ? "flex" : "hidden lg:flex"
           }`}
           style={{
             backgroundColor: theme?.secondary
               ? `${theme.secondary}e6`
-              : "rgba(255, 255, 255, 0.9)",
+              : "rgba(255, 255, 255, 0.95)",
           }}
         >
           {selectedTopic ? (
             <>
               {/* TOPIC CONTENT */}
-              <div className="flex-1 min-h-0 overflow-y-auto pt-4 pb-18 px-3 md:px-6 space-y-4">
+              <div className="flex-1 min-h-0 overflow-y-auto p-4 md:p-6 pb-16 space-y-5">
                 {/* Back Button for Mobile */}
-                <div className="mb-2 -mt-0">
+                <div className="lg:hidden mb-2">
                   <button
                     onClick={() => {
                       setShowTopicsList(true);
-                      setSelectedTopicId("");
-                      setSelectedTopic(null);
                     }}
-                    className="inline-flex items-center gap-2 px-3 py-2 rounded-lg bg-red-50 text-emerald-700 text-sm font-medium hover:bg-emerald-100 transition-colors shadow-sm"
+                    className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-emerald-50 text-emerald-700 text-xs font-semibold hover:bg-emerald-100 transition-colors shadow-xs border border-emerald-200"
                   >
-                    ← Kembali ke Topik
+                    ← Kembali ke Daftar Topik
                   </button>
                 </div>
 
-                {/* Topic Header */}
-                <div>
-                  <h3 className="text-lg md:text-2xl font-bold text-gray-900 mb-2">
-                    {selectedTopic.title}
-                  </h3>
-                  <p className="text-xs md:text-sm text-gray-600">
-                    Dibuat oleh:{" "}
-                    <span className="font-medium">
-                      {selectedTopic.createdByName}
-                    </span>{" "}
-                    •{" "}
-                    {new Date(selectedTopic.createdAt).toLocaleDateString(
-                      "id-ID",
-                    )}
-                  </p>
+                {/* UNIFIED HERO TOPIC CARD */}
+                <div className="bg-white rounded-3xl p-5 md:p-7 border border-slate-100 shadow-sm space-y-4">
+                  {/* Topic Title & Meta */}
+                  <div>
+                    <div className="flex items-center gap-2 mb-2">
+                      <span className="px-3 py-1 rounded-full bg-emerald-100 text-emerald-800 text-xs font-bold tracking-wide">
+                        📌 Diskusi Kelas
+                      </span>
+                      {selectedTopic.status === "draft" && (
+                        <span className="px-3 py-1 rounded-full bg-amber-100 text-amber-800 text-xs font-bold">
+                          Draft (Belum Dipublikasikan)
+                        </span>
+                      )}
+                    </div>
+                    <h3 className="text-xl md:text-2xl font-bold text-slate-900 leading-snug">
+                      {selectedTopic.title}
+                    </h3>
+                    <p className="text-xs md:text-sm text-slate-500 mt-2 flex items-center gap-2">
+                      <span>
+                        Dibuat oleh:{" "}
+                        <strong className="text-slate-700">
+                          {selectedTopic.createdByName}
+                        </strong>
+                      </span>
+                      <span>•</span>
+                      <span>
+                        {new Date(selectedTopic.createdAt).toLocaleDateString(
+                          "id-ID",
+                        )}
+                      </span>
+                    </p>
+                  </div>
+
+                  {/* Embed Preview */}
+                  <EmbedPreview topic={selectedTopic} />
+
+                  {/* Topic Description Box */}
+                  <div className="bg-slate-50/90 rounded-2xl p-4 md:p-5 border border-slate-100">
+                    <p className="text-sm md:text-base text-slate-800 leading-relaxed whitespace-pre-wrap font-sans">
+                      {selectedTopic.description}
+                    </p>
+                  </div>
                 </div>
 
-                {/* Embed Preview */}
-                <EmbedPreview topic={selectedTopic} />
-
-                {/* Topic Description */}
-                <div className="bg-blue-50 border-l-4 border-blue-500 p-4 rounded">
-                  <p className="text-sm text-gray-800 whitespace-pre-wrap">
-                    {selectedTopic.description}
-                  </p>
-                </div>
-
-                {/* Comments Section */}
-                <div className="mt-6 overflow-hidden rounded-2xl bg-white shadow-[0_18px_45px_rgba(15,23,42,0.16)] ring-1 ring-black/5">
-                  <div className="sticky top-0 z-10 flex items-center justify-center border-b border-gray-100 bg-white/95 px-4 py-3 backdrop-blur">
-                    <div className="absolute left-4 h-1 w-10 rounded-full bg-gray-300 md:hidden" />
-                    <h4 className="text-sm font-bold text-gray-950 md:text-base">
-                    💭 Komentar ({selectedTopic.commentCount})
+                {/* COMMENTS SECTION CONTAINER */}
+                <div className="rounded-3xl bg-white border border-slate-100 shadow-sm p-4 md:p-6">
+                  <div className="flex items-center justify-between border-b border-slate-100 pb-4 mb-4">
+                    <h4 className="text-base font-bold text-slate-900 flex items-center gap-2">
+                      💬 Diskusi & Komentar
+                      <span className="text-xs bg-emerald-100 text-emerald-800 px-2.5 py-0.5 rounded-full font-semibold">
+                        {selectedTopic.commentCount}
+                      </span>
                     </h4>
                   </div>
 
                   {loadingComments ? (
-                    <div className="px-4 py-10 text-center text-sm text-gray-500">
+                    <div className="py-12 text-center text-sm text-slate-400">
                       Memuat komentar...
                     </div>
                   ) : comments.length === 0 ? (
-                    <p className="px-4 py-10 text-center text-xs text-gray-500 md:text-sm">
-                      Belum ada komentar. Jadilah yang pertama berkomentar!
-                    </p>
+                    <div className="py-12 text-center text-sm text-slate-400 flex flex-col items-center gap-2">
+                      <div className="w-12 h-12 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center text-xl">
+                        💭
+                      </div>
+                      <p className="font-medium text-slate-600">
+                        Belum ada komentar
+                      </p>
+                      <p className="text-xs text-slate-400">
+                        Jadilah yang pertama membuka diskusi!
+                      </p>
+                    </div>
                   ) : (
-                    <div className="divide-y divide-gray-100">
+                    <div className="space-y-4">
                       {comments.map((comment) => (
                         <div
                           key={comment.id}
-                          className="group px-4 py-4 transition-colors hover:bg-gray-50/70 md:px-5"
+                          className="group rounded-2xl bg-slate-50/80 p-4 border border-slate-100 hover:border-slate-200 transition-colors"
                         >
                           <div className="flex items-start gap-3">
-                            <div className="grid h-9 w-9 flex-shrink-0 place-items-center rounded-full bg-gradient-to-br from-pink-500 via-red-500 to-amber-400 text-sm font-extrabold text-white shadow-sm">
+                            {/* Avatar with Emerald Gradient */}
+                            <div className="grid h-9 w-9 flex-shrink-0 place-items-center rounded-full bg-gradient-to-br from-emerald-500 to-teal-600 text-sm font-extrabold text-white shadow-sm">
                               {getInitial(comment.siswaName)}
                             </div>
                             <div className="min-w-0 flex-1">
-                              <div className="flex items-start justify-between gap-3">
-                                <div className="min-w-0">
-                                  <p className="truncate text-xs font-semibold text-gray-500 md:text-sm">
+                              <div className="flex items-start justify-between gap-2">
+                                <div>
+                                  <p className="text-xs font-bold text-slate-800">
                                     {comment.siswaName}
                                   </p>
-                                  <p className="mt-1 text-sm leading-relaxed text-gray-950 md:text-base">
+                                  <p className="mt-1 text-sm text-slate-900 leading-relaxed">
                                     {comment.text}
                                   </p>
                                 </div>
@@ -636,7 +682,7 @@ export default function SocialTab({ classId, theme }: SocialTabProps) {
                                     onClick={() =>
                                       handleDeleteComment(comment.id)
                                     }
-                                    className="rounded-full p-2 text-gray-400 opacity-100 transition hover:bg-red-50 hover:text-red-600 md:opacity-0 md:group-hover:opacity-100"
+                                    className="rounded-full p-1.5 text-slate-400 opacity-0 group-hover:opacity-100 transition hover:bg-rose-50 hover:text-rose-600"
                                     title="Hapus komentar"
                                   >
                                     <Trash2 size={15} />
@@ -644,40 +690,46 @@ export default function SocialTab({ classId, theme }: SocialTabProps) {
                                 )}
                               </div>
 
-                              <div className="mt-2 flex items-center gap-3 text-[11px] font-semibold text-gray-400 md:text-xs">
+                              <div className="mt-2 flex items-center gap-3 text-[11px] font-medium text-slate-400">
                                 <span>
-                                  {new Date(comment.createdAt).toLocaleString(
-                                    "id-ID",
-                                  )}
+                                  {new Date(
+                                    comment.createdAt,
+                                  ).toLocaleTimeString("id-ID", {
+                                    hour: "2-digit",
+                                    minute: "2-digit",
+                                  })}
                                 </span>
-                                <span>Balas</span>
                               </div>
 
+                              {/* Nested Replies */}
                               {(commentReplies[comment.id] || []).length >
                                 0 && (
-                                <div className="mt-3 space-y-3 border-l border-gray-200 pl-3">
+                                <div className="mt-3 space-y-2.5 border-l-2 border-emerald-200/60 pl-3">
                                   {(commentReplies[comment.id] || []).map(
                                     (reply) => (
                                       <div
                                         key={reply.id}
-                                        className="flex items-start gap-2"
+                                        className="flex items-start gap-2.5 bg-white rounded-xl p-3 border border-slate-100 shadow-2xs"
                                       >
-                                        <div className="grid h-7 w-7 flex-shrink-0 place-items-center rounded-full bg-gray-200 text-[11px] font-bold text-gray-700">
+                                        <div className="grid h-7 w-7 flex-shrink-0 place-items-center rounded-full bg-emerald-100 text-[11px] font-bold text-emerald-800">
                                           {getInitial(reply.userName)}
                                         </div>
-                                        <div className="min-w-0 flex-1 rounded-2xl bg-gray-100 px-3 py-2">
+                                        <div className="min-w-0 flex-1">
                                           <div className="flex items-start justify-between gap-2">
-                                            <div className="min-w-0">
-                                              <p className="truncate text-[11px] font-semibold text-gray-500">
+                                            <div>
+                                              <p className="text-[11px] font-bold text-slate-800">
                                                 {reply.userName}
                                               </p>
-                                              <p className="mt-1 text-xs leading-relaxed text-gray-900 md:text-sm">
+                                              <p className="mt-0.5 text-xs text-slate-800 leading-relaxed">
                                                 {reply.text}
                                               </p>
-                                              <p className="mt-1 text-[10px] font-medium text-gray-400">
+                                              <p className="mt-1 text-[10px] text-slate-400">
                                                 {new Date(
                                                   reply.createdAt,
-                                                ).toLocaleString("id-ID")}
+                                                ).toLocaleTimeString("id-ID", {
+                                                  hour: "2-digit",
+                                                  minute: "2-digit",
+                                                })}
                                               </p>
                                             </div>
                                             {isTeacher && (
@@ -688,7 +740,7 @@ export default function SocialTab({ classId, theme }: SocialTabProps) {
                                                     reply.id,
                                                   )
                                                 }
-                                                className="rounded-full p-1 text-gray-400 hover:bg-white hover:text-red-600"
+                                                className="rounded-full p-1 text-slate-400 hover:bg-rose-50 hover:text-rose-600"
                                                 title="Hapus balasan"
                                               >
                                                 <X size={12} />
@@ -702,9 +754,10 @@ export default function SocialTab({ classId, theme }: SocialTabProps) {
                                 </div>
                               )}
 
-                              <div className="mt-3 flex items-center gap-2 rounded-full bg-gray-100 px-3 py-2">
+                              {/* Reply Input Box */}
+                              <div className="mt-3 flex items-center gap-2 rounded-full bg-white border border-slate-200 px-3 py-1.5 focus-within:ring-2 focus-within:ring-emerald-500/20 focus-within:border-emerald-500 transition-all">
                                 <input
-                                  className="min-w-0 flex-1 bg-transparent text-xs text-gray-950 placeholder:text-gray-400 focus:outline-none md:text-sm"
+                                  className="min-w-0 flex-1 bg-transparent text-xs text-slate-900 placeholder:text-slate-400 focus:outline-none"
                                   placeholder="Balas komentar..."
                                   value={replyText[comment.id] || ""}
                                   onChange={(e) =>
@@ -716,14 +769,17 @@ export default function SocialTab({ classId, theme }: SocialTabProps) {
                                 />
                                 <button
                                   onClick={() => handleAddReply(comment.id)}
-                                  disabled={creatingReply[comment.id]}
-                                  className="grid h-8 w-8 flex-shrink-0 place-items-center rounded-full bg-gray-950 text-white transition hover:bg-pink-600 disabled:bg-gray-300"
+                                  disabled={
+                                    creatingReply[comment.id] ||
+                                    !(replyText[comment.id] || "").trim()
+                                  }
+                                  className="grid h-7 w-7 flex-shrink-0 place-items-center rounded-full bg-emerald-600 text-white transition hover:bg-emerald-700 disabled:bg-slate-200 disabled:text-slate-400"
                                   title="Balas"
                                 >
                                   {creatingReply[comment.id] ? (
-                                    <span className="text-xs">...</span>
+                                    <span className="text-[10px]">...</span>
                                   ) : (
-                                    <SendHorizontal size={15} />
+                                    <SendHorizontal size={13} />
                                   )}
                                 </button>
                               </div>
@@ -736,16 +792,16 @@ export default function SocialTab({ classId, theme }: SocialTabProps) {
                 </div>
               </div>
 
-              {/* ADD COMMENT SECTION */}
+              {/* ADD COMMENT INPUT BAR */}
               {!isTeacher && selectedTopic.status === "published" && (
-                <div className="flex-shrink-0 border-t bg-white/95 p-3 shadow-[0_-12px_30px_rgba(15,23,42,0.08)] backdrop-blur md:p-4">
-                  <div className="flex items-end gap-2 rounded-2xl border border-gray-200 bg-gray-100 px-3 py-2">
-                    <div className="grid h-9 w-9 flex-shrink-0 place-items-center rounded-full bg-gray-950 text-sm font-extrabold text-white">
+                <div className="flex-shrink-0 border-t border-slate-100 bg-white/95 p-3 shadow-lg backdrop-blur-md md:p-4 rounded-b-3xl">
+                  <div className="flex items-center gap-2 rounded-2xl border border-slate-200 bg-slate-50 px-3 py-2 focus-within:bg-white focus-within:ring-2 focus-within:ring-emerald-500/20 focus-within:border-emerald-500 transition-all">
+                    <div className="grid h-9 w-9 flex-shrink-0 place-items-center rounded-full bg-emerald-600 text-sm font-extrabold text-white shadow-sm">
                       {getInitial(userProfile?.name || userProfile?.email)}
                     </div>
                     <textarea
-                      className="min-h-[42px] flex-1 resize-none bg-transparent px-1 py-2 text-sm text-gray-950 placeholder:text-gray-400 focus:outline-none"
-                      rows={2}
+                      className="min-h-[40px] max-h-24 flex-1 resize-none bg-transparent px-1 py-1 text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none"
+                      rows={1}
                       placeholder="Tambahkan komentar..."
                       value={newComment}
                       onChange={(e) => setNewComment(e.target.value)}
@@ -753,7 +809,7 @@ export default function SocialTab({ classId, theme }: SocialTabProps) {
                     <button
                       onClick={handleAddComment}
                       disabled={creatingComment || !newComment.trim()}
-                      className="grid h-10 w-10 flex-shrink-0 place-items-center rounded-full bg-pink-600 text-white transition hover:bg-pink-700 disabled:bg-gray-300"
+                      className="grid h-10 w-10 flex-shrink-0 place-items-center rounded-full bg-emerald-600 text-white transition hover:bg-emerald-700 disabled:bg-slate-200 disabled:text-slate-400 shadow-sm"
                       title="Kirim komentar"
                     >
                       {creatingComment ? (
@@ -767,28 +823,25 @@ export default function SocialTab({ classId, theme }: SocialTabProps) {
               )}
 
               {!isTeacher && selectedTopic.status === "draft" && (
-                <div className="p-3 md:p-4 border-t bg-yellow-50 flex-shrink-0">
-                  <p className="text-xs text-yellow-700">
+                <div className="p-3 md:p-4 border-t border-amber-200 bg-amber-50 flex-shrink-0 rounded-b-3xl">
+                  <p className="text-xs text-amber-800 font-medium">
                     ⚠️ Topik ini masih draft dan belum dipublikasikan oleh guru.
                   </p>
                 </div>
               )}
-
-              {/* Bottom Padding untuk konten yang di-scroll */}
-              <div className="h-20 flex-shrink-0"></div>
             </>
           ) : (
-            <div className="flex-1 flex items-center justify-center text-gray-500 text-sm">
+            <div className="flex-1 flex items-center justify-center text-slate-400 text-sm p-6">
               <div className="text-center">
-                <p className="mb-4">Pilih topik untuk memulai diskusi</p>
-                {topics.length === 0 && (
-                  <button
-                    onClick={() => setShowTopicsList(true)}
-                    className="text-emerald-600 hover:text-emerald-700 text-xs font-medium"
-                  >
-                    Lihat Topik Diskusi
-                  </button>
-                )}
+                <div className="w-16 h-16 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center text-2xl mx-auto mb-3">
+                  💬
+                </div>
+                <p className="font-semibold text-slate-700 mb-1">
+                  Pilih Topik Diskusi
+                </p>
+                <p className="text-xs text-slate-400 max-w-xs mx-auto">
+                  Pilih salah satu topik di sebelah kiri untuk membaca dan ikut berpartisipasi dalam diskusi kelas.
+                </p>
               </div>
             </div>
           )}
