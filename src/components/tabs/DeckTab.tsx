@@ -37,7 +37,7 @@ const principleCards = [
     title: "Ekonomi Atom",
     summary: "Proses kimia sebisa mungkin agar atom pada reaktan menjadi produk akhir yg diinginkan.",
     details:
-      "Contohnya dalam kegiatan memasak, idealnya seluruh bahan yang kita digunakan menjadi bagian dari makanan tanpa menghasilkan sisa. Dalam reaksi kimia, kita usahakan atom-atom awal menjadi bagian dari produk akhir.",
+      "contohnya persamaan reaksi NaCl yaitu Na + Cl > NaCl sehingga atom reaktan seluruhnya menjadi produk akhir",
     icon: <Layers size={38} className="text-cyan-700" />,
     color: "from-cyan-50 to-cyan-100 border-cyan-300",
   },
