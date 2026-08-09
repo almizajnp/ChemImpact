@@ -24,7 +24,9 @@ import {
   deleteDiscussionReply,
   subscribeToDiscussionReplies,
   detectEmbedType,
+  getTopicEmbeds,
 } from "../../lib/firestore";
+import EmbedViewer from "../EmbedViewer";
 import {
   DiscussionTopic,
   DiscussionComment,
@@ -295,62 +297,22 @@ export default function SocialTab({ classId, theme }: SocialTabProps) {
 
   // ================= EMBED PREVIEW COMPONENTS =================
   const EmbedPreview = ({ topic }: { topic: DiscussionTopic }) => {
-    if (!topic.optionalEmbedLink) return null;
+    // Mendukung banyak link embed; semua tampil inline via EmbedViewer
+    const embeds = getTopicEmbeds(topic);
+    if (embeds.length === 0) return null;
 
-    const { embedType, optionalEmbedLink } = topic;
-
-    if (embedType === "youtube") {
-      return (
-        <div className="mb-4 bg-gray-900 rounded-lg overflow-hidden aspect-video">
-          <iframe
-            width="100%"
-            height="100%"
-            src={optionalEmbedLink}
+    return (
+      <>
+        {embeds.map((embed, idx) => (
+          <EmbedViewer
+            key={idx}
+            embed={embed}
             title={topic.title}
-            frameBorder="0"
-            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-            allowFullScreen
-          ></iframe>
-        </div>
-      );
-    }
-
-    if (embedType === "image") {
-      return (
-        <div className="mb-4 bg-gray-100 rounded-lg overflow-hidden max-h-64">
-          <img
-            src={optionalEmbedLink}
-            alt={topic.title}
-            className="w-full h-full object-cover"
+            index={idx}
           />
-        </div>
-      );
-    }
-
-    if (embedType === "article" || embedType === "website") {
-      return (
-        <div className="mb-4 bg-blue-50 border border-blue-200 rounded-lg p-3">
-          <div className="flex items-start gap-3">
-            <ExternalLink className="w-5 h-5 text-blue-600 shrink-0 mt-1" />
-            <div className="flex-1 min-w-0">
-              <p className="text-sm text-blue-600 font-medium truncate">
-                External Resource
-              </p>
-              <a
-                href={optionalEmbedLink}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-xs text-blue-500 hover:underline truncate block"
-              >
-                {optionalEmbedLink}
-              </a>
-            </div>
-          </div>
-        </div>
-      );
-    }
-
-    return null;
+        ))}
+      </>
+    );
   };
 
   // Mobile state
@@ -455,9 +417,8 @@ export default function SocialTab({ classId, theme }: SocialTabProps) {
       <div className="flex flex-1 min-h-0 flex-col lg:flex-row gap-5 overflow-hidden">
         {/* TOPICS SIDEBAR / LIST */}
         <div
-          className={`${
-            showTopicsList ? "block" : "hidden lg:block"
-          } w-full lg:w-[340px] flex-shrink-0 h-full flex flex-col bg-white/80 backdrop-blur-md rounded-3xl border border-slate-200/80 shadow-sm p-4 overflow-hidden`}
+          className={`${showTopicsList ? "block" : "hidden lg:block"
+            } w-full lg:w-[340px] flex-shrink-0 h-full flex flex-col bg-white/80 backdrop-blur-md rounded-3xl border border-slate-200/80 shadow-sm p-4 overflow-hidden`}
         >
           <div className="flex items-center justify-between pb-3 mb-2 border-b border-slate-100">
             <h3 className="font-bold text-slate-900 text-sm md:text-base flex items-center gap-2">
@@ -489,19 +450,17 @@ export default function SocialTab({ classId, theme }: SocialTabProps) {
                       setSelectedTopicId(t.id);
                       setShowTopicsList(false); // Switch to detail view on mobile
                     }}
-                    className={`w-full text-left p-4 rounded-2xl transition-all duration-200 group relative border ${
-                      isSelected
+                    className={`w-full text-left p-4 rounded-2xl transition-all duration-200 group relative border ${isSelected
                         ? "bg-emerald-50/70 border-emerald-500 shadow-md ring-1 ring-emerald-500/20"
                         : "bg-white border-slate-200/80 hover:border-emerald-300 hover:shadow-md"
-                    }`}
+                      }`}
                   >
                     <div className="flex items-start justify-between gap-2 mb-2">
                       <h3
-                        className={`font-bold text-sm line-clamp-2 transition-colors ${
-                          isSelected
+                        className={`font-bold text-sm line-clamp-2 transition-colors ${isSelected
                             ? "text-emerald-950"
                             : "text-slate-900 group-hover:text-emerald-700"
-                        }`}
+                          }`}
                       >
                         {t.title}
                       </h3>
@@ -531,11 +490,10 @@ export default function SocialTab({ classId, theme }: SocialTabProps) {
                             e.stopPropagation();
                             handlePublishDiscussion(t);
                           }}
-                          className={`text-[11px] px-2 py-0.5 rounded font-medium transition-colors ${
-                            t.status === "published"
+                          className={`text-[11px] px-2 py-0.5 rounded font-medium transition-colors ${t.status === "published"
                               ? "bg-slate-100 text-slate-700 hover:bg-slate-200"
                               : "bg-emerald-100 text-emerald-700 hover:bg-emerald-200"
-                          }`}
+                            }`}
                         >
                           {t.status === "published" ? "Unpublish" : "Publish"}
                         </button>
@@ -559,9 +517,8 @@ export default function SocialTab({ classId, theme }: SocialTabProps) {
 
         {/* MAIN CONTENT - TOPIC & COMMENTS CHANNEL */}
         <div
-          className={`flex-1 flex flex-col overflow-hidden rounded-3xl border border-slate-200/80 shadow-sm ${
-            !showTopicsList && selectedTopic ? "flex" : "hidden lg:flex"
-          }`}
+          className={`flex-1 flex flex-col overflow-hidden rounded-3xl border border-slate-200/80 shadow-sm ${!showTopicsList && selectedTopic ? "flex" : "hidden lg:flex"
+            }`}
           style={{
             backgroundColor: theme?.secondary
               ? `${theme.secondary}e6`
@@ -704,55 +661,55 @@ export default function SocialTab({ classId, theme }: SocialTabProps) {
                               {/* Nested Replies */}
                               {(commentReplies[comment.id] || []).length >
                                 0 && (
-                                <div className="mt-3 space-y-2.5 border-l-2 border-emerald-200/60 pl-3">
-                                  {(commentReplies[comment.id] || []).map(
-                                    (reply) => (
-                                      <div
-                                        key={reply.id}
-                                        className="flex items-start gap-2.5 bg-white rounded-xl p-3 border border-slate-100 shadow-2xs"
-                                      >
-                                        <div className="grid h-7 w-7 flex-shrink-0 place-items-center rounded-full bg-emerald-100 text-[11px] font-bold text-emerald-800">
-                                          {getInitial(reply.userName)}
-                                        </div>
-                                        <div className="min-w-0 flex-1">
-                                          <div className="flex items-start justify-between gap-2">
-                                            <div>
-                                              <p className="text-[11px] font-bold text-slate-800">
-                                                {reply.userName}
-                                              </p>
-                                              <p className="mt-0.5 text-xs text-slate-800 leading-relaxed">
-                                                {reply.text}
-                                              </p>
-                                              <p className="mt-1 text-[10px] text-slate-400">
-                                                {new Date(
-                                                  reply.createdAt,
-                                                ).toLocaleTimeString("id-ID", {
-                                                  hour: "2-digit",
-                                                  minute: "2-digit",
-                                                })}
-                                              </p>
+                                  <div className="mt-3 space-y-2.5 border-l-2 border-emerald-200/60 pl-3">
+                                    {(commentReplies[comment.id] || []).map(
+                                      (reply) => (
+                                        <div
+                                          key={reply.id}
+                                          className="flex items-start gap-2.5 bg-white rounded-xl p-3 border border-slate-100 shadow-2xs"
+                                        >
+                                          <div className="grid h-7 w-7 flex-shrink-0 place-items-center rounded-full bg-emerald-100 text-[11px] font-bold text-emerald-800">
+                                            {getInitial(reply.userName)}
+                                          </div>
+                                          <div className="min-w-0 flex-1">
+                                            <div className="flex items-start justify-between gap-2">
+                                              <div>
+                                                <p className="text-[11px] font-bold text-slate-800">
+                                                  {reply.userName}
+                                                </p>
+                                                <p className="mt-0.5 text-xs text-slate-800 leading-relaxed">
+                                                  {reply.text}
+                                                </p>
+                                                <p className="mt-1 text-[10px] text-slate-400">
+                                                  {new Date(
+                                                    reply.createdAt,
+                                                  ).toLocaleTimeString("id-ID", {
+                                                    hour: "2-digit",
+                                                    minute: "2-digit",
+                                                  })}
+                                                </p>
+                                              </div>
+                                              {isTeacher && (
+                                                <button
+                                                  onClick={() =>
+                                                    handleDeleteReply(
+                                                      comment.id,
+                                                      reply.id,
+                                                    )
+                                                  }
+                                                  className="rounded-full p-1 text-slate-400 hover:bg-rose-50 hover:text-rose-600"
+                                                  title="Hapus balasan"
+                                                >
+                                                  <X size={12} />
+                                                </button>
+                                              )}
                                             </div>
-                                            {isTeacher && (
-                                              <button
-                                                onClick={() =>
-                                                  handleDeleteReply(
-                                                    comment.id,
-                                                    reply.id,
-                                                  )
-                                                }
-                                                className="rounded-full p-1 text-slate-400 hover:bg-rose-50 hover:text-rose-600"
-                                                title="Hapus balasan"
-                                              >
-                                                <X size={12} />
-                                              </button>
-                                            )}
                                           </div>
                                         </div>
-                                      </div>
-                                    ),
-                                  )}
-                                </div>
-                              )}
+                                      ),
+                                    )}
+                                  </div>
+                                )}
 
                               {/* Reply Input Box */}
                               <div className="mt-3 flex items-center gap-2 rounded-full bg-white border border-slate-200 px-3 py-1.5 focus-within:ring-2 focus-within:ring-emerald-500/20 focus-within:border-emerald-500 transition-all">

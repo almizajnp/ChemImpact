@@ -19,6 +19,8 @@ import {
   ClassMember,
   StudentResponse,
   DiscussionTopic,
+  EmbedLink,
+  EmbedType,
   DiscussionComment,
   DiscussionReply,
 } from "../types";
@@ -38,39 +40,57 @@ export const generateId = (): string => {
 /**
  * Deteksi tipe embed dari URL
  */
-export const detectEmbedType = (
-  url: string,
-): "youtube" | "image" | "article" | "website" | null => {
+export const detectEmbedType = (url: string): EmbedType | null => {
   if (!url) return null;
 
-  const youtubePatterns = [
-    /youtube\.com\/watch/i,
-    /youtu\.be\//i,
-    /youtube\.com\/embed/i,
-  ];
+  // Platform video
+  if (/youtube\.com\/(watch|embed|shorts)|youtu\.be\//i.test(url))
+    return "youtube";
+  if (/vimeo\.com\/(\d+)/i.test(url) || /player\.vimeo\.com/i.test(url))
+    return "vimeo";
+  if (/tiktok\.com\/.*\/video\/(\d+)/i.test(url) || /tiktok\.com\/embed/i.test(url))
+    return "tiktok";
+  if (/drive\.google\.com\/file\/d\//i.test(url)) return "drive";
 
-  const imagePatterns = [/\.(jpg|jpeg|png|gif|webp)$/i];
-  const articlePatterns = [/medium\.com/i, /dev\.to/i, /blog/i];
+  // File langsung
+  if (/\.(mp4|webm|ogg|mov|m4v)(\?.*)?$/i.test(url)) return "video";
+  if (/\.pdf(\?.*)?$/i.test(url)) return "pdf";
+  if (/\.(jpg|jpeg|png|gif|webp)(\?.*)?$/i.test(url)) return "image";
 
-  for (const pattern of youtubePatterns) {
-    if (pattern.test(url)) return "youtube";
-  }
+  // Artikel
+  if (/medium\.com|dev\.to|blog/i.test(url)) return "article";
 
-  for (const pattern of imagePatterns) {
-    if (pattern.test(url)) return "image";
-  }
-
-  for (const pattern of articlePatterns) {
-    if (pattern.test(url)) return "article";
-  }
-
-  // Default ke website jika bukan yang di atas
+  // Default ke website jika URL valid
   try {
     new URL(url);
     return "website";
   } catch {
     return null;
   }
+};
+
+/**
+ * Konversi URL ke format yang bisa di-embed (iframe/player) di dalam website.
+ */
+export const convertToEmbedUrl = (url: string, type: EmbedType): string => {
+  if (type === "youtube") return convertYouTubeUrl(url);
+
+  if (type === "vimeo") {
+    const m = url.match(/vimeo\.com\/(\d+)/i);
+    return m ? `https://player.vimeo.com/video/${m[1]}` : url;
+  }
+
+  if (type === "tiktok") {
+    const m = url.match(/video\/(\d+)/i);
+    return m ? `https://www.tiktok.com/embed/v2/${m[1]}` : url;
+  }
+
+  if (type === "drive") {
+    const m = url.match(/drive\.google\.com\/file\/d\/([\w-]+)/i);
+    return m ? `https://drive.google.com/file/d/${m[1]}/preview` : url;
+  }
+
+  return url;
 };
 
 /**
@@ -88,6 +108,39 @@ export const convertYouTubeUrl = (url: string): string => {
   if (match2) videoId = match2[1];
 
   return videoId ? `https://www.youtube.com/embed/${videoId}` : url;
+};
+
+/**
+ * Proses daftar URL mentah menjadi EmbedLink[] (deteksi tipe + konversi YouTube).
+ * URL kosong/tidak valid dilewati.
+ */
+export const processEmbedUrls = (urls: string[]): EmbedLink[] => {
+  const result: EmbedLink[] = [];
+  for (const raw of urls) {
+    const url = (raw || "").trim();
+    if (!url) continue;
+    const type = detectEmbedType(url);
+    if (!type) continue;
+    result.push({
+      url: convertToEmbedUrl(url, type),
+      type,
+    });
+  }
+  return result;
+};
+
+/**
+ * Ambil semua embed dari sebuah topik diskusi.
+ * Mendukung format baru (embedLinks[]) dan format lama (optionalEmbedLink tunggal).
+ */
+export const getTopicEmbeds = (topic: DiscussionTopic): EmbedLink[] => {
+  if (topic.embedLinks && topic.embedLinks.length > 0) {
+    return topic.embedLinks;
+  }
+  if (topic.optionalEmbedLink && topic.embedType) {
+    return [{ url: topic.optionalEmbedLink, type: topic.embedType }];
+  }
+  return [];
 };
 
 // ============ CLASS OPERATIONS ============
@@ -322,23 +375,14 @@ export const createDiscussionTopic = async (
   description: string,
   userId: string,
   userName: string,
-  embedUrl?: string,
+  embedUrl?: string | string[],
 ): Promise<string> => {
   const topicRef = push(ref(db, `discussionTopics/${classId}`));
   const topicId = topicRef.key!;
 
-  // Validasi dan deteksi tipe embed
-  let embedType: "youtube" | "image" | "article" | "website" | undefined;
-  let processedEmbedUrl = embedUrl;
-
-  if (embedUrl) {
-    embedType = detectEmbedType(embedUrl) || undefined;
-
-    // Konversi YouTube URL ke embed format
-    if (embedType === "youtube") {
-      processedEmbedUrl = convertYouTubeUrl(embedUrl);
-    }
-  }
+  // Dukung banyak link embed (string[] baru, string tunggal untuk kompatibilitas)
+  const rawUrls = Array.isArray(embedUrl) ? embedUrl : embedUrl ? [embedUrl] : [];
+  const embedLinks = processEmbedUrls(rawUrls);
 
   const topicData: Record<string, any> = {
     id: topicId,
@@ -353,11 +397,11 @@ export const createDiscussionTopic = async (
     lastActivityAt: new Date().toISOString(),
   };
 
-  if (processedEmbedUrl) {
-    topicData.optionalEmbedLink = processedEmbedUrl;
-  }
-  if (embedType) {
-    topicData.embedType = embedType;
+  if (embedLinks.length > 0) {
+    topicData.embedLinks = embedLinks;
+    // Simpan juga link pertama di field lama untuk kompatibilitas mundur
+    topicData.optionalEmbedLink = embedLinks[0].url;
+    topicData.embedType = embedLinks[0].type;
   }
 
   await set(topicRef, topicData);
@@ -1014,7 +1058,7 @@ export const subscribeToLeaderboard = (
                           // Sync ke Realtime DB agar tersimpan permanen
                           update(ref(db, `studentScores/${siswaId}`), {
                             kelas: targetClass.name,
-                          }).catch(() => {});
+                          }).catch(() => { });
                           break;
                         }
                       }
@@ -1056,7 +1100,7 @@ export const subscribeToLeaderboard = (
     return unsubscribe;
   } catch (error) {
     console.error("❌ Error setting up leaderboard subscription:", error);
-    return () => {};
+    return () => { };
   }
 };
 
@@ -1178,12 +1222,12 @@ export const getCompletedMissions = async (
   try {
     console.log(`🎯 Fetching completed missions for siswaId: ${siswaId}`);
     const allResponses = await getStudentResponsesByStudent(siswaId);
-    
+
     // Filter hanya misi yang status-nya "completed"
     const completedMissions = allResponses
       .filter((response) => response.status === "completed")
       .map((response) => response.missionName);
-    
+
     console.log(
       `✅ Found ${completedMissions.length} completed missions:`,
       completedMissions,

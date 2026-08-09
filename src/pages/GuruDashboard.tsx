@@ -38,6 +38,8 @@ import {
   subscribeToDiscussionComments,
   subscribeToDiscussionReplies,
   detectEmbedType,
+  processEmbedUrls,
+  getTopicEmbeds,
 } from "../lib/firestore";
 import {
   Class,
@@ -46,9 +48,11 @@ import {
   DiscussionTopic,
   DiscussionComment,
   DiscussionReply,
+  EmbedLink,
 } from "../types";
 import { getGuruMissions } from "../lib/missions";
 import MissionManager from "../components/guru/MissionManager";
+import EmbedViewer from "../components/EmbedViewer";
 
 // --- COMPONENT ---
 
@@ -116,9 +120,19 @@ export default function GuruDashboard() {
   const [discussionFormData, setDiscussionFormData] = useState({
     title: "",
     description: "",
-    embedLink: "",
+    embedLinks: [""] as string[], // dukung banyak link embed
   });
   const [creatingDiscussion, setCreatingDiscussion] = useState(false);
+
+  // Edit Discussion States
+  const [editingDiscussion, setEditingDiscussion] =
+    useState<DiscussionTopic | null>(null);
+  const [editFormData, setEditFormData] = useState({
+    title: "",
+    description: "",
+    embedLinks: [""] as string[],
+  });
+  const [savingEdit, setSavingEdit] = useState(false);
 
   // Discussion Detail View States
   const [selectedDiscussionForDetail, setSelectedDiscussionForDetail] =
@@ -261,11 +275,15 @@ export default function GuruDashboard() {
 
     setCreatingDiscussion(true);
     try {
-      // Validasi embed link jika ada
-      if (discussionFormData.embedLink.trim()) {
-        const embedType = detectEmbedType(discussionFormData.embedLink);
-        if (!embedType) {
-          alert("URL tidak valid. Gunakan URL YouTube, gambar, atau website.");
+      // Validasi semua embed link yang diisi
+      const filledLinks = discussionFormData.embedLinks
+        .map((l) => l.trim())
+        .filter((l) => l.length > 0);
+      for (const link of filledLinks) {
+        if (!detectEmbedType(link)) {
+          alert(
+            `URL tidak valid: ${link}\nGunakan URL YouTube, gambar, atau website.`,
+          );
           setCreatingDiscussion(false);
           return;
         }
@@ -277,10 +295,10 @@ export default function GuruDashboard() {
         discussionFormData.description,
         userProfile!.uid,
         userProfile!.name,
-        discussionFormData.embedLink.trim() || undefined,
+        filledLinks,
       );
 
-      setDiscussionFormData({ title: "", description: "", embedLink: "" });
+      setDiscussionFormData({ title: "", description: "", embedLinks: [""] });
       setShowCreateDiscussion(false);
     } catch (error) {
       console.error("Error creating discussion:", error);
@@ -324,6 +342,110 @@ export default function GuruDashboard() {
     setSelectedDiscussionForDetail(topic);
   };
 
+  // Buka modal edit dengan data topik (termasuk semua link embed yang ada)
+  const handleOpenEditDiscussion = (topic: DiscussionTopic) => {
+    const existingLinks = getTopicEmbeds(topic).map((e) => e.url);
+    setEditFormData({
+      title: topic.title,
+      description: topic.description,
+      embedLinks: existingLinks.length > 0 ? existingLinks : [""],
+    });
+    setEditingDiscussion(topic);
+  };
+
+  const handleSaveEditDiscussion = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (
+      !editingDiscussion ||
+      !selectedClass ||
+      !editFormData.title.trim() ||
+      !editFormData.description.trim()
+    )
+      return;
+
+    setSavingEdit(true);
+    try {
+      // Validasi semua link yang diisi
+      const filledLinks = editFormData.embedLinks
+        .map((l) => l.trim())
+        .filter((l) => l.length > 0);
+      for (const link of filledLinks) {
+        if (!detectEmbedType(link)) {
+          alert(
+            `URL tidak valid: ${link}\nGunakan URL YouTube, gambar, atau website.`,
+          );
+          setSavingEdit(false);
+          return;
+        }
+      }
+
+      const embedLinks = processEmbedUrls(filledLinks);
+      await updateDiscussionTopic(selectedClass.id!, editingDiscussion.id, {
+        title: editFormData.title.trim(),
+        description: editFormData.description.trim(),
+        embedLinks,
+        // Field legacy diselaraskan dengan link pertama (null = hapus dari DB)
+        optionalEmbedLink: (embedLinks[0]?.url ?? null) as any,
+        embedType: (embedLinks[0]?.type ?? null) as any,
+      });
+
+      setEditingDiscussion(null);
+    } catch (error) {
+      console.error("Error updating discussion:", error);
+      alert("Gagal menyimpan perubahan diskusi");
+    } finally {
+      setSavingEdit(false);
+    }
+  };
+
+  // Helper input daftar link (dipakai form buat & edit)
+  const renderLinkInputs = (
+    links: string[],
+    setLinks: (links: string[]) => void,
+    accent: string,
+  ) => (
+    <div className="space-y-2">
+      {links.map((link, idx) => (
+        <div key={idx} className="flex gap-2">
+          <input
+            type="url"
+            value={link}
+            onChange={(e) => {
+              const next = [...links];
+              next[idx] = e.target.value;
+              setLinks(next);
+            }}
+            placeholder={`Link ${idx + 1}: https://youtu.be/... atau https://contoh.com/gambar.jpg`}
+            className={`flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 ${accent} text-black text-sm`}
+          />
+          <button
+            type="button"
+            onClick={() => {
+              const next = links.filter((_, i) => i !== idx);
+              setLinks(next.length > 0 ? next : [""]);
+            }}
+            className="px-3 rounded-lg bg-red-50 text-red-500 hover:bg-red-100 transition-colors"
+            title="Hapus link ini"
+          >
+            <Trash2 size={16} />
+          </button>
+        </div>
+      ))}
+      <button
+        type="button"
+        onClick={() => setLinks([...links, ""])}
+        className="flex items-center gap-1 text-xs font-semibold text-emerald-600 hover:text-emerald-800 px-1 py-1"
+      >
+        <Plus size={14} /> Tambah Link Lain
+      </button>
+    </div>
+  );
+
+  // Render satu embed (dipakai berulang di modal detail)
+  const renderEmbed = (embed: EmbedLink, key: number, title: string) => (
+    <EmbedViewer key={key} embed={embed} title={title} index={key} />
+  );
+
   const loadMonitoringData = async (classItem: Class) => {
     setLoadingMembers(true);
     try {
@@ -360,7 +482,7 @@ export default function GuruDashboard() {
   };
 
   const handleOpenMonitoring = async (classItem: Class) => {
-    console.log(`📚 Opening monitoring for class: ${classItem.id}`);
+    console.log(`\ud83d\udcda Opening monitoring for class: ${classItem.id}`);
     setActiveView("classes");
     setSelectedClass(classItem);
     await loadMonitoringData(classItem);
@@ -1165,24 +1287,21 @@ export default function GuruDashboard() {
 
                             <div>
                               <label className="block text-sm font-medium text-gray-700 mb-2">
-                                Link Embed (Opsional)
+                                Link Embed (Opsional — bisa lebih dari satu)
                               </label>
                               <p className="text-xs text-gray-600 mb-2">
                                 🎥 YouTube • 📷 Gambar • 📄 Artikel • 🌐
                                 Website
                               </p>
-                              <input
-                                type="url"
-                                value={discussionFormData.embedLink}
-                                onChange={(e) =>
+                              {renderLinkInputs(
+                                discussionFormData.embedLinks,
+                                (links) =>
                                   setDiscussionFormData({
                                     ...discussionFormData,
-                                    embedLink: e.target.value,
-                                  })
-                                }
-                                placeholder="Contoh: https://youtu.be/... atau https://contoh.com/gambar.jpg"
-                                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 text-black"
-                              />
+                                    embedLinks: links,
+                                  }),
+                                "focus:ring-emerald-500",
+                              )}
                             </div>
 
                             <div className="flex gap-3">
@@ -1202,7 +1321,7 @@ export default function GuruDashboard() {
                                   setDiscussionFormData({
                                     title: "",
                                     description: "",
-                                    embedLink: "",
+                                    embedLinks: [""],
                                   });
                                 }}
                                 className="flex-1 bg-gray-200 text-gray-900 py-2 rounded-lg hover:bg-gray-300 transition-colors font-medium"
@@ -1266,16 +1385,26 @@ export default function GuruDashboard() {
                               </p>
 
                               {/* Embed Info */}
-                              {topic.optionalEmbedLink && (
-                                <div className="flex items-center gap-2 text-xs text-blue-600 mb-3">
+                              {getTopicEmbeds(topic).length > 0 && (
+                                <div className="flex items-center gap-2 text-xs text-blue-600 mb-3 flex-wrap">
                                   <LinkIcon size={14} />
-                                  {topic.embedType === "youtube" &&
-                                    "🎥 Video YouTube"}
-                                  {topic.embedType === "image" && "📷 Gambar"}
-                                  {topic.embedType === "article" &&
-                                    "📄 Artikel"}
-                                  {topic.embedType === "website" &&
-                                    "🌐 Website"}
+                                  {getTopicEmbeds(topic).map((embed, i) => (
+                                    <span
+                                      key={i}
+                                      className="bg-blue-50 border border-blue-100 px-2 py-0.5 rounded-full"
+                                    >
+                                      {(embed.type === "youtube" ||
+                                        embed.type === "vimeo" ||
+                                        embed.type === "tiktok" ||
+                                        embed.type === "drive" ||
+                                        embed.type === "video") &&
+                                        "🎥 Video"}
+                                      {embed.type === "image" && "📷 Gambar"}
+                                      {embed.type === "pdf" && "📑 PDF"}
+                                      {embed.type === "article" && "📄 Artikel"}
+                                      {embed.type === "website" && "🌐 Website"}
+                                    </span>
+                                  ))}
                                 </div>
                               )}
 
@@ -1290,6 +1419,17 @@ export default function GuruDashboard() {
                                 >
                                   <Eye size={16} />
                                   Lihat Detail
+                                </button>
+
+                                <button
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleOpenEditDiscussion(topic);
+                                  }}
+                                  className="flex items-center gap-2 px-3 py-2 bg-amber-100 text-amber-700 rounded hover:bg-amber-200 transition-colors text-sm font-medium"
+                                >
+                                  <Edit2 size={16} />
+                                  Edit
                                 </button>
 
                                 <button
@@ -1602,59 +1742,17 @@ export default function GuruDashboard() {
 
                 {/* Modal Content */}
                 <div className="p-3 md:p-6 space-y-4">
-                  {/* Embed Preview */}
-                  {selectedDiscussionForDetail.optionalEmbedLink && (
+                  {/* Embed Preview (mendukung banyak link) */}
+                  {getTopicEmbeds(selectedDiscussionForDetail).length > 0 && (
                     <div>
-                      {selectedDiscussionForDetail.embedType === "youtube" && (
-                        <div className="mb-4 bg-gray-900 rounded-lg overflow-hidden aspect-video">
-                          <iframe
-                            width="100%"
-                            height="100%"
-                            src={selectedDiscussionForDetail.optionalEmbedLink}
-                            title={selectedDiscussionForDetail.title}
-                            frameBorder="0"
-                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                            allowFullScreen
-                          ></iframe>
-                        </div>
+                      {getTopicEmbeds(selectedDiscussionForDetail).map(
+                        (embed, i) =>
+                          renderEmbed(
+                            embed,
+                            i,
+                            selectedDiscussionForDetail.title,
+                          ),
                       )}
-
-                      {selectedDiscussionForDetail.embedType === "image" && (
-                        <div className="mb-4 bg-gray-100 rounded-lg overflow-hidden max-h-64">
-                          <img
-                            src={selectedDiscussionForDetail.optionalEmbedLink}
-                            alt={selectedDiscussionForDetail.title}
-                            className="w-full h-full object-cover"
-                          />
-                        </div>
-                      )}
-
-                      {(selectedDiscussionForDetail.embedType === "article" ||
-                        selectedDiscussionForDetail.embedType ===
-                        "website") && (
-                          <div className="mb-4 bg-blue-50 border border-blue-200 rounded-lg p-3">
-                            <div className="flex items-start gap-3">
-                              <ExternalLink className="w-5 h-5 text-blue-600 shrink-0 mt-1" />
-                              <div className="flex-1 min-w-0">
-                                <p className="text-sm text-blue-600 font-medium truncate">
-                                  External Resource
-                                </p>
-                                <a
-                                  href={
-                                    selectedDiscussionForDetail.optionalEmbedLink
-                                  }
-                                  target="_blank"
-                                  rel="noopener noreferrer"
-                                  className="text-xs text-blue-500 hover:underline truncate block"
-                                >
-                                  {
-                                    selectedDiscussionForDetail.optionalEmbedLink
-                                  }
-                                </a>
-                              </div>
-                            </div>
-                          </div>
-                        )}
                     </div>
                   )}
 
@@ -1740,6 +1838,108 @@ export default function GuruDashboard() {
                     )}
                   </div>
                 </div>
+              </div>
+            </div>
+          )}
+
+          {/* ============ EDIT DISCUSSION MODAL ============ */}
+          {editingDiscussion && (
+            <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-2 md:p-4">
+              <div className="bg-white rounded-xl shadow-2xl max-w-2xl w-full max-h-[95vh] overflow-y-auto">
+                <div className="sticky top-0 bg-gradient-to-r from-amber-500 to-orange-500 px-4 md:px-6 py-4 flex justify-between items-center">
+                  <div>
+                    <h2 className="text-lg md:text-xl font-bold text-white">
+                      ✏️ Edit Topik Diskusi
+                    </h2>
+                    <p className="text-amber-100 text-xs mt-0.5">
+                      Ubah judul, deskripsi, dan link yang disematkan
+                    </p>
+                  </div>
+                  <button
+                    onClick={() => setEditingDiscussion(null)}
+                    className="p-1.5 hover:bg-white/20 rounded-lg transition-colors"
+                  >
+                    <X className="w-5 h-5 text-white" />
+                  </button>
+                </div>
+
+                <form
+                  onSubmit={handleSaveEditDiscussion}
+                  className="p-4 md:p-6 space-y-4"
+                >
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Judul Diskusi
+                    </label>
+                    <input
+                      type="text"
+                      value={editFormData.title}
+                      onChange={(e) =>
+                        setEditFormData({
+                          ...editFormData,
+                          title: e.target.value,
+                        })
+                      }
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500 text-black"
+                      required
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Deskripsi / Studi Kasus
+                    </label>
+                    <textarea
+                      value={editFormData.description}
+                      onChange={(e) =>
+                        setEditFormData({
+                          ...editFormData,
+                          description: e.target.value,
+                        })
+                      }
+                      rows={5}
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500 resize-none text-black"
+                      required
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Link Embed (bisa lebih dari satu)
+                    </label>
+                    <p className="text-xs text-gray-600 mb-2">
+                      🎥 YouTube • 📷 Gambar • 📄 Artikel • 🌐 Website —
+                      kosongkan semua untuk menghapus embed
+                    </p>
+                    {renderLinkInputs(
+                      editFormData.embedLinks,
+                      (links) =>
+                        setEditFormData({
+                          ...editFormData,
+                          embedLinks: links,
+                        }),
+                      "focus:ring-amber-500",
+                    )}
+                  </div>
+
+                  <div className="flex gap-3 pt-2">
+                    <button
+                      type="submit"
+                      disabled={savingEdit}
+                      className="flex-1 bg-amber-500 text-white py-2.5 rounded-lg hover:bg-amber-600 disabled:bg-gray-400 transition-colors font-medium"
+                    >
+                      {savingEdit ? "Menyimpan..." : "Simpan Perubahan"}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setEditingDiscussion(null)}
+                      disabled={savingEdit}
+                      className="flex-1 bg-gray-200 text-gray-900 py-2.5 rounded-lg hover:bg-gray-300 transition-colors font-medium disabled:opacity-50"
+                    >
+                      Batal
+                    </button>
+                  </div>
+                </form>
               </div>
             </div>
           )}

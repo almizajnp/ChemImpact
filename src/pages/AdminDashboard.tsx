@@ -246,10 +246,10 @@ export default function AdminDashboard() {
   const roleBadge = (role: string) => (
     <span
       className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold ${role === "guru"
-          ? "bg-emerald-100 text-emerald-700"
-          : role === "siswa"
-            ? "bg-blue-100 text-blue-700"
-            : "bg-purple-100 text-purple-700"
+        ? "bg-emerald-100 text-emerald-700"
+        : role === "siswa"
+          ? "bg-blue-100 text-blue-700"
+          : "bg-purple-100 text-purple-700"
         }`}
     >
       {role === "guru" ? (
@@ -316,8 +316,8 @@ export default function AdminDashboard() {
           <div
             key={toast.id}
             className={`flex items-start gap-2 px-4 py-3 rounded-xl shadow-lg border text-sm font-medium animate-[fadeIn_0.2s_ease-out] ${toast.type === "success"
-                ? "bg-emerald-50 border-emerald-200 text-emerald-800"
-                : "bg-red-50 border-red-200 text-red-800"
+              ? "bg-emerald-50 border-emerald-200 text-emerald-800"
+              : "bg-red-50 border-red-200 text-red-800"
               }`}
           >
             {toast.type === "success" ? (
@@ -402,8 +402,8 @@ export default function AdminDashboard() {
                   key={value}
                   onClick={() => setRoleFilter(value)}
                   className={`px-3.5 py-2 rounded-lg text-xs font-semibold transition-colors ${roleFilter === value
-                      ? "bg-indigo-600 text-white"
-                      : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                    ? "bg-indigo-600 text-white"
+                    : "bg-gray-100 text-gray-600 hover:bg-gray-200"
                     }`}
                 >
                   {label}

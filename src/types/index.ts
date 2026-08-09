@@ -19,13 +19,30 @@ export interface Class {
 
 // ============ DISCUSSION FORUM TYPES ============
 
+export type EmbedType =
+  | "youtube"
+  | "vimeo"
+  | "tiktok"
+  | "drive" // Google Drive (video/file preview)
+  | "video" // file video langsung (.mp4, .webm, dll)
+  | "pdf"
+  | "image"
+  | "article"
+  | "website";
+
+export interface EmbedLink {
+  url: string;
+  type: EmbedType;
+}
+
 export interface DiscussionTopic {
   id: string;
   classId: string;
   title: string;
   description: string;
-  optionalEmbedLink?: string; // URL untuk YouTube, artikel, atau gambar
-  embedType?: "youtube" | "image" | "article" | "website"; // tipe embed yang terdeteksi
+  optionalEmbedLink?: string; // (legacy) URL tunggal - dipertahankan untuk kompatibilitas data lama
+  embedType?: EmbedType; // (legacy) tipe embed link tunggal
+  embedLinks?: EmbedLink[]; // BARU: dukung banyak link embed (video, gambar, artikel, dst.)
   status: "draft" | "published"; // draft hanya guru, published untuk siswa
   createdBy: string; // userId (guru)
   createdByName: string;
