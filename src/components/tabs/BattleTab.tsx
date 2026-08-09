@@ -1,50 +1,26 @@
 import CRButton from "../ui/CRButton";
-import {
-  Trophy,
-  Settings,
-  List,
-  Award,
-  Tv,
-  Shield,
-  BookOpen,
-  GraduationCap,
-  ChevronLeft,
-  ChevronRight,
-} from "lucide-react";
-import React, { useState, useEffect } from "react";
+import { ChevronLeft, ChevronRight } from "lucide-react";
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { useAudio } from "../../hooks/useAudio";
+import { ArenaMission } from "../../types/mission";
 
-interface ArenaProps {
-  id: number;
+// BattleTab kini dinamis: daftar arena berasal dari parent (StudentDashboard)
+// = misi default yang tidak disembunyikan guru + misi custom yang published.
+
+interface ArenaGraphicProps {
   name: string;
   image: string;
   color?: string;
-  isLocked?: boolean;
+  isCustom?: boolean;
 }
 
-const arenas = [
-  {
-    id: 1,
-    name: "Sungai Berbusa",
-    image: "/images/c1.png",
-    color: "#3498db",
-  },
-  {
-    id: 2,
-    name: "Pencemaran Plastik",
-    image: "/images/c2.png",
-    color: "#9b59b6",
-  },
-  {
-    id: 3,
-    name: "Polusi Udara",
-    image: "/images/c3.png",
-    color: "#9b59b6",
-  },
-];
-
-const ArenaGraphic = ({ id, name, image, color = "#3498db" }: ArenaProps) => (
+const ArenaGraphic = ({
+  name,
+  image,
+  color = "#3498db",
+  isCustom,
+}: ArenaGraphicProps) => (
   <div className="relative w-full aspect-square mx-auto mb-4 select-none cursor-grab active:cursor-grabbing">
     {/* Island Base */}
     <div className="absolute inset-x-4 bottom-4 top-10 bg-[#1a2634] rounded-[40px] shadow-2xl transform rotate-x-12 border-b-8 border-[#0f1620]"></div>
@@ -57,16 +33,34 @@ const ArenaGraphic = ({ id, name, image, color = "#3498db" }: ArenaProps) => (
 
     {/* The Arena Image (Floating Island) */}
     <div className="absolute inset-0 flex items-center justify-center z-10 p-6">
-      <img
-        src={image}
-        alt={name}
-        className="w-full h-full object-cover rounded-2xl"
-      />
+      {image ? (
+        <img
+          src={image}
+          alt={name}
+          className="w-full h-full object-cover rounded-2xl"
+        />
+      ) : (
+        <div
+          className="w-full h-full rounded-2xl flex items-center justify-center text-6xl"
+          style={{
+            background: `linear-gradient(135deg, ${color}, ${color}66)`,
+          }}
+        >
+          🎮
+        </div>
+      )}
     </div>
 
+    {/* Badge misi buatan guru */}
+    {isCustom && (
+      <div className="absolute top-6 right-6 z-20 bg-violet-600 text-white text-[10px] font-bold px-2 py-1 rounded-full border-2 border-violet-800 shadow-md">
+        MISI GURU
+      </div>
+    )}
+
     {/* Arena Name Label */}
-    <div className="absolute -bottom-6 left-1/2 transform -translate-x-1/2 z-20">
-      <div className="bg-[#2c3e50] text-white font-clash text-xl px-6 py-1 rounded-full border-2 border-[#34495e] shadow-lg text-stroke whitespace-nowrap">
+    <div className="absolute -bottom-6 left-1/2 transform -translate-x-1/2 z-20 max-w-full px-2">
+      <div className="bg-[#2c3e50] text-white font-clash text-xl px-6 py-1 rounded-full border-2 border-[#34495e] shadow-lg text-stroke whitespace-nowrap overflow-hidden text-ellipsis max-w-[280px]">
         {name}
       </div>
     </div>
@@ -74,78 +68,65 @@ const ArenaGraphic = ({ id, name, image, color = "#3498db" }: ArenaProps) => (
 );
 
 export interface BattleTabProps {
-  onBattleClick: (missionId: number) => void;
-  onArenaChange?: (id: number) => void;
-  selectedMission?: number;
-  onMissionChange?: (missionId: number) => void;
+  missions: ArenaMission[]; // daftar arena dinamis dari parent
+  onBattleClick: (missionId: number | string) => void;
+  onArenaChange?: (id: number | string) => void;
+  selectedMission?: number | string;
+  onMissionChange?: (missionId: number | string) => void;
 }
 
 export default function BattleTab({
+  missions,
   onBattleClick,
   onArenaChange,
   selectedMission,
   onMissionChange,
 }: BattleTabProps) {
   const { playSound } = useAudio();
-  const [arenaIndex, setArenaIndex] = useState((selectedMission || 1) - 1);
-  const [selectedDesktopArena, setSelectedDesktopArena] = useState(
-    arenas[(selectedMission || 1) - 1].id,
-  );
-  const [currentMission, setCurrentMission] = useState(selectedMission || 1);
 
-  // Sync currentMission dengan selectedMission dari parent
+  const findIndex = (id?: number | string): number => {
+    if (id === undefined) return 0;
+    const idx = missions.findIndex((m) => m.id === id);
+    return idx >= 0 ? idx : 0;
+  };
+
+  const [arenaIndex, setArenaIndex] = useState(findIndex(selectedMission));
+
+  // Sync dengan selectedMission dari parent & jaga index tetap valid
   useEffect(() => {
-    if (selectedMission) {
-      console.log(`🔄 BattleTab syncing: selectedMission=${selectedMission}`);
-      setCurrentMission(selectedMission);
-      setArenaIndex(selectedMission - 1);
-      setSelectedDesktopArena(arenas[selectedMission - 1].id);
-    }
-  }, [selectedMission]);
+    const idx = findIndex(selectedMission);
+    setArenaIndex(idx < missions.length ? idx : 0);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedMission, missions.length]);
 
-  const nextArena = () => {
-    setArenaIndex((prev) => {
-      const newIndex = (prev + 1) % arenas.length;
-      const newMissionId = newIndex + 1; // Arena ID = index + 1
-      setSelectedDesktopArena(arenas[newIndex].id);
-      setCurrentMission(newMissionId);
-      onArenaChange?.(arenas[newIndex].id);
-      onMissionChange?.(newMissionId); // Notify parent about mission change
-      console.log(`➡️ Next Arena: missionId=${newMissionId}`);
-      return newIndex;
-    });
+  if (missions.length === 0) {
+    return (
+      <div className="pt-32 px-6 min-h-screen flex items-center justify-center">
+        <div className="bg-[#2c3e50] text-white rounded-2xl border-4 border-[#34495e] shadow-2xl p-8 max-w-md text-center">
+          <p className="text-4xl mb-3">🎮</p>
+          <p className="font-clash text-xl mb-2">Belum Ada Misi</p>
+          <p className="text-sm text-gray-300">
+            Guru kelasmu belum mempublikasikan misi apapun. Silakan cek kembali
+            nanti!
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  const currentArena = missions[arenaIndex] || missions[0];
+
+  const goToIndex = (newIndex: number) => {
+    const mission = missions[newIndex];
+    setArenaIndex(newIndex);
+    onArenaChange?.(mission.id);
+    onMissionChange?.(mission.id);
+    console.log(`🎯 Arena changed: index=${newIndex}, id=${mission.id}`);
   };
 
-  const prevArena = () => {
-    setArenaIndex((prev) => {
-      const newIndex = (prev - 1 + arenas.length) % arenas.length;
-      const newMissionId = newIndex + 1; // Arena ID = index + 1
-      setSelectedDesktopArena(arenas[newIndex].id);
-      setCurrentMission(newMissionId);
-      onArenaChange?.(arenas[newIndex].id);
-      onMissionChange?.(newMissionId); // Notify parent about mission change
-      console.log(`⬅️ Prev Arena: missionId=${newMissionId}`);
-      return newIndex;
-    });
-  };
-
-  const nextMission = () => {
-    const newMission = currentMission < arenas.length ? currentMission + 1 : 1;
-    setCurrentMission(newMission);
-    setArenaIndex(newMission - 1);
-    setSelectedDesktopArena(arenas[newMission - 1].id);
-    onMissionChange?.(newMission);
-    playSound("/audio/pilih.mp3");
-  };
-
-  const prevMission = () => {
-    const newMission = currentMission > 1 ? currentMission - 1 : arenas.length;
-    setCurrentMission(newMission);
-    setArenaIndex(newMission - 1);
-    setSelectedDesktopArena(arenas[newMission - 1].id);
-    onMissionChange?.(newMission);
-    playSound("/audio/pilih.mp3");
-  };
+  const nextArena = () => goToIndex((arenaIndex + 1) % missions.length);
+  const prevArena = () =>
+    goToIndex((arenaIndex - 1 + missions.length) % missions.length);
 
   return (
     <div className="pt-24 md:pt-32 lg:pt-40 pb-24 md:pb-48 lg:pb-56 px-2 md:px-4 lg:px-6 min-h-screen flex flex-col w-full mx-auto">
@@ -168,7 +149,7 @@ export default function BattleTab({
           <div
             className="absolute inset-0 z-0 opacity-20 transition-colors duration-500 pointer-events-none"
             style={{
-              background: `radial-gradient(circle at center, ${arenas[arenaIndex].color} 0%, transparent 70%)`,
+              background: `radial-gradient(circle at center, ${currentArena.color} 0%, transparent 70%)`,
             }}
           />
 
@@ -204,7 +185,7 @@ export default function BattleTab({
                 drag="x"
                 dragConstraints={{ left: 0, right: 0 }}
                 dragElastic={0.2}
-                onDragEnd={(e, { offset, velocity }) => {
+                onDragEnd={(_e, { offset }) => {
                   const swipe = offset.x;
                   if (swipe < -50) {
                     nextArena();
@@ -214,13 +195,18 @@ export default function BattleTab({
                 }}
                 className="w-full touch-pan-y"
               >
-                <ArenaGraphic {...arenas[arenaIndex]} />
+                <ArenaGraphic
+                  name={currentArena.name}
+                  image={currentArena.image}
+                  color={currentArena.color}
+                  isCustom={currentArena.source === "custom"}
+                />
               </motion.div>
             </AnimatePresence>
 
             {/* Pagination Dots */}
             <div className="absolute -bottom-8 left-1/2 transform -translate-x-1/2 flex gap-2">
-              {arenas.map((_, idx) => (
+              {missions.map((_, idx) => (
                 <div
                   key={idx}
                   className={`w-2 h-2 rounded-full transition-colors ${idx === arenaIndex ? "bg-yellow-400" : "bg-gray-600"}`}
@@ -249,7 +235,7 @@ export default function BattleTab({
             drag="x"
             dragConstraints={{ left: -100, right: 100 }}
             dragElastic={0.2}
-            onDragEnd={(e, { offset, velocity }) => {
+            onDragEnd={(_e, { offset }) => {
               const swipe = offset.x;
               if (swipe < -50) {
                 nextArena();
@@ -258,26 +244,36 @@ export default function BattleTab({
               }
             }}
           >
-            {arenas.map((arena) => (
-              <motion.div
-                key={arena.id}
-                className={`max-w-xs mx-auto w-full transition-all duration-300 transform cursor-grab active:cursor-grabbing ${
-                  selectedDesktopArena === arena.id
-                    ? "scale-110"
-                    : "scale-100 opacity-75"
-                }`}
-                onClick={() => {
-                  setSelectedDesktopArena(arena.id);
-                  setCurrentMission(arena.id);
-                  onMissionChange?.(arena.id);
-                }}
-                whileHover={{
-                  scale: selectedDesktopArena === arena.id ? 1.15 : 1.05,
-                }}
-              >
-                <ArenaGraphic {...arena} />
-              </motion.div>
-            ))}
+            {/* Tampilkan maksimal 3 arena sekaligus, berpusat pada arena aktif */}
+            {missions
+              .map((arena, idx) => ({ arena, idx }))
+              .filter(({ idx }) => {
+                if (missions.length <= 3) return true;
+                const diff =
+                  (idx - arenaIndex + missions.length) % missions.length;
+                return diff === 0 || diff === 1 || diff === missions.length - 1;
+              })
+              .map(({ arena, idx }) => (
+                <motion.div
+                  key={String(arena.id)}
+                  className={`max-w-xs mx-auto w-full transition-all duration-300 transform cursor-grab active:cursor-grabbing ${idx === arenaIndex ? "scale-110" : "scale-100 opacity-75"
+                    }`}
+                  onClick={() => {
+                    playSound("/audio/pilih.mp3");
+                    goToIndex(idx);
+                  }}
+                  whileHover={{
+                    scale: idx === arenaIndex ? 1.15 : 1.05,
+                  }}
+                >
+                  <ArenaGraphic
+                    name={arena.name}
+                    image={arena.image}
+                    color={arena.color}
+                    isCustom={arena.source === "custom"}
+                  />
+                </motion.div>
+              ))}
           </motion.div>
 
           {/* Right Arrow */}
@@ -301,7 +297,7 @@ export default function BattleTab({
           className="w-48 shadow-[0_6px_0_#e65100,0_10px_10px_rgba(0,0,0,0.4)] active:shadow-[0_0_0_#e65100] active:translate-y-1.5 transition-all"
           onClick={() => {
             playSound("/audio/start.mp3");
-            onBattleClick(currentMission);
+            onBattleClick(currentArena.id);
           }}
         >
           <span className="text-3xl drop-shadow-md text-stroke-lg">MULAI</span>

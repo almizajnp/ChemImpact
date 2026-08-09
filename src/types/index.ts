@@ -98,7 +98,7 @@ export interface StudentResponse {
   classId: string;
   siswaId: string;
   siswaName: string;
-  missionId: number; // e.g., 1 for ComicStory
+  missionId: number | string; // number = misi default (1-3), string = id misi custom buatan guru
   missionName: string; // e.g., "Ancaman Limbah Deterjen"
   essayAnswers?: Record<string, string>; // {essayId: answer}
   essayQuestions?: Record<string, string>; // {essayId: question}

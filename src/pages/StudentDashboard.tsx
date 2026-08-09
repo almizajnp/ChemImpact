@@ -7,6 +7,12 @@ import {
   getCompletedMissions,
   getStudentRank,
 } from "../lib/firestore";
+import {
+  getPublishedMissionsByGuru,
+  getHiddenDefaultMissions,
+} from "../lib/missions";
+import { DEFAULT_MISSIONS } from "../data/defaultMissions";
+import { ArenaMission } from "../types/mission";
 import CRHeader from "../components/layout/CRHeader";
 import CRNavigation from "../components/layout/CRNavigation";
 import StudentProfileModal from "../components/layout/StudentProfileModal";
@@ -19,6 +25,7 @@ import DecisionSim from "../components/DecisionSim";
 import ComicStory from "../components/game/ComicStory";
 import ComicStoryMisi2 from "../components/game/ComicStoryMisi2";
 import ComicStoryMisi3 from "../components/game/ComicStoryMisi3";
+import DynamicComicStory from "../components/game/DynamicComicStory";
 import { motion, AnimatePresence } from "motion/react";
 import { X, Music, Image as ImageIcon, Palette } from "lucide-react";
 
@@ -35,6 +42,16 @@ const themes = [
   { id: "cyan", name: "Cyan", primary: "#1abc9c", secondary: "#16a085" },
 ];
 
+// Semua misi default sebagai fallback (dipakai jika siswa belum punya kelas)
+const buildDefaultArenas = (hiddenIds: number[] = []): ArenaMission[] =>
+  DEFAULT_MISSIONS.filter((m) => !hiddenIds.includes(m.id)).map((m) => ({
+    id: m.id,
+    name: m.name,
+    image: m.image,
+    color: m.color,
+    source: "default" as const,
+  }));
+
 export default function StudentDashboard() {
   const navigate = useNavigate();
   const { logout, userProfile } = useAuth();
@@ -45,14 +62,18 @@ export default function StudentDashboard() {
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [activeTab, setActiveTab] = useState("battle");
   const [isBattleMode, setIsBattleMode] = useState(false);
-  const [selectedArenaId, setSelectedArenaId] = useState(1);
-  const [selectedMission, setSelectedMission] = useState(1);
-  const [activeBattleMission, setActiveBattleMission] = useState(1); // Track mission saat bermain
+  const [selectedMission, setSelectedMission] = useState<number | string>(1);
+  const [activeBattleMission, setActiveBattleMission] = useState<
+    number | string
+  >(1); // Track mission saat bermain
   const [totalScore, setTotalScore] = useState(0);
   const [activeClassId, setActiveClassId] = useState<string | null>(null);
   const [activeClassName, setActiveClassName] = useState<string | null>(null);
   const [completedMissions, setCompletedMissions] = useState<string[]>([]);
   const [studentRank, setStudentRank] = useState<number>(-1);
+  const [availableMissions, setAvailableMissions] = useState<ArenaMission[]>(
+    buildDefaultArenas(),
+  );
   const bgMusicRef = useRef<HTMLAudioElement | null>(null);
 
   // Initialize score dari userProfile saat component mount atau userProfile berubah
@@ -95,22 +116,59 @@ export default function StudentDashboard() {
     loadStudentRank();
   }, [userProfile?.uid]);
 
-  // Load first class for social tab
+  // Load kelas siswa + daftar misi yang tersedia
+  // (misi default yang tidak disembunyikan guru + misi custom published dari guru)
   useEffect(() => {
-    const loadFirstClass = async () => {
-      if (userProfile?.uid) {
-        try {
-          const classes = await getStudentClasses(userProfile.uid);
-          if (classes.length > 0) {
-            setActiveClassId(classes[0].id);
-            setActiveClassName(classes[0].name);
-          }
-        } catch (error) {
-          console.error("Error loading student classes:", error);
+    const loadClassAndMissions = async () => {
+      if (!userProfile?.uid) return;
+      try {
+        const classes = await getStudentClasses(userProfile.uid);
+
+        if (classes.length === 0) {
+          // Belum punya kelas: tampilkan semua misi default
+          setAvailableMissions(buildDefaultArenas());
+          return;
         }
+
+        setActiveClassId(classes[0].id ?? null);
+        setActiveClassName(classes[0].name);
+
+        const guruId = classes[0].guruId;
+        const [hiddenDefaults, customMissions] = await Promise.all([
+          getHiddenDefaultMissions(guruId),
+          getPublishedMissionsByGuru(guruId),
+        ]);
+
+        const defaultArenas = buildDefaultArenas(hiddenDefaults);
+        const customArenas: ArenaMission[] = customMissions.map((m) => ({
+          id: m.id,
+          name: m.title,
+          image: m.coverImage || "",
+          color: m.color || "#3498db",
+          source: "custom" as const,
+          customMission: m,
+        }));
+
+        const combined = [...defaultArenas, ...customArenas];
+        setAvailableMissions(
+          combined.length > 0 ? combined : buildDefaultArenas(),
+        );
+        console.log(
+          `🎮 Loaded missions: ${defaultArenas.length} default + ${customArenas.length} custom`,
+        );
+
+        // Pastikan misi terpilih masih valid
+        if (combined.length > 0) {
+          setSelectedMission((prev) =>
+            combined.some((m) => m.id === prev) ? prev : combined[0].id,
+          );
+        }
+      } catch (error) {
+        console.error("Error loading classes/missions:", error);
+        setAvailableMissions(buildDefaultArenas());
       }
     };
-    loadFirstClass();
+    loadClassAndMissions();
   }, [userProfile?.uid]);
 
   // Handle score updates dan simpan ke Firebase
@@ -149,10 +207,10 @@ export default function StudentDashboard() {
       completedMissions.length > 0
         ? completedMissions.map((mission) => `✅ Menyelesaikan Misi ${mission}`)
         : [
-            "🎯 Belum ada misi yang diselesaikan",
-            "💡 Mulai bermain untuk membuka pencapaian",
-            "🚀 Tingkatkan skor dengan menyelesaikan misi",
-          ],
+          "🎯 Belum ada misi yang diselesaikan",
+          "💡 Mulai bermain untuk membuka pencapaian",
+          "🚀 Tingkatkan skor dengan menyelesaikan misi",
+        ],
   };
 
   const handleLogout = async () => {
@@ -164,24 +222,17 @@ export default function StudentDashboard() {
     }
   };
 
-  const handleMissionChange = (missionId: number) => {
+  const handleMissionChange = (missionId: number | string) => {
     console.log(`🎮 Mission changed to: ${missionId}`);
     setSelectedMission(missionId);
   };
 
-  const handleBattleClick = (missionId: number) => {
+  const handleBattleClick = (missionId: number | string) => {
     console.log(`🎯 Battle clicked with missionId: ${missionId}`);
     setSelectedMission(missionId);
     setActiveBattleMission(missionId); // Set mission yang akan dimainkan
     setIsBattleMode(true);
   };
-
-  // Track mission selection changes
-  useEffect(() => {
-    console.log(
-      `✅ StudentDashboard selectedMission updated to: ${selectedMission}`,
-    );
-  }, [selectedMission]);
 
   useEffect(() => {
     if (!bgMusicRef.current) {
@@ -192,12 +243,12 @@ export default function StudentDashboard() {
     bgMusicRef.current.volume = bgmVolume;
 
     if (activeTab === "battle" && !isBattleMode) {
-      bgMusicRef.current.play().catch(() => {});
+      bgMusicRef.current.play().catch(() => { });
     } else {
       bgMusicRef.current.pause();
     }
 
-    return () => {};
+    return () => { };
   }, [activeTab, isBattleMode, bgmVolume]);
 
   const renderTab = () => {
@@ -205,8 +256,8 @@ export default function StudentDashboard() {
       case "battle":
         return (
           <BattleTab
+            missions={availableMissions}
             onBattleClick={handleBattleClick}
-            onArenaChange={(id) => setSelectedArenaId(id)}
             selectedMission={selectedMission}
             onMissionChange={handleMissionChange}
           />
@@ -254,10 +305,31 @@ export default function StudentDashboard() {
     }
   };
 
+  // Cari data misi yang sedang aktif dimainkan
+  const activeMissionData = availableMissions.find(
+    (m) => m.id === activeBattleMission,
+  );
+
+  const getBattleTitle = (): string => {
+    switch (activeBattleMission) {
+      case 1:
+        return "MISSION: SAVE THE RIVER";
+      case 2:
+        return "MISSION: PENCEMARAN PLASTIK";
+      case 3:
+        return "MISSION: POLUSI UDARA";
+      default:
+        return activeMissionData
+          ? `MISSION: ${activeMissionData.name.toUpperCase()}`
+          : "MISSION";
+    }
+  };
+
   const renderBattleContent = () => {
     console.log(
       `📺 Rendering battle content for activeBattleMission: ${activeBattleMission}`,
     );
+    // Misi default (hardcoded components)
     switch (activeBattleMission) {
       case 1:
         return (
@@ -290,6 +362,19 @@ export default function StudentDashboard() {
           />
         );
       default:
+        // Misi custom buatan guru (dimainkan lewat DynamicComicStory)
+        if (activeMissionData?.customMission) {
+          return (
+            <DynamicComicStory
+              mission={activeMissionData.customMission}
+              onClose={() => setIsBattleMode(false)}
+              onScoreUpdate={handleScoreUpdate}
+              classId={activeClassId}
+              siswaId={userProfile?.uid}
+              siswaName={userProfile?.name || studentProfile?.name}
+            />
+          );
+        }
         return <DecisionSim onComplete={() => setIsBattleMode(false)} />;
     }
   };
@@ -361,11 +446,7 @@ export default function StudentDashboard() {
           >
             <div className="p-4 flex justify-between items-center bg-[#2c3e50] border-b-4 border-black/20">
               <h2 className="font-clash text-2xl text-white text-stroke">
-                {activeBattleMission === 1
-                  ? "MISSION: SAVE THE RIVER"
-                  : activeBattleMission === 2
-                    ? "MISSION: PENCEMARAN PLASTIK"
-                    : "MISSION: POLUSI UDARA"}
+                {getBattleTitle()}
               </h2>
               <button
                 onClick={() => setIsBattleMode(false)}
@@ -442,11 +523,10 @@ export default function StudentDashboard() {
                       <button
                         key={bg}
                         onClick={() => setCurrentBg(bg)}
-                        className={`relative h-20 rounded-lg overflow-hidden border-2 transition-all ${
-                          currentBg === bg
+                        className={`relative h-20 rounded-lg overflow-hidden border-2 transition-all ${currentBg === bg
                             ? "scale-105"
                             : "opacity-70 hover:opacity-100"
-                        }`}
+                          }`}
                         style={{
                           borderColor:
                             currentBg === bg ? theme.primary : "#34495e",
@@ -472,11 +552,10 @@ export default function StudentDashboard() {
                       <button
                         key={t.id}
                         onClick={() => setCurrentTheme(t.id)}
-                        className={`h-10 rounded-lg border-2 transition-all ${
-                          currentTheme === t.id
+                        className={`h-10 rounded-lg border-2 transition-all ${currentTheme === t.id
                             ? "scale-110"
                             : "opacity-70 hover:opacity-100"
-                        }`}
+                          }`}
                         style={{
                           backgroundColor: t.primary,
                           borderColor:

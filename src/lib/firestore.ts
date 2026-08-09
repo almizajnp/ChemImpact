@@ -1153,7 +1153,11 @@ export const getStudentResponsesByStudent = async (
     const missionsData = snapshot.val();
     const responses: StudentResponse[] = Object.values(missionsData);
     // Sort by missionId ascending
-    responses.sort((a, b) => (a.missionId || 1) - (b.missionId || 1));
+    responses.sort((a, b) =>
+      String(a.missionId ?? 1).localeCompare(String(b.missionId ?? 1), undefined, {
+        numeric: true,
+      }),
+    );
     console.log(
       `✅ Found ${responses.length} responses for ${siswaId}`,
       responses.map((r) => `Mission ${r.missionId}`),
